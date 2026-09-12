@@ -568,7 +568,9 @@ public class OrderFacadeImpl implements OrderFacade {
 		order.setCustomerEmailAddress(customer.getEmailAddress());
 		order.setCustomerId(customer.getId());
 		//set username
-		if(! customer.isAnonymous() && !StringUtils.isBlank(customer.getPassword())) {
+		if(! customer.isAnonymous() && !StringUtils.isBlank(customer.getPassword())
+				&& StringUtils.isBlank(customer.getNick())) {
+			//only set nick for a new customer, never overwrite an existing username
 			customer.setNick(customer.getEmailAddress());
 		}
 
