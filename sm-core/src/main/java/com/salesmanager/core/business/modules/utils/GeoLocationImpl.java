@@ -28,7 +28,7 @@ public class GeoLocationImpl implements GeoLocation {
 		
 			if(reader==null) {
 					try {
-						java.io.InputStream inputFile = GeoLocationImpl.class.getClassLoader().getResourceAsStream("reference/GeoLite2-City.mmdb");
+						java.io.InputStream inputFile = GeoLocationImpl.class.getClassLoader().getResourceAsStream("reference/IP2LOCATION-LITE-DB11.mmdb");
 						reader = new DatabaseReader.Builder(inputFile).build();
 					} catch(Exception e) {
 						LOGGER.error("Cannot instantiate IP database",e);

@@ -940,20 +940,175 @@
 		"zoneName": "Western Australia",
 		"countryCode": "AU"
 	} ,
-	  {
-		  "zoneCode": "ASU",
-		  "zoneName": "Asuncion",
-		  "countryCode": "PY"
-	  },
-	  {
-		  "zoneCode": "CEN",
-		  "zoneName": "Central",
-		  "countryCode": "PY"
-	  },
-	  {
-		  "zoneCode": "OTR",
-		  "zoneName": "Other",
-		  "countryCode": "PY"
+	{
+		"zoneCode": "ASU",
+		"zoneName": "Asuncion",
+		"countryCode": "PY"
+	},
+	{
+		"zoneCode": "CEN",
+		"zoneName": "Central",
+		"countryCode": "PY"
+	},
+	{
+		"zoneCode": "OTR",
+		"zoneName": "Other",
+		"countryCode": "PY"
+	},		
+	{
+		"zoneCode": "37",
+		"zoneName": "Tây Ninh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "35",
+		"zoneName": "Lâm Đồng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "HN",
+		"zoneName": "Hà Nội",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "SG",
+		"zoneName": "Hồ Chí Minh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "HP",
+		"zoneName": "Hải Phòng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "26",
+		"zoneName": "Thừa Thiên Huế",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "01",
+		"zoneName": "Lai Châu",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "71",
+		"zoneName": "Điện Biên",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "05",
+		"zoneName": "Sơn La",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "09",
+		"zoneName": "Lạng Sơn",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "13",
+		"zoneName": "Quảng Ninh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "21",
+		"zoneName": "Thanh Hóa",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "22",
+		"zoneName": "Nghệ An",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "23",
+		"zoneName": "Hà Tĩnh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "04",
+		"zoneName": "Cao Bằng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "07",
+		"zoneName": "Tuyên Quang",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "06",
+		"zoneName": "Yên Bái",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "68",
+		"zoneName": "Phú Thọ",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "56",
+		"zoneName": "Bắc Ninh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "18",
+		"zoneName": "Ninh Bình",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "24",
+		"zoneName": "Quảng Bình",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "DN",
+		"zoneName": "Đà Nẵng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "29",
+		"zoneName": "Quảng Ngãi",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "30",
+		"zoneName": "Gia Lai",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "33",
+		"zoneName": "Đắk lăk",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "39",
+		"zoneName": "Đồng Nai",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "CT",
+		"zoneName": "Cần Thơ",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "49",
+		"zoneName": "Vĩnh Long",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "46",
+		"zoneName": "Tiền Giang",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "59",
+		"zoneName": "Cà Mau",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "89",
+		"zoneName": "An Giang",
+		"countryCode": "VN"
 	} 
 ]  ,
 
@@ -1897,6 +2052,161 @@
 		"zoneCode":"NSW",
 		"zoneName":"Nouvelle-Galles du Sud",
 		"countryCode":"AU"
+	},		
+	{
+		"zoneCode": "37",
+		"zoneName": "Tây Ninh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "35",
+		"zoneName": "Lâm Đồng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "HN",
+		"zoneName": "Hà Nội",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "SG",
+		"zoneName": "Hồ Chí Minh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "HP",
+		"zoneName": "Hải Phòng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "26",
+		"zoneName": "Thừa Thiên Huế",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "01",
+		"zoneName": "Lai Châu",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "71",
+		"zoneName": "Điện Biên",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "05",
+		"zoneName": "Sơn La",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "09",
+		"zoneName": "Lạng Sơn",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "13",
+		"zoneName": "Quảng Ninh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "21",
+		"zoneName": "Thanh Hóa",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "22",
+		"zoneName": "Nghệ An",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "23",
+		"zoneName": "Hà Tĩnh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "04",
+		"zoneName": "Cao Bằng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "07",
+		"zoneName": "Tuyên Quang",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "06",
+		"zoneName": "Yên Bái",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "68",
+		"zoneName": "Phú Thọ",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "56",
+		"zoneName": "Bắc Ninh",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "18",
+		"zoneName": "Ninh Bình",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "24",
+		"zoneName": "Quảng Bình",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "DN",
+		"zoneName": "Đà Nẵng",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "29",
+		"zoneName": "Quảng Ngãi",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "30",
+		"zoneName": "Gia Lai",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "33",
+		"zoneName": "Đắk lăk",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "39",
+		"zoneName": "Đồng Nai",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "CT",
+		"zoneName": "Cần Thơ",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "49",
+		"zoneName": "Vĩnh Long",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "46",
+		"zoneName": "Tiền Giang",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "59",
+		"zoneName": "Cà Mau",
+		"countryCode": "VN"
+	},
+	{
+		"zoneCode": "89",
+		"zoneName": "An Giang",
+		"countryCode": "VN"
 	}
 
 ],
@@ -2857,12 +3167,12 @@
 			"countryCode": "PY"
 		},		
 		{
-			"zoneCode": "TN",
+			"zoneCode": "37",
 			"zoneName": "Tây Ninh",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "LD",
+			"zoneCode": "35",
 			"zoneName": "Lâm Đồng",
 			"countryCode": "VN"
 		},
@@ -2872,7 +3182,7 @@
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "HCM",
+			"zoneCode": "SG",
 			"zoneName": "Hồ Chí Minh",
 			"countryCode": "VN"
 		},
@@ -2882,82 +3192,82 @@
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "HU",
-			"zoneName": "Huế",
+			"zoneCode": "26",
+			"zoneName": "Thừa Thiên Huế",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "LC",
+			"zoneCode": "01",
 			"zoneName": "Lai Châu",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "DB",
+			"zoneCode": "71",
 			"zoneName": "Điện Biên",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "SL",
+			"zoneCode": "05",
 			"zoneName": "Sơn La",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "LS",
+			"zoneCode": "09",
 			"zoneName": "Lạng Sơn",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "QN",
+			"zoneCode": "13",
 			"zoneName": "Quảng Ninh",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "TH",
+			"zoneCode": "21",
 			"zoneName": "Thanh Hóa",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "NA",
+			"zoneCode": "22",
 			"zoneName": "Nghệ An",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "HT",
+			"zoneCode": "23",
 			"zoneName": "Hà Tĩnh",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "CB",
+			"zoneCode": "04",
 			"zoneName": "Cao Bằng",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "TQ",
+			"zoneCode": "07",
 			"zoneName": "Tuyên Quang",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "YB",
+			"zoneCode": "06",
 			"zoneName": "Yên Bái",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "PT",
+			"zoneCode": "68",
 			"zoneName": "Phú Thọ",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "BN",
+			"zoneCode": "56",
 			"zoneName": "Bắc Ninh",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "NB",
+			"zoneCode": "18",
 			"zoneName": "Ninh Bình",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "QB",
+			"zoneCode": "24",
 			"zoneName": "Quảng Bình",
 			"countryCode": "VN"
 		},
@@ -2967,22 +3277,22 @@
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "QN",
+			"zoneCode": "29",
 			"zoneName": "Quảng Ngãi",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "GL",
+			"zoneCode": "30",
 			"zoneName": "Gia Lai",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "DL",
+			"zoneCode": "33",
 			"zoneName": "Đắk lăk",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "DN",
+			"zoneCode": "39",
 			"zoneName": "Đồng Nai",
 			"countryCode": "VN"
 		},
@@ -2992,22 +3302,22 @@
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "VL",
+			"zoneCode": "49",
 			"zoneName": "Vĩnh Long",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "TG",
+			"zoneCode": "46",
 			"zoneName": "Tiền Giang",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "CM",
+			"zoneCode": "59",
 			"zoneName": "Cà Mau",
 			"countryCode": "VN"
 		},
 		{
-			"zoneCode": "AG",
+			"zoneCode": "89",
 			"zoneName": "An Giang",
 			"countryCode": "VN"
 		}

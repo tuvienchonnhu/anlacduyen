@@ -68,7 +68,7 @@ function getZones(countryCode){
 				var data = isc.XMLTools.selectObjects(response, "/response/data");
 				if(data && data.length>0) {
 					
-					$('.zone-list').show();  
+					$('.zone-list').show();  	
 					$('#storestateprovince').hide();
 					$(".zone-list").addItems(data);
 					<c:if test="${store.zone!=null}">
