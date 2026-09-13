@@ -107,7 +107,7 @@ body {}
 .mt-50{margin-top:50px;}
 .mb-30{margin-bottom:30px;}
 
-.bg-color-1{background:#2E2D25;}
+.bg-color-1{background:#223b76;}
 /* scrollUp-start */
 #scrollUp {
 	background: #333333 none repeat scroll 0 0;
@@ -425,6 +425,7 @@ body {}
 }
 .mainmenu ul li a{
 	color: #ffffff;
+	font-family: "Times New Roman", Times,serif;
 	display: block;
 	font-size: 14px;
 	font-weight: 900;

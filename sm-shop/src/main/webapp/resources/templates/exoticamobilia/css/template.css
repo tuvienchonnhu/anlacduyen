@@ -1,10 +1,18 @@
-@font-face {
+/*@font-face {
     font-family: 'SalarymanRegular';
     src: url('../fonts/SALARYMA-webfont.eot');
     src: url('../fonts/SALARYMA-webfont.eot?#iefix') format('embedded-opentype'),
          url('../fonts/SALARYMA-webfont.woff') format('woff'),
          url('../fonts/SALARYMA-webfont.ttf') format('truetype'),
          url('../fonts/SALARYMA-webfont.svg#SalarymanRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}*/
+@font-face {
+    font-family: 'montserratextralight';
+    src: url('montserrat-extralight-webfont.woff2') format('woff2'),
+         url('montserrat-extralight-webfont.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 
@@ -46,7 +54,7 @@
 }
 
 .logo > h1{
-	font: 21px "SalarymanRegular", Arial, sans-serif;
+	font: 22px "montserratextralight", "Times New Roman", serif;
 	letter-spacing: 0;
 	padding:0;
 	margin-top:0px;
@@ -58,7 +66,7 @@
 }
 
 .sub-header {
-	font: 15px "SalarymanRegular", Arial, sans-serif;
+	font: 15px "montserratextralight", "Times New Roman", serif;
 	letter-spacing: 0;
 	padding:3;
 	margin-top:30px;
@@ -66,7 +74,7 @@
 }
 
 .header-caption {
-	font: 15px "SalarymanRegular", Arial, sans-serif;
+	font: 15px "montserratextralight", "Times New Roman", serif;
 	letter-spacing: 0;
 	padding: 20px 0;
 	margin-left: 8px;
@@ -96,7 +104,7 @@
 }
 
 .store-name { 
-	font: 22px "SalarymanRegular",Arial,sans-serif;
+	font: 22px "montserratextralight", "Times New Roman", serif;
     letter-spacing: -1px;
 }
 	
@@ -311,7 +319,7 @@ a.overlay {
 }
 
 .ribbon-green {
-  font: bold 14px Sans-Serif;
+  font: bold 14px Serif;
   color: #333;
   text-align: center;
   text-shadow: rgba(255,255,255,0.5) 0px 1px 0px;
