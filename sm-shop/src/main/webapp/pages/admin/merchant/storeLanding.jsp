@@ -77,7 +77,7 @@
 
                         
 		                        <textarea cols="30" id="descriptions[${counter.index}].homePageContent" class="ckeditor" name="descriptions[${counter.index}].homePageContent">
-		                        		<c:out value="${description.homePageContent}" escapeXml="true"/>
+		                        		<c:out value="${description.homePageContent}" escapeXml="false"/>
 		                        </textarea>
 
 

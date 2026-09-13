@@ -10,7 +10,12 @@
 	<script type="text/javascript">
 
 	$(function(){
-		$('#order').numeric();
+		// CKEditor sync before submit
+		$('form').on('submit', function() {
+			for (var name in CKEDITOR.instances) {
+				CKEDITOR.instances[name].updateElement();
+			}
+		});
 		if($("#code").val()=="") {
 			$('.btn').addClass('disabled');
 		}
@@ -279,3 +284,4 @@
 	   </div>
 	</div>
 </div>
+

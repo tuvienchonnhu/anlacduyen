@@ -11,6 +11,12 @@
 
 	$(function(){
 		$('#order').numeric();
+		// ensure CKEditor instances sync their content into the textareas before submit
+		$('form').on('submit', function() {
+			for (var name in CKEDITOR.instances) {
+				CKEDITOR.instances[name].updateElement();
+			}
+		});
 		if($("#code").val()=="") {
 			$('.btn').addClass('disabled');
 		}
@@ -124,9 +130,7 @@
                   <div class="control-group">
                         <label><s:message code="label.category.categorydescription" text="Category description"/> (<c:out value="${description.language.code}"/>)</label>
                         <div class="controls">
-                        <textarea cols="30" id="descriptions[${counter.index}].description" class="ckeditor" name="descriptions[${counter.index}].description">
-                        		<c:out value="${category.descriptions[counter.index].description}"/>
-                        </textarea>
+                        <textarea cols="30" id="descriptions[${counter.index}].description" class="ckeditor" name="descriptions[${counter.index}].description"><c:out value="${category.descriptions[counter.index].description}" escapeXml="false"/></textarea>
                         </div>
                         <script type="text/javascript">
 						//<![CDATA[
