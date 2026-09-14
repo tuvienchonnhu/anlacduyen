@@ -398,15 +398,15 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		store.setCurrency(currency);
 		store.setDefaultLanguage(defaultLanguage);
 		store.setInBusinessSince(date);
-		store.setStorename("Default store");
-		store.setStorephone("888-888-8888");
+		store.setStorename("Bách Hóa An Lạc Duyên");
+		store.setStorephone("0949777111");
 		store.setCode(MerchantStore.DEFAULT_STORE);
-		store.setStorecity("My city");
-		store.setStoreaddress("1234 Street address");
-		store.setStorepostalcode("H2H-2H2");
-		store.setStoreEmailAddress("john@test.com");
+		store.setStorecity("Trảng Bàng");
+		store.setStoreaddress("đường phố đêm xứ Trảng");
+		store.setStorepostalcode("80000");
+		store.setStoreEmailAddress("anlacduyen01@gmail.com");
 		store.setDomainName("localhost:8080");
-		store.setStoreTemplate("december");
+		store.setStoreTemplate("generic");
 		store.setRetailer(true);
 		store.setLanguages(supportedLanguages);
 		
