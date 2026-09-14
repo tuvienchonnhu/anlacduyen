@@ -262,6 +262,336 @@ Slashdot allowed tags taken from "Reply" page:
 	<!--  No CSS on Slashdot posts -->
 
 	<css-rules>
+	<property name="margin" description="The margin property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="margin-top" description="The margin-top property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="margin-bottom" description="The margin-bottom property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="margin-left" description="The margin-left property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="margin-right" description="The margin-right property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="padding" description="The padding property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="padding-top" description="The padding-top property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="padding-bottom" description="The padding-bottom property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="padding-left" description="The padding-left property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="padding-right" description="The padding-right property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border" description="The border property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-width" description="The border-width property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-style" description="The border-style property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-color" description="The border-color property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-top" description="The border-top property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-bottom" description="The border-bottom property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-left" description="The border-left property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-right" description="The border-right property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="border-radius" description="The border-radius property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="width" description="The width property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="height" description="The height property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="max-width" description="The max-width property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="max-height" description="The max-height property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="min-width" description="The min-width property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="min-height" description="The min-height property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="color" description="The color property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="background-color" description="The background-color property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="background" description="The background property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="text-align" description="The text-align property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="text-decoration" description="The text-decoration property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="font-size" description="The font-size property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="font-family" description="The font-family property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="font-weight" description="The font-weight property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="font-style" description="The font-style property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="display" description="The display property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="vertical-align" description="The vertical-align property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="cursor" description="The cursor property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="opacity" description="The opacity property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="box-shadow" description="The box-shadow property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="overflow" description="The overflow property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<regexp-list>
+			<regexp name="anything"/>
+	</regexp-list>
+	</property>
+	<property name="float" description="The float property">
+	<category-list>
+			<category value="visual"/>
+	</category-list>
+	<literal-list>
+			<literal value="left"/>
+			<literal value="right"/>
+			<literal value="none"/>
+	</literal-list>
+	</property>
 	</css-rules>
 <allowed-empty-tags>
         <literal-list>
