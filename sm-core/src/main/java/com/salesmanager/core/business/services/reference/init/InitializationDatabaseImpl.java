@@ -26,6 +26,8 @@ import com.salesmanager.core.business.services.system.optin.OptinService;
 import com.salesmanager.core.business.services.tax.TaxClassService;
 import com.salesmanager.core.business.services.user.GroupService;
 import com.salesmanager.core.business.services.user.PermissionService;
+import com.salesmanager.core.business.constants.Constants;
+import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.utils.SecurityGroupsBuilder;
 import com.salesmanager.core.constants.SchemaConstant;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
@@ -48,62 +50,62 @@ import com.salesmanager.core.model.user.Permission;
 
 @Service("initializationDatabase")
 public class InitializationDatabaseImpl implements InitializationDatabase {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(InitializationDatabaseImpl.class);
-	
+
 
 	@Inject
 	private ZoneService zoneService;
-	
+
 	@Inject
 	private LanguageService languageService;
-	
+
 	@Inject
 	private CountryService countryService;
-	
+
 	@Inject
 	private CurrencyService currencyService;
-	
+
 	@Inject
 	protected MerchantStoreService merchantService;
-		
+
 	@Inject
 	protected ProductTypeService productTypeService;
-	
+
 	@Inject
 	private TaxClassService taxClassService;
-	
+
 	@Inject
 	private ZonesLoader zonesLoader;
-	
+
 	@Inject
 	private IntegrationModulesLoader modulesLoader;
-	
+
 	@Inject
 	private ManufacturerService manufacturerService;
-	
+
 	@Inject
 	private ModuleConfigurationService moduleConfigurationService;
-	
+
 	@Inject
 	private OptinService optinService;
-	
+
 	@Inject
 	protected GroupService   groupService;
-	
+
 	@Inject
 	protected PermissionService   permissionService;
 
 	private String name;
-	
+
 	public boolean isEmpty() {
 		return languageService.count() == 0;
 	}
-	
+
 	@Transactional
 	public void populate(String contextName) throws ServiceException {
 		this.name =  contextName;
-		
+
 		createSecurityGroups();
 		createLanguages();
 		createCountries();
@@ -115,60 +117,60 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 
 
 	}
-	
+
 	private void createSecurityGroups() throws ServiceException {
-		
+
 		  //create permissions
 		  //Map name object
 		  Map<String, Permission> permissionKeys = new HashMap<String, Permission>();
 		  Permission AUTH = new Permission("AUTH");
 		  permissionService.create(AUTH);
 		  permissionKeys.put(AUTH.getPermissionName(), AUTH);
-		  
+
 		  Permission SUPERADMIN = new Permission("SUPERADMIN");
 		  permissionService.create(SUPERADMIN);
 		  permissionKeys.put(SUPERADMIN.getPermissionName(), SUPERADMIN);
-		  
+
 		  Permission ADMIN = new Permission("ADMIN");
 		  permissionService.create(ADMIN);
 		  permissionKeys.put(ADMIN.getPermissionName(), ADMIN);
-		  
+
 		  Permission PRODUCTS = new Permission("PRODUCTS");
 		  permissionService.create(PRODUCTS);
 		  permissionKeys.put(PRODUCTS.getPermissionName(), PRODUCTS);
-		  
+
 		  Permission ORDER = new Permission("ORDER");
 		  permissionService.create(ORDER);
 		  permissionKeys.put(ORDER.getPermissionName(), ORDER);
-		  
+
 		  Permission CONTENT = new Permission("CONTENT");
 		  permissionService.create(CONTENT);
 		  permissionKeys.put(CONTENT.getPermissionName(), CONTENT);
-		  
+
 		  Permission STORE = new Permission("STORE");
 		  permissionService.create(STORE);
 		  permissionKeys.put(STORE.getPermissionName(), STORE);
-		  
+
 		  Permission TAX = new Permission("TAX");
 		  permissionService.create(TAX);
 		  permissionKeys.put(TAX.getPermissionName(), TAX);
-		  
+
 		  Permission PAYMENT = new Permission("PAYMENT");
 		  permissionService.create(PAYMENT);
 		  permissionKeys.put(PAYMENT.getPermissionName(), PAYMENT);
-		  
+
 		  Permission CUSTOMER = new Permission("CUSTOMER");
 		  permissionService.create(CUSTOMER);
 		  permissionKeys.put(CUSTOMER.getPermissionName(), CUSTOMER);
-		  
+
 		  Permission SHIPPING = new Permission("SHIPPING");
 		  permissionService.create(SHIPPING);
 		  permissionKeys.put(SHIPPING.getPermissionName(), SHIPPING);
-		  
+
 		  Permission AUTH_CUSTOMER = new Permission("AUTH_CUSTOMER");
 		  permissionService.create(AUTH_CUSTOMER);
 		  permissionKeys.put(AUTH_CUSTOMER.getPermissionName(), AUTH_CUSTOMER);
-		
+
 		  SecurityGroupsBuilder groupBuilder = new SecurityGroupsBuilder();
 		  groupBuilder
 		  .addGroup("SUPERADMIN", GroupType.ADMIN)
@@ -183,7 +185,7 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		  .addPermission(permissionKeys.get("PAYMENT"))
 		  .addPermission(permissionKeys.get("CUSTOMER"))
 		  .addPermission(permissionKeys.get("SHIPPING"))
-		  
+
 		  .addGroup("ADMIN", GroupType.ADMIN)
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("ADMIN"))
@@ -195,7 +197,7 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		  .addPermission(permissionKeys.get("PAYMENT"))
 		  .addPermission(permissionKeys.get("CUSTOMER"))
 		  .addPermission(permissionKeys.get("SHIPPING"))
-		  
+
 		  .addGroup("ADMIN_RETAILER", GroupType.ADMIN)
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("ADMIN"))
@@ -207,7 +209,7 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		  .addPermission(permissionKeys.get("PAYMENT"))
 		  .addPermission(permissionKeys.get("CUSTOMER"))
 		  .addPermission(permissionKeys.get("SHIPPING"))
-		  
+
 		  .addGroup("ADMIN_STORE", GroupType.ADMIN)
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("CONTENT"))
@@ -216,46 +218,46 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		  .addPermission(permissionKeys.get("PAYMENT"))
 		  .addPermission(permissionKeys.get("CUSTOMER"))
 		  .addPermission(permissionKeys.get("SHIPPING"))
-		  
+
 		  .addGroup("ADMIN_CATALOGUE", GroupType.ADMIN)
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("PRODUCTS"))
-		  
+
 		  .addGroup("ADMIN_ORDER", GroupType.ADMIN)
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("ORDER"))
-		  
+
 		  .addGroup("ADMIN_CONTENT", GroupType.ADMIN)
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("CONTENT"))
-		  
+
 		  .addGroup("CUSTOMER", GroupType.CUSTOMER)
 		  .addPermission(permissionKeys.get("AUTH"))
 		  .addPermission(permissionKeys.get("AUTH_CUSTOMER"));
-		  
+
 		  for(Group g : groupBuilder.build()) {
 			  groupService.create(g);
 		  }
 
-		
+
 	}
-	
+
 
 
 	private void createCurrencies() throws ServiceException {
 		LOGGER.info(String.format("%s : Populating Currencies ", name));
 
 		for (String code : SchemaConstant.CURRENCY_MAP.keySet()) {
-  
+
             try {
             	java.util.Currency c = java.util.Currency.getInstance(code);
-            	
+
             	if(c==null) {
             		LOGGER.info(String.format("%s : Populating Currencies : no currency for code : %s", name, code));
             	}
-            	
+
             		//check if it exist
-            		
+
 	            	Currency currency = new Currency();
 	            	currency.setName(c.getCurrencyCode());
 	            	currency.setCurrency(c);
@@ -265,7 +267,7 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
             } catch (IllegalArgumentException e) {
             	LOGGER.info(String.format("%s : Populating Currencies : no currency for code : %s", name, code));
             }
-        }  
+        }
 	}
 
 	private void createCountries() throws ServiceException {
@@ -276,27 +278,27 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 			if (locale != null) {
 				Country country = new Country(code);
 				countryService.create(country);
-				
+
 				for (Language language : languages) {
 					String name = locale.getDisplayCountry(new Locale(language.getCode()));
-					//byte[] ptext = value.getBytes(Constants.ISO_8859_1); 
-					//String name = new String(ptext, Constants.UTF_8); 
+					//byte[] ptext = value.getBytes(Constants.ISO_8859_1);
+					//String name = new String(ptext, Constants.UTF_8);
 					CountryDescription description = new CountryDescription(language, name);
 					countryService.addCountryDescription(country, description);
 				}
 			}
 		}
 	}
-	
+
 	private void createZones() throws ServiceException {
 		LOGGER.info(String.format("%s : Populating Zones ", name));
         try {
 
     		  Map<String,Zone> zonesMap = new HashMap<String,Zone>();
     		  zonesMap = zonesLoader.loadZones("reference/zoneconfig.json");
-    		  
+
     		  this.addZonesToDb(zonesMap);
-/*              
+/*
               for (Map.Entry<String, Zone> entry : zonesMap.entrySet()) {
             	    String key = entry.getKey();
             	    Zone value = entry.getValue();
@@ -304,18 +306,18 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
             	    	LOGGER.warn("This zone " + key + " has no descriptions");
             	    	continue;
             	    }
-            	    
+
             	    List<ZoneDescription> zoneDescriptions = value.getDescriptions();
             	    value.setDescriptons(null);
 
             	    zoneService.create(value);
-            	    
+
             	    for(ZoneDescription description : zoneDescriptions) {
             	    	description.setZone(value);
             	    	zoneService.addDescription(value, description);
             	    }
               }*/
-              
+
               //lookup additional zones
               //iterate configured languages
       		  LOGGER.info("Populating additional zones");
@@ -324,21 +326,21 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
               //example in.json and in-fr.son
               //will load es zones and use a specific file for french es zones
       		  List<Map<String, Zone>> loadIndividualZones = zonesLoader.loadIndividualZones();
-      		  
+
       		loadIndividualZones.forEach(this::addZonesToDb);
 
   		} catch (Exception e) {
-  		    
+
   			throw new ServiceException(e);
   		}
 
 	}
 
-	
+
 	private void addZonesToDb(Map<String,Zone> zonesMap) throws RuntimeException {
-		
+
 		try {
-		
+
 	        for (Map.Entry<String, Zone> entry : zonesMap.entrySet()) {
 	    	    String key = entry.getKey();
 	    	    Zone value = entry.getValue();
@@ -347,25 +349,25 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 	    	    	LOGGER.warn("This zone " + key + " has no descriptions");
 	    	    	continue;
 	    	    }
-	    	    
+
 	    	    List<ZoneDescription> zoneDescriptions = value.getDescriptions();
 	    	    value.setDescriptons(null);
-	
+
 	    	    zoneService.create(value);
-	    	    
+
 	    	    for(ZoneDescription description : zoneDescriptions) {
 	    	    	description.setZone(value);
 	    	    	zoneService.addDescription(value, description);
 	    	    }
 	        }
-        
+
 		}catch(Exception e) {
 			LOGGER.error("An error occured while loading zones",e);
-			
+
 		}
-		
+
 	}
-	
+
 	private void createLanguages() throws ServiceException {
 		LOGGER.info(String.format("%s : Populating Languages ", name));
 		for(String code : SchemaConstant.LANGUAGE_ISO_CODE) {
@@ -373,27 +375,29 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 			languageService.create(language);
 		}
 	}
-	
+
 	private void createMerchant() throws ServiceException {
 		LOGGER.info(String.format("%s : Creating merchant ", name));
-		
+
 		Date date = new Date(System.currentTimeMillis());
-		
+
+		Language defaultLanguage = languageService.getByCode(Constants.DEFAULT_LANGUAGE);
 		Language en = languageService.getByCode("en");
-		Country ca = countryService.getByCode("CA");
-		Currency currency = currencyService.getByCode("CAD");
-		Zone qc = zoneService.getByCode("QC");
-		
+		Language zh = languageService.getByCode("zh");
+		Country defaultCountry = countryService.getByCode(Constants.DEFAULT_COUNTRY);
+		Currency currency = currencyService.getByCode("VND");
+
 		List<Language> supportedLanguages = new ArrayList<Language>();
+		supportedLanguages.add(defaultLanguage);
 		supportedLanguages.add(en);
-		
+		supportedLanguages.add(zh);
+
 		//create a merchant
 		MerchantStore store = new MerchantStore();
-		store.setCountry(ca);
+		store.setCountry(defaultCountry);
 		store.setCurrency(currency);
-		store.setDefaultLanguage(en);
+		store.setDefaultLanguage(defaultLanguage);
 		store.setInBusinessSince(date);
-		store.setZone(qc);
 		store.setStorename("Default store");
 		store.setStorephone("888-888-8888");
 		store.setCode(MerchantStore.DEFAULT_STORE);

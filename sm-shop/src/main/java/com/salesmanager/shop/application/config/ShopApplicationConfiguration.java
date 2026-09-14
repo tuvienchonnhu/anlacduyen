@@ -163,7 +163,9 @@ public class ShopApplicationConfiguration implements WebMvcConfigurer {
   @Bean
   public SessionLocaleResolver localeResolver() {
     SessionLocaleResolver slr = new SessionLocaleResolver();
-    slr.setDefaultLocale(Locale.getDefault());
+    // Vietnam is the default locale (language code "vn")
+    slr.setDefaultLocale(new Locale("vn", "VN"));
+    //slr.setDefaultLocale(Locale.getDefault());
     return slr;
   }
 
@@ -178,6 +180,8 @@ public class ShopApplicationConfiguration implements WebMvcConfigurer {
         "classpath:bundles/payment");
 
     messageSource.setDefaultEncoding("UTF-8");
+    // Fallback to default bundle (English) when a key is missing in a locale bundle
+    messageSource.setUseCodeAsDefaultMessage(true);
     return messageSource;
   }
 

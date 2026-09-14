@@ -3321,5 +3321,172 @@
 			"zoneName": "An Giang",
 			"countryCode": "VN"
 		}
-] 
+	],
+	"zh":[
+		{
+			"zoneCode": "BJ",
+			"zoneName": "北京",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "TJ",
+			"zoneName": "天津",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "HE",
+			"zoneName": "河北",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "SX",
+			"zoneName": "山西",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "NM",
+			"zoneName": "内蒙古",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "LN",
+			"zoneName": "辽宁",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "JL",
+			"zoneName": "吉林",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "HL",
+			"zoneName": "黑龙江",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "SH",
+			"zoneName": "上海",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "JS",
+			"zoneName": "江苏",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "ZJ",
+			"zoneName": "浙江",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "AH",
+			"zoneName": "安徽",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "FJ",
+			"zoneName": "福建",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "JX",
+			"zoneName": "江西",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "SD",
+			"zoneName": "山东",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "HA",
+			"zoneName": "河南",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "HB",
+			"zoneName": "湖北",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "HN",
+			"zoneName": "湖南",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "GD",
+			"zoneName": "广东",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "GX",
+			"zoneName": "广西",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "HI",
+			"zoneName": "海南",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "CQ",
+			"zoneName": "重庆",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "SC",
+			"zoneName": "四川",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "GZ",
+			"zoneName": "贵州",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "YN",
+			"zoneName": "云南",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "XZ",
+			"zoneName": "西藏",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "SN",
+			"zoneName": "陕西",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "GS",
+			"zoneName": "甘肃",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "QH",
+			"zoneName": "青海",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "NX",
+			"zoneName": "宁夏",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "XJ",
+			"zoneName": "新疆",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "HK",
+			"zoneName": "香港",
+			"countryCode": "CN"
+		},
+		{
+			"zoneCode": "MO",
+			"zoneName": "澳门",
+			"countryCode": "CN"
+		}
+	] 
 }
