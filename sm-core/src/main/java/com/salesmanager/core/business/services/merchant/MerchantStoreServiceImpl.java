@@ -1,4 +1,4 @@
-package com.salesmanager.core.business.services.merchant;
+﻿package com.salesmanager.core.business.services.merchant;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +42,7 @@ public class MerchantStoreServiceImpl extends SalesManagerEntityServiceImpl<Inte
 	}
 
 	@Override
-	@CacheEvict(value="store", key="#store.code")
+	@CacheEvict(value = "store", allEntries = true)
 	public void saveOrUpdate(MerchantStore store) throws ServiceException {
 		super.save(store);
 	}
