@@ -22,7 +22,12 @@
 			"type": "text"
 		},
 		"tags": {
-			"type": "keyword"
+			"type": "text",
+			"fields": {
+				"keyword": {
+					"type": "keyword"
+				}
+			}
 		},
 		"price": {
 			"type": "float"

@@ -85,6 +85,7 @@ Slashdot allowed tags taken from "Reply" page:
 				<literal value="char"/>
 			</literal-list>
 		</attribute>
+		
 
 	</common-attributes>
 
@@ -160,6 +161,36 @@ Slashdot allowed tags taken from "Reply" page:
 					<literal value="nofollow"/>
 				</literal-list>
 			</attribute>
+		</tag>
+		
+		<tag name="img" action="validate">
+			<!-- Cho phép thu?c tính src -->
+			<attribute name="src">
+				<regexp-list>
+					<regexp value=".*"/>
+				</regexp-list>
+			</attribute>
+
+			<!-- Cho phép thu?c tính style (ch?a float, margin, width...) -->
+			<attribute name="style">
+				<regexp-list>
+					<regexp value=".*"/>
+				</regexp-list>
+			</attribute>
+
+			<!-- Cho phép thu?c tính class n?u b?n dùng CSS class -->
+			<attribute name="class">
+				<regexp-list>
+					<regexp value=".*"/>
+				</regexp-list>
+			</attribute>
+
+			<!-- Các thu?c tính can ch?nh/kích thu?c b? sung -->
+			<attribute name="alt"/>
+			<attribute name="title"/>
+			<attribute name="width"/>
+			<attribute name="height"/>
+			<attribute name="align"/>
 		</tag>
 
 		<!-- List tags -->

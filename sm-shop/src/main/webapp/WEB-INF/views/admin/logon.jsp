@@ -315,7 +315,7 @@
 							</p>
 						</div>
 						<div style="float: right;">
-							<img alt="go to www.shopizer.com"
+							<img alt="go to http://www.tuvienchonnhu.net"
 								src="<c:url value="/resources/img/shopizer_small.png" />">
 						</div>
 					</div>

@@ -127,9 +127,15 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 			index.setHighlight(description.getProductHighlight());
 			if(!StringUtils.isBlank(description.getMetatagKeywords())){
 				String[] tags = description.getMetatagKeywords().split(",");
-				@SuppressWarnings("unchecked")
-				List<String> tagsList = new ArrayList(Arrays.asList(tags));
-				index.setTags(tagsList);
+				List<String> tagsList = new ArrayList<String>();
+				for (String tag : tags) {
+					if (StringUtils.isNotBlank(tag)) {
+						tagsList.add(tag.trim());
+					}
+				}
+				if (!tagsList.isEmpty()) {
+					index.setTags(tagsList);
+				}
 			}
 
 			

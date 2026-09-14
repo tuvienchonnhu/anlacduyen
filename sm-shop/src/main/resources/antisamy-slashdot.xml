@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+﻿<?xml version="1.0" encoding="ISO-8859-1"?>
 	
 <!-- 
 W3C rules retrieved from:
@@ -191,6 +191,9 @@ Slashdot allowed tags taken from "Reply" page:
 			<attribute name="hspace"><regexp name="number"/></attribute>
 			<attribute name="vspace"><regexp name="number"/></attribute>
 			<attribute name="align"><regexp-list><regexp name="anything"/></regexp-list></attribute>
+			<attribute name="class"><regexp-list><regexp name="anything"/></regexp-list></attribute>
+			<attribute name="title"><regexp-list><regexp name="anything"/></regexp-list></attribute>
+			<attribute name="style"><regexp-list><regexp name="anything"/></regexp-list></attribute>
 		</tag>
 		<tag name="table" action="validate">
 			<attribute name="border"><regexp-list><regexp name="number"/></regexp-list></attribute>
