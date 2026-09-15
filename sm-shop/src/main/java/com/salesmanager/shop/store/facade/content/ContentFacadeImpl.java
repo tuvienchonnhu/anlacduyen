@@ -561,6 +561,7 @@ public class ContentFacadeImpl implements ContentFacade {
 			page.setCode(content.getCode());
 			page.setId(content.getId());
 			page.setVisible(content.isVisible());
+			page.setLinkToMenu(content.isLinkToMenu());
 			return page;
 		} else {
 			ReadableContentPageFull page = new ReadableContentPageFull();

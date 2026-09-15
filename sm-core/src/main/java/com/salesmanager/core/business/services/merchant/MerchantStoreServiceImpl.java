@@ -1,4 +1,4 @@
-﻿package com.salesmanager.core.business.services.merchant;
+package com.salesmanager.core.business.services.merchant;
 
 import java.util.List;
 import java.util.Optional;

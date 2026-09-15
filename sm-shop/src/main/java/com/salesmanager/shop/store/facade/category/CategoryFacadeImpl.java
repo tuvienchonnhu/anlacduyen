@@ -128,7 +128,11 @@ public class CategoryFacadeImpl implements CategoryFacade {
 
 			//filter root categories for store front menu (unless admin explicitly requests all)
 			if(CollectionUtils.isEmpty(filter) || !filter.contains(ADMIN_CATEGORY)) {
-				filteredList = readableCategoryMap.values().stream().filter(cat -> cat.getDepth() == 0)
+				filteredList = readableCategoryMap.values().stream()
+					// keep root categories and also visible categories whose parent
+					// has been filtered out so they still show up in the main menu
+					.filter(cat -> cat.getDepth() == 0 || cat.getParent() == null
+							|| !readableCategoryMap.containsKey(cat.getParent().getId()))
 						.sorted(Comparator.comparing(ReadableCategory::getSortOrder)).collect(Collectors.toList());
 				
 				returnList.setNumber(filteredList.size());

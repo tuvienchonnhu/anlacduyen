@@ -20,11 +20,13 @@ response.setDateHeader ("Expires", -1);
 					<ul class="nav nav-pills pull-left" id="linkMenuLinks">
 						<li class="active"><a href="<c:url value="/shop"/>"><s:message code="menu.home" text="Home"/></a></li>
 						<c:forEach items="${requestScope.CONTENT_PAGE}" var="content">
-    							<li class="">
-    								<a href="<c:url value="/shop/pages/${content.seUrl}.html"/>" class="current"> 
-    									<span class="name">${content.name}</span> 
-    								</a>
-    							</li>
+								<c:if test="${content.content.linkToMenu}">
+										<li class="">
+											<a href="<c:url value="/shop/pages/${content.seUrl}.html"/>" class="current">
+												<span class="name">${content.name}</span>
+											</a>
+										</li>
+								</c:if>
 						</c:forEach>
 						<c:if test="${requestScope.CONFIGS['displayContactUs']==true}">
 						<li><a href="<c:url value="/shop/store/contactus.html"/>"><s:message code="label.customer.contactus" text="Contact us"/></a></li>
