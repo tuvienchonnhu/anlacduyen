@@ -191,16 +191,37 @@ response.setDateHeader ("Expires", -1);
 						    <!-- search box -->
 		                    <c:if test="${requestScope.CONFIGS['displaySearchBox'] == true}">
 
-		                    <div class="input-group menu-search-box">
-   								<input type="text" class="form-control typeahead" type="search" name="q" id="searchField" placeholder="<s:message code="label.generic.search" text="Search"/>" value="" />
-   								<span class="input-group-btn">
-        							<button class="btn btn-default searchButton" type="button"><s:message code="label.generic.search" text="Search"/></button>
-   								</span>
+							<div class="input-group menu-search-box">
+								<input type="text" class="form-control typeahead" type="search" name="q" id="searchField" placeholder="<s:message code="label.generic.search" text="Search"/>" value="" />
+								<span class="input-group-btn">
+									<button class="btn btn-default" id="searchButton" type="button" onclick="submitSearch()"><s:message code="label.generic.search" text="Search"/></button>
+								</span>
 								<!-- important for submitting search -->
-                                <form id="hiddenSearchForm" method="post" action="<c:url value="/shop/search/search.html"/>">
-										<input type="hidden" id="hiddenQuery" name="q">
+								<form id="hiddenSearchForm" method="post" action="<c:url value="/shop/search/search.html"/>">
+									<input type="hidden" id="hiddenQuery" name="q">
 								</form>
 							</div>
+
+							<!-- Thêm Script xử lý sự kiện Enter và Click -->
+							<script type="text/javascript">
+								function submitSearch() {
+									var query = $('#searchField').val();
+									if (query && query.trim() !== '') {
+										$('#hiddenQuery').val(query.trim());
+										$('#hiddenSearchForm').submit();
+									}
+								}
+
+								$(document).ready(function() {
+									$('#searchField').on('keypress', function(e) {
+										// Kiểm tra nếu phím bấm là Enter (mã phím 13)
+										if (e.which === 13 || e.keyCode === 13) {
+											e.preventDefault(); // Ngăn hành vi submit form mặc định (nếu có)
+											submitSearch();
+										}
+									});
+								});
+							</script>
 
 							</c:if>
 						    <!-- Shopping cart -->

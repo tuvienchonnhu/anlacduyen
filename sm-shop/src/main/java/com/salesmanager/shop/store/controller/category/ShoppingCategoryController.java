@@ -140,11 +140,13 @@ public class ShoppingCategoryController {
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 		
 		//set ref as request attribute
-		String encoded = SanitizeUtils.getSafeRequestParamString(ref);
-		if(!encoded.equals(ref)) {//possible xss
-			throw new Exception("Wrong input parameter [" + ref + "]");
+		if(ref != null) {
+			String encoded = SanitizeUtils.getSafeRequestParamString(ref);
+			if(!encoded.equals(ref)) {//possible xss
+				throw new Exception("Wrong input parameter [" + ref + "]");
+			}
+			request.setAttribute("ref", encoded);
 		}
-		request.setAttribute("ref", encoded);
 
 		//get category
 		Category category = categoryService.getBySeUrl(store, friendlyUrl);
