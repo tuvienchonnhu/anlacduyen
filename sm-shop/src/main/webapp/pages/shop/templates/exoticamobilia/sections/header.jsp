@@ -37,11 +37,18 @@ $(document).ready(function() {
 				return;
 			}
 			$('#hiddenQuery').val(q);
-			var uri = '<c:url value="/shop/search/search.html"/>';
 			e.preventDefault();//action url will be overriden
-			       $('#hiddenSearchForm').attr('action',uri).submit();
+			$('#hiddenSearchForm').attr('action','<c:url value="/shop/search/search.html"/>').submit();
 
-   });
+			});
+
+			//submit search when pressing Enter in search input fields
+			$('#searchField, #responsiveSearchField').on('keydown', function(e){
+			if (e.which === 13 || e.keyCode === 13) {
+				e.preventDefault();
+				$(".searchButton").trigger('click');
+			}
+			});
 
       //trigger search when pressing Enter in the search fields
    function submitSearchForm() {
@@ -350,6 +357,411 @@ $(document).ready(function() {
 							<div class="header-left clearfix" id="site-branding">
 								<c:choose>
 									<c:when test="${requestScope.CONTENT['logo']!=null}">
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+                <header class="header fixed clearfix">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+
+							<!-- header-left start -->
+							<!-- ================ -->
+							<div class="header-left clearfix" id="site-branding">
+								<c:choose>
+									<c:when test="${requestScope.CONTENT['logo']!=null}">
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+				</div>
+			<!-- header-top end -->	
+			</div>
+
+                <!-- logo -->     
+                <header class="header fixed clearfix">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+
+							<!-- header-left start -->
+							<!-- ================ -->
+							<div class="header-left clearfix" id="site-branding">
+								<c:choose>
+									<c:when test="${requestScope.CONTENT['logo']!=null}">
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+                                        <div id="miniCart" class="btn-group dropdown">
+                                        	<button id="open-cart" type="button" class="btn dropdown-toggle" data-toggle="dropdown"><i class="fa fa-shopping-cart"></i> <span id="miniCartSummary"></span></button>
+                                        	<!-- miniCartDetails id required to add cart content from html template -->
+                                        	<ul id="miniCartDetails" class="dropdown-menu dropdown-menu-right dropdown-animation cart"></ul>
+                                        </div>
+                                        </c:if>
+								</div>
+								<!--  header top dropdowns end -->
+
+							</div>
+							<!-- header-top-second end -->
+
+						</div>
+					</div>
+				</div>
+			<!-- header-top end -->	
+			</div>
+
+                <!-- logo -->     
+                <header class="header fixed clearfix">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4">
+
+							<!-- header-left start -->
+							<!-- ================ -->
+							<div class="header-left clearfix" id="site-branding">
+								<c:choose>
+									<c:when test="${requestScope.CONTENT['logo']!=null}">
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
+										<!-- A content logo exist -->
+										<sm:pageContent contentCode="logo"/>
+									</c:when>
+									<c:otherwise>
+										<c:choose>
+						                		<c:when test="${not empty requestScope.MERCHANT_STORE.storeLogo}">
+						                			<!--  use merchant store logo -->
+						                			<img class="logoImage" src="<sm:storeLogo/>"/>
+						                		</c:when>
+						                		<c:otherwise>
+						                			<!-- Use store name -->
+						                			<div class="logo">
+						                			<h1>
+						                			<a class="grey store-name" href="<c:url value="/shop/"/>">
+						                				<c:out value="${requestScope.MERCHANT_STORE.storename}"/>
+						                			</a>  
+						                			</h1>
+						                			</div>
+						                		</c:otherwise>
+						                </c:choose>
+									</c:otherwise>
+								</c:choose>
+								
+							</div>
+							<!-- header-left end -->
+
+						</div>
 										<!-- A content logo exist -->
 										<sm:pageContent contentCode="logo"/>
 									</c:when>

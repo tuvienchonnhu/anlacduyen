@@ -59,8 +59,7 @@ response.setDateHeader ("Expires", -1);
 </div>
 {{/products}}
 </script>
-</script>
- 
+
 
  
  <script>
