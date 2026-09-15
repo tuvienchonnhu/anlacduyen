@@ -112,13 +112,21 @@ response.setDateHeader ("Expires", -1);
 					<div class="row">
 						<div class="col-lg-9 col-md-8 col-sm-8">
 						    <c:if test="${fn:length(requestScope.MERCHANT_STORE.languages) > 1}">
-							<div class="dropdown header-left-menu">
-								 <c:forEach items="${requestScope.MERCHANT_STORE.languages}" var="language">
-									<c:if test="${requestScope.LANGUAGE.code ne language.code}">
-									  <a href="<c:url value="/shop?locale=${language.code}"/>"><s:message code="lang.${language.code}" text="${language.code}" /></a>
-								    </c:if>
-								  </c:forEach>
-							</div>
+							<!-- switch language -->
+							<div class="btn-group dropdown">
+								<!-- For this template only french and english supported, if required build a dropdown list with all languages -->
+								<button type="button" class="btn dropdown-toggle" data-toggle="dropdown">
+									<i class="fa fa-gear no-desktop">
+									</i>
+									<span class="no-responsive"><s:message code="label.generic.language" text="Language"/>
+									</span>
+								</button>
+								<ul class="dropdown-menu dropdown-menu-right dropdown-animation">
+									<c:forEach items="${requestScope.MERCHANT_STORE.languages}" var="language">
+									<li><a href="<c:url value="/shop?locale=${language.code}"/>"><s:message code="lang.${language.code}" text="${language.code}" /></a></li>
+									</c:forEach>
+								</ul>
+							</div> 
 							</c:if>
 							<c:if test="${requestScope.CONFIGS['displayCustomerSection'] == true}">
 							<!-- placeholder for customer account -->
