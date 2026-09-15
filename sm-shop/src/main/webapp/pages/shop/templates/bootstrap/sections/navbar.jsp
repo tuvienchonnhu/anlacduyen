@@ -85,8 +85,7 @@ $(document).ready(function() {
                     						<!-- request contains url and url contains /shop -->
 											<li class="">  
 	                    					       <a href="<c:url value="/shop"/>" class="current">          
-	                    					            <span class="name"><s:message code="menu.home" text="Home"/></span>     
-	                    								<span class="desc"><s:message code="menu.home" text="Home"/></span>                                  
+	                    					            <span class="name"><s:message code="menu.home" text="Home"/></span>                                     
 	                    						   </a>                         
 	                    					</li>
 	
@@ -95,7 +94,6 @@ $(document).ready(function() {
 	    										<li class="">
 	    											<a href="<c:url value="/shop/category/${category.description.friendlyUrl}.html"/><sm:breadcrumbParam categoryId="${category.id}"/>" class="current"> 
 	    												<span class="name">${category.description.name}</span>
-	    												<span class="desc">${category.description.highlights}</span> 
 	    											</a>
 	    										</li> 
 											</c:forEach>

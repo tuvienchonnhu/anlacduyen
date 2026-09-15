@@ -37,9 +37,9 @@ $(document).ready(function() {
 				return;
 			}
 			$('#hiddenQuery').val(q);
-			var uri = '<c:url value="/shop/search/search.html"/>';
+			var url = '<c:url value="/shop/search/search.html"/>';
 			e.preventDefault();//action url will be overriden
-	        $('#hiddenSearchForm').attr('action',url).submit();
+			       $('#hiddenSearchForm').attr('action',url).submit();
 
    });
 
@@ -265,7 +265,7 @@ $(document).ready(function() {
                                         <!-- search box -->
                                         <c:if test="${requestScope.CONFIGS['displaySearchBox'] == true}">
                                         <div id="searchFieldGroup" class="btn-group dropdown no-responsive">  
-					      					<input id="searchField" class="typeahead form-control" name="q" type="text"  />" autocomplete="off" spellcheck="false" dir="auto" value="<c:out value="${q}"/>">
+					      					<input id="searchField" class="typeahead form-control" name="q" type="text" autocomplete="off" spellcheck="false" dir="auto" value="<c:out value="${q}"/>">
                                         </div>
                                         <div class="btn-group dropdown">
                                             <button type="button" class="btn dropdown-toggle no-responsive searchButton" data-toggle="dropdown"><i class="fa fa-search"></i><span class="uppercase"><s:message code="label.generic.search" text="Search" /></span></button>
