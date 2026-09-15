@@ -37,13 +37,40 @@ $(document).ready(function() {
 				return;
 			}
 			$('#hiddenQuery').val(q);
-			var url = '<c:url value="/shop/search/search.html"/>';
+			var uri = '<c:url value="/shop/search/search.html"/>';
 			e.preventDefault();//action url will be overriden
-			       $('#hiddenSearchForm').attr('action',url).submit();
+			       $('#hiddenSearchForm').attr('action',uri).submit();
 
    });
 
-   
+      //trigger search when pressing Enter in the search fields
+   function submitSearchForm() {
+       var q = $('#searchField').val();
+       if(q==null || q=='') {
+           q = $('#responsiveSearchField').val();
+       }
+       if(q==null || q =='') {
+           return;
+       }
+       $('#hiddenQuery').val(q);
+       var url = '<c:url value="/shop/search/search.html"/>';
+       $('#hiddenSearchForm').attr('action',url).submit();
+   }
+
+   $('#searchField').keypress(function(e){
+       if(e.which == 13) {
+           e.preventDefault();
+           submitSearchForm();
+       }
+   });
+
+   $('#responsiveSearchField').keypress(function(e){
+       if(e.which == 13) {
+           e.preventDefault();
+           submitSearchForm();
+       }
+   });
+
    
 	
    var searchElements = new Bloodhound({
