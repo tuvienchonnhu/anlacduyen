@@ -50,19 +50,6 @@ $(document).ready(function() {
 			}
 			});
 
-      //trigger search when pressing Enter in the search fields
-   function submitSearchForm() {
-       var q = $('#searchField').val();
-       if(q==null || q=='') {
-           q = $('#responsiveSearchField').val();
-       }
-       if(q==null || q =='') {
-           return;
-       }
-       $('#hiddenQuery').val(q);
-       var url = '<c:url value="/shop/search/search.html"/>';
-       $('#hiddenSearchForm').attr('action',url).submit();
-   }
 
 
    var searchElements = new Bloodhound({
@@ -369,7 +356,3 @@ $(document).ready(function() {
 							<!-- header-left end -->
 
 						</div>
-</div>
-</div>
-</header>
-<!-- header-end -->
