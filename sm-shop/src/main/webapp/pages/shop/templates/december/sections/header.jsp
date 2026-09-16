@@ -68,7 +68,7 @@ response.setDateHeader ("Expires", -1);
 										</a>
 										{{/image}}
 										{{^image}}
-											&nbsp
+											&nbsp;
 										{{/image}}
 										</div>
                     					<div class="product-details">

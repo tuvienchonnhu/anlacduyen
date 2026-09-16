@@ -84,7 +84,7 @@
 					<img width="40" src="{{contextPath}}{{image}}">
 			{{/image}}
 			{{^image}}
-					&nbsp
+					&nbsp;
 			{{/image}}
 				</td>
 				<td>{{quantity}}</td>

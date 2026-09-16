@@ -69,7 +69,7 @@ response.setDateHeader ("Expires", -1);
 												<img src="<c:out value="${pageContext.servletContext.contextPath}" />{{image}}">
 											{{/image}}
 											{{^image}}
-												&nbsp
+												&nbsp;
 											{{/image}}
 									</div>	
 									<div class="cart-content">
@@ -210,7 +210,7 @@ response.setDateHeader ("Expires", -1);
 								</form>
 							</div>
 
-							<!-- Thêm Script xử lý sự kiện Enter và Click -->
+							<!-- ThÃªm Script xá»­ lÃ½ sá»± kiá»‡n Enter vÃ  Click -->
 							<script type="text/javascript">
 								function submitSearch() {
 									var query = $('#searchField').val();
@@ -222,9 +222,9 @@ response.setDateHeader ("Expires", -1);
 
 								$(document).ready(function() {
 									$('#searchField').on('keypress', function(e) {
-										// Kiểm tra nếu phím bấm là Enter (mã phím 13)
+										// Kiá»ƒm tra náº¿u phÃ­m báº¥m lÃ  Enter (mÃ£ phÃ­m 13)
 										if (e.which === 13 || e.keyCode === 13) {
-											e.preventDefault(); // Ngăn hành vi submit form mặc định (nếu có)
+											e.preventDefault(); // NgÄƒn hÃ nh vi submit form máº·c Ä‘á»‹nh (náº¿u cÃ³)
 											submitSearch();
 										}
 									});

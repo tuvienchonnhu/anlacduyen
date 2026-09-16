@@ -14,51 +14,43 @@ response.setDateHeader ("Expires", -1);
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 
- <script type="text/html" id="productBoxTemplate">
-{{#products}}
-<div itemscope itemtype="http://schema.org/Enumeration" class="col-md-4 productItem" item-order="{{sortOrder}}" item-name="{{description.name}}" item-price="{{price}}" data-id="{{id}}" class="col-sm-4">
-<div class="box-style-4 white-bg object-non-visible animated object-visible">
- 	{{#description.highlights}}  
-    <div class="ribbon-wrapper-green">
-   		<div class="ribbon-green">
-   			{{description.highlights}} 
-   		</div>
-   	</div>
-    {{/description.highlights}}
-	{{^canBePurchased}}
-		<div class="sold-out-box">
-	    			<span class="sold-out-text"><s:message code="label.soldout" text="Sold out" /></span>
-	  	</div> 
-	{{/canBePurchased}}
-	<div class="product-image">
-    {{#image}}                              
-	<a href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html<sm:breadcrumbParam/>"><img class="product-img" src="<c:url value="/"/>{{image.imageUrl}}"></a>
-    {{/image}}
-    </div>
-	<!--  *** Product Name & Price Starts *** -->
-	<div class="caption">
-	<div class="product-details">
-	<div class="clearfix">
-		<h3 class="product-heading product-name" itemprop="name">{{description.name}}</h3>
-		<h4 class="price">
-			{{#discounted}}<del>{{originalPrice}}</del>&nbsp;<span itemprop="price" class="specialPrice">{{finalPrice}}</span>{{/discounted}}
-			{{^discounted}}<span itemprop="price" class="specialPrice">{{finalPrice}}</span>{{/discounted}}
-		</h4>
-		<!-- Product Name & Price Ends -->
-		<!-- Product Buttons Starts -->
-		<div class="clearfix">
-			<a class="btn btn-default pull-left" href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html<sm:breadcrumbParam/>" class="details"><s:message code="button.label.view" text="Details" /></a>
-		<c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">
-		{{#canBePurchased}}<a class="btn btn-buy pull-right addToCart" href="javascript:void(0);" class="addToCart" productId="{{id}}"><s:message code="button.label.addToCart" text="Add to cart" /></a>{{/canBePurchased}}
-		</c:if>
-		</div>
-	</div>
-	</div>
-	</div>
-</div>
-</div>
-{{/products}}
-</script>
+  <script type="text/html" id="productBoxTemplate">
+ {{#products}}
+ <div itemscope itemtype="http://schema.org/Enumeration" class="col-md-4 col-sm-6 col-xs-12 product" item-order="{{sortOrder}}" item-name="{{description.name}}" item-price="{{price}}" data-id="{{id}}">
+ 								<div class="thumbnail product-img" style="border:none !important;">
+ 									{{#description.highlights}}
+ 									<div class="ribbon-wrapper-green">
+ 										<div class="ribbon-green">
+ 											{{description.highlights}}
+ 										</div>
+ 									</div>
+ 									{{/description.highlights}}
+ 									{{^canBePurchased}}
+ 									<div class="sold-out-box">
+ 										<span class="sold-out-text"><s:message code="label.soldout" text="Sold out" /></span>
+ 									</div>
+ 									{{/canBePurchased}}
+                                     {{#image}}
+ 									<a href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html<sm:breadcrumbParam/>">
+ 										<img class="img-responsive" src="<c:url value=""/>{{image.imageUrl}}" alt="{{description.name}}" />
+ 									</a>
+ 									{{/image}}
+ 								</div>
+ 								<div class="product-content text-center">
+ 									<a class="listing-product-name" href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html<sm:breadcrumbParam/>"><h3 itemprop="name">{{description.name}}</h3></a>
+ 									<h4>
+ 										{{#discounted}}<del>{{originalPrice}}</del>&nbsp;<span itemprop="price" class="specialPrice">{{finalPrice}}</span>{{/discounted}}
+ 										{{^discounted}}<span itemprop="price">{{finalPrice}}</span>{{/discounted}}
+ 									</h4>
+ 									<c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">
+ 									{{#canBePurchased}}<div class="store-btn">
+       										<div class="store-btn-addtocart"><a class="addToCart" href="javascript:void(0)" productId="{{id}}"><s:message code="button.label.addToCart" text="Add to cart"/></a></div>
+   										</div>{{/canBePurchased}}
+ 									</c:if>
+ 								</div>
+ 						</div>
+ {{/products}}
+ </script>
 
 
  
