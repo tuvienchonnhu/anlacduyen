@@ -240,13 +240,27 @@ public class ProductPriceUtils {
 		} else {
 			currencyInstance = NumberFormat.getCurrencyInstance();//international
 		}
-	    currencyInstance.setCurrency(currency);
-		
-	    
-	    return currencyInstance.format(amount.doubleValue());
-		
+	      currencyInstance.setCurrency(currency);
 
-    }
+	     String formatted = currencyInstance.format(amount.doubleValue());
+
+	     // Always put the currency symbol after the amount
+	     java.text.DecimalFormatSymbols symbols = ((java.text.DecimalFormat) currencyInstance).getDecimalFormatSymbols();
+	     String symbol = currency.getSymbol(locale);
+	     String prefix = ((java.text.DecimalFormat) currencyInstance).getPositivePrefix();
+	     String suffix = ((java.text.DecimalFormat) currencyInstance).getPositiveSuffix();
+	     if (prefix != null && prefix.contains(symbol) && (suffix == null || suffix.isEmpty() || !suffix.contains(symbol))) {
+	         // symbol is a prefix, move it to the end
+	         String newPrefix = prefix.replace(symbol, "").trim();
+	         ((java.text.DecimalFormat) currencyInstance).setPositivePrefix(newPrefix);
+	         ((java.text.DecimalFormat) currencyInstance).setPositiveSuffix((suffix == null ? "" : suffix) + (newPrefix.isEmpty() ? " " : " ") + symbol);
+	         formatted = currencyInstance.format(amount.doubleValue());
+	     }
+
+	     return formatted;
+
+
+	    }
 	
 	
 	public String getFormatedAmountWithCurrency(Locale locale, com.salesmanager.core.model.reference.currency.Currency currency, BigDecimal amount) throws Exception {
@@ -257,6 +271,15 @@ public class ProductPriceUtils {
 		Currency curr = currency.getCurrency();
 		NumberFormat currencyInstance = NumberFormat.getCurrencyInstance(locale);
 		currencyInstance.setCurrency(curr);
+		if(currencyInstance instanceof java.text.DecimalFormat) {
+			java.text.DecimalFormat df = (java.text.DecimalFormat) currencyInstance;
+			String symbol = curr.getSymbol(locale);
+			String prefix = df.getPositivePrefix();
+			if (prefix != null && prefix.contains(symbol)) {
+				df.setPositivePrefix(prefix.replace(symbol, "").trim());
+				df.setPositiveSuffix(" " + symbol);
+			}
+		}
 	    return currencyInstance.format(amount.doubleValue());
 		
 
