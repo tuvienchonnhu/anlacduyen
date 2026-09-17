@@ -42,8 +42,9 @@ response.setDateHeader ("Expires", -1);
 							<!-- server side rendered products using productBox.jsp (same as exoticamobilia) -->
 							<c:if test="${not empty requestScope.products}">
 							<c:set var="ITEMS" value="${requestScope.products}" scope="request" />
-							<c:remove var="FEATURED" scope="request" />
-							<jsp:include page="/pages/shop/templates/exoticamobilia/sections/productBox.jsp" />
+								<!-- Search results are regular products, so Add to cart uses the normal purchase rule. -->
+								<c:set var="FEATURED" value="false" scope="request" />
+								<jsp:include page="/pages/shop/templates/exoticamobilia/sections/productBox.jsp" />
 							</c:if>
 							<c:if test="${empty requestScope.products}">
 							<p><s:message code="label.search.noresults" text="No results found" /></p>
