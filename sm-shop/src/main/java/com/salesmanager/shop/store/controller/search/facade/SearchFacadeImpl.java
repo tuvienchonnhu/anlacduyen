@@ -90,6 +90,19 @@ public class SearchFacadeImpl implements SearchFacade {
 	public SearchProductList search(MerchantStore store, Language language, SearchProductRequest searchRequest) {
 		SearchResponse response = search(store, language.getCode(), searchRequest.getQuery(), searchRequest.getCount(),
 				searchRequest.getStart());
+
+		// Fallback: if no results found in the requested language (index may not exist
+		// for that language), retry using the store default language
+		if (response != null && CollectionUtils.isEmpty(response.getEntries())
+				&& store.getDefaultLanguage() != null
+				&& !store.getDefaultLanguage().getCode().equals(language.getCode())) {
+			LOGGER.debug("No results for language " + language.getCode() + ", retrying with default language "
+					+ store.getDefaultLanguage().getCode());
+			response = search(store, store.getDefaultLanguage().getCode(), searchRequest.getQuery(),
+					searchRequest.getCount(), searchRequest.getStart());
+			language = store.getDefaultLanguage();
+		}
+
 		return convertToSearchProductList(response, store, searchRequest.getStart(), searchRequest.getCount(),
 				language);
 	}

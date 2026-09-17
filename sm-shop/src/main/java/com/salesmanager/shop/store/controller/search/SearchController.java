@@ -26,6 +26,7 @@ import com.salesmanager.core.model.search.SearchKeywords;
 import com.salesmanager.shop.constants.Constants;
 import com.salesmanager.shop.model.catalog.SearchProductList;
 import com.salesmanager.shop.model.catalog.SearchProductRequest;
+import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.store.controller.ControllerConstants;
 import com.salesmanager.shop.store.controller.search.facade.SearchFacade;
 import com.salesmanager.shop.store.model.search.AutoCompleteRequest;
@@ -33,27 +34,27 @@ import com.salesmanager.shop.utils.ImageFilePath;
 
 @Controller
 public class SearchController {
-	
+
 	@Inject
 	private MerchantStoreService merchantStoreService;
 
 	@Inject
 	private SearchService searchService;
-	
+
 	@Inject
 	private SearchFacade searchFacade;
-	
+
 	@Inject
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
 
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearchController.class);
-	
+
 	private final static int AUTOCOMPLETE_ENTRIES_COUNT = 15;
 
-	
-	
+
+
 	/**
 	 * Retrieves a list of keywords for a given series of character typed by the end user
 	 * This is used for auto complete on search input field
@@ -77,34 +78,34 @@ public class SearchController {
 				merchantStore = null; //reset for the current request
 			}
 		}
-		
+
 		try {
-		
+
 			if(merchantStore== null) {
 					merchantStore = merchantStoreService.getByCode(store);
 			}
-			
+
 			if(merchantStore==null) {
 				LOGGER.error("Merchant store is null for code " + store);
 				response.sendError(503, "Merchant store is null for code " + store);//TODO localized message
 				return null;
 			}
-			
+
 			AutoCompleteRequest req = new AutoCompleteRequest(store,language);
 			/** formatted toJSONString because of te specific field names required in the UI **/
 			SearchKeywords keywords = searchService.searchForKeywords(req.getCollectionName(), query, AUTOCOMPLETE_ENTRIES_COUNT);
 			return keywords.toJSONString();
 
-			
+
 		} catch (Exception e) {
 			LOGGER.error("Exception while autocomplete " + e);
 		}
-		
+
 		return null;
-		
+
 	}
 
-	
+
 	/**
 	 * Search results page
 	 * @param searchRequest
@@ -117,15 +118,15 @@ public class SearchController {
 	@ResponseBody
 	public SearchProductList search(
 	    @RequestBody SearchProductRequest searchRequest,
-	    Model model, 
-	    Language language, 
+	    Model model,
+	    Language language,
 	    MerchantStore store) {
 
 		return searchFacade.search(store, language, searchRequest);
 
-		
+
 	}
-	
+
 	/**
 	 * Displays the search page after a search query post
 	 * @param query
@@ -140,10 +141,30 @@ public class SearchController {
 	public String displaySearch(@RequestParam("q") String query, Model model, HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
 
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
-		
+		Language language = (Language)request.getAttribute(Constants.LANGUAGE);
+
 		String q = request.getParameter("q");
 
 		model.addAttribute("q",q);
+
+
+		//server side search so the products can be rendered with productBox.jsp
+		SearchProductRequest searchRequest = new SearchProductRequest();
+		searchRequest.setQuery(q);
+		searchRequest.setCount(50);
+		searchRequest.setStart(0);
+
+		try {
+
+			SearchProductList productList = searchFacade.search(store, language, searchRequest);
+
+			if(productList!=null) {
+				model.addAttribute("products", productList.getProducts());
+			}
+
+		} catch(Exception e) {
+			LOGGER.error("Error while searching products for query " + q, e);
+		}
 		
 		/** template **/
 		StringBuilder template = new StringBuilder().append(ControllerConstants.Tiles.Search.search).append(".").append(store.getStoreTemplate());

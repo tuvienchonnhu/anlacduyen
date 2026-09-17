@@ -53,8 +53,8 @@ response.setDateHeader ("Expires", -1);
 													</div>
 													<!-- Product Name & Price Ends -->
 													<!-- Product Buttons Starts -->
-														<div class="clearfix">
-															<a class="btn btn-default pull-left" href="<c:url value="/shop/product/" /><c:out value="${product.description.friendlyUrl}"/>.html<sm:breadcrumbParam productId="${product.id}"/>"><s:message code="button.label.view" text="Details" /></a>
+														<div class="product-box-actions clearfix">
+														<a class="btn btn-default pull-left" href="<c:url value="/shop/product/" /><c:out value="${product.description.friendlyUrl}"/>.html<sm:breadcrumbParam productId="${product.id}"/>"><s:message code="button.label.view" text="Details" /></a>
 															<c:choose>
 																<c:when test="${requestScope.FEATURED==true}">
 																	<c:if test="${requestScope.CONFIGS['displayAddToCartOnFeaturedItems']==true && requestScope.CONFIGS['allowPurchaseItems']==true && product.canBePurchased}"><a class="btn btn-buy pull-right addToCart" href="javascript:void(0);" productId="${product.id}"><s:message code="button.label.addToCart" text="Add to cart" /></a>

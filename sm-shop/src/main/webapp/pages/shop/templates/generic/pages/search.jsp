@@ -1,4 +1,4 @@
-<%
+﻿﻿<%
 response.setCharacterEncoding("UTF-8");
 response.setHeader("Cache-Control","no-cache");
 response.setHeader("Pragma","no-cache");
@@ -14,165 +14,52 @@ response.setDateHeader ("Expires", -1);
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 
-  <script type="text/html" id="productBoxTemplate">
- {{#products}}
- <div itemscope itemtype="http://schema.org/Enumeration" class="col-md-4 col-sm-6 col-xs-12 product" item-order="{{sortOrder}}" item-name="{{description.name}}" item-price="{{price}}" data-id="{{id}}">
- 								<div class="thumbnail product-img" style="border:none !important;">
- 									{{#description.highlights}}
- 									<div class="ribbon-wrapper-green">
- 										<div class="ribbon-green">
- 											{{description.highlights}}
- 										</div>
- 									</div>
- 									{{/description.highlights}}
- 									{{^canBePurchased}}
- 									<div class="sold-out-box">
- 										<span class="sold-out-text"><s:message code="label.soldout" text="Sold out" /></span>
- 									</div>
- 									{{/canBePurchased}}
-                                     {{#image}}
- 									<a href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html<sm:breadcrumbParam/>">
- 										<img class="img-responsive" src="<c:url value=""/>{{image.imageUrl}}" alt="{{description.name}}" />
- 									</a>
- 									{{/image}}
- 								</div>
- 								<div class="product-content text-center">
- 									<a class="listing-product-name" href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html<sm:breadcrumbParam/>"><h3 itemprop="name">{{description.name}}</h3></a>
- 									<h4>
- 										{{#discounted}}<del>{{originalPrice}}</del>&nbsp;<span itemprop="price" class="specialPrice">{{finalPrice}}</span>{{/discounted}}
- 										{{^discounted}}<span itemprop="price">{{finalPrice}}</span>{{/discounted}}
- 									</h4>
- 									<c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">
- 									{{#canBePurchased}}<div class="store-btn">
-       										<div class="store-btn-addtocart"><a class="addToCart" href="javascript:void(0)" productId="{{id}}"><s:message code="button.label.addToCart" text="Add to cart"/></a></div>
-   										</div>{{/canBePurchased}}
- 									</c:if>
- 								</div>
- 						</div>
- {{/products}}
- </script>
-
-
- 
  <script>
- 
- var START_COUNT_PRODUCTS = 0;
- var MAX_PRODUCTS = 18;
- 
-
- $(function(){
-	 	 
-	 search();
-
- });
- 
-
- 
- 	function search() {
- 		//Invoke search service
- 		$('#productsContainer').showLoading();
- 		var url = '<%=request.getContextPath()%>/services/public/search/<c:out value="${requestScope.MERCHANT_STORE.code}"/>/<c:out value="${requestScope.LANGUAGE.code}"/>/' + START_COUNT_PRODUCTS + '/' + MAX_PRODUCTS + '/search.json';
-	 	searchProducts(url,'#productsContainer','<c:out value="${q}"/>',null);
- 	}
- 	
- 	//inviked from callback below
- 	function buildProductsList(productList) {
- 		log('Products-> ' + productList.products.length);
-		var productsTemplate = Hogan.compile(document.getElementById("productBoxTemplate").innerHTML);
-		var productsRendred = productsTemplate.render(productList);
-		$('#productsContainer').append(productsRendred);
-		//$('#hiddenProductsContainer').append(productsRendred);//used for filtering products but no filter in search
-		initBindings();//add to cart etc...
- 	}
- 
-	//once the list of product is retrieved
- 	function callBackSearchProducts(productList) {
- 			buildProductsList(productList);
-			totalCount = productList.productCount;
-			START_COUNT_PRODUCTS = START_COUNT_PRODUCTS + MAX_PRODUCTS;
-			if(START_COUNT_PRODUCTS < totalCount) {
-					$("#button_nav").show();
-			} else {
-					$("#button_nav").hide();
-			}
-			
-			$('#productsContainer').hideLoading();
-			
-			
-			var productQty = productList.productCount + ' <s:message code="label.search.items.found" text="item(s) found" />';
-			$('#products-qty').html(productQty);
-			
-			//facets
-			if(productList.categoryFacets!=null && productList.categoryFacets.length>0) {	
-				$('#categoryLabel').show();
-				for (var i = 0; i < productList.categoryFacets.length; i++) {
-					var categoryFacets = '<li>';
-					categoryFacets = categoryFacets + '<a href="<c:url value="/shop"/>/category/' + productList.categoryFacets[i].description.friendlyUrl + '.html">' + productList.categoryFacets[i].description.name;
-					if(productList.categoryFacets[i].productCount>0) {
-					   categoryFacets = categoryFacets + '&nbsp;<span class="countItems">(' + productList.categoryFacets[i].productCount + ')</span>'
-					}
-					categoryFacets = categoryFacets + '</a>';
-					categoryFacets = categoryFacets + '</li>';
-					$(categoriesFacets).append(categoryFacets);
-				}
-			} else {
-				$('#categoryLabel').hide();
-			}
-			
-
-
-	}
- 
- 
- 
- 
-</script>
+ 	//server side rendered, bindings only
+ 	$(function(){
+  	initBindings();
+ 	});
+ </script>
 
 
 	<div id="mainContent" class="container">
 
-        
-        
-		<div class="bedroom-all-product-area ptb-80">
-			<div class="container">
-				<div class="row">
-					<div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-						<!-- category-products-area-start -->
-						<div class="caregory-products-area">
-							<div class="row">
-								<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-									<div class="product-option">
-										<div class="porduct-option-left floatleft">
-											<strong><div id="products-qty"></div></strong>
-										</div>
-										<div class="product-option-right floatright">
-											&nbsp;
-										</div>
-									</div>
+		<div id="shop" class="row">
+
+
+
+        			<div class="col-md-9">
+
+							<div class="row top-shop-option">
+								<div class="col-sm-9 col-md-9">
+									<strong><div id="products-qty">${fn:length(requestScope.products)} <s:message code="label.search.items.found" text="item(s) found" /></div></strong>
 								</div>
 							</div>
-						</div>
-						<div class="tab-content category-products">
-								<div class="tab-pane active" id="viewed">
-									<div class="row">
-									<section class="products-grid">
-									    <!-- Products here -->
-									    <div id="productsContainer" class="list-unstyled"></div>
-										<span id="end_nav" style="display:none;"><s:message code="label.product.nomoreitems" text="No more items to be displayed" /></span>
-          								<!-- end block -->
-										<!-- hidden -->
-										<div id="hiddenProductsContainer" style="display:none;"></div>
-									</section>
-									</div>
-								</div>
-						</div>
-					</div>
-					<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-								<h3 id="categoryLabel"><s:message code="label.categories.title" text="Categories"/></h3>
-        			            <ul id="categoriesFacets" class="nav nav-list"></ul>
-					</div>
-				</div>
-			</div>
-		</div>
 
+
+							<div class="row product-list">
+
+							<!-- server side rendered products using productBox.jsp (same as exoticamobilia) -->
+							<c:if test="${not empty requestScope.products}">
+							<c:set var="ITEMS" value="${requestScope.products}" scope="request" />
+							<c:remove var="FEATURED" scope="request" />
+							<jsp:include page="/pages/shop/templates/generic/sections/productBox.jsp" />
+							</c:if>
+							<c:if test="${empty requestScope.products}">
+							<p><s:message code="label.search.noresults" text="No results found" /></p>
+							</c:if>
+
+							</div>
+
+					</div><!-- /col-md-9 -->
+        
+        			<sidebar class="col-md-3">
+        						<h3 id="categoryLabel"><s:message code="label.categories.title" text="Categories"/></h3>
+        			            <ul id="categoriesFacets" class="nav nav-list"></ul>
+        			</sidebar>
+        
+
+        
+        </div><!-- row -->
+        
       </div><!-- container -->

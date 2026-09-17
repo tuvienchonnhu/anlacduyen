@@ -261,10 +261,17 @@
 					</div>
 				
 				
-				<!-- customer review -->
+						<!-- customer review -->
+					<c:if test="${requestScope.CONTENT['sideBar']!=null}">
+						<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+							<sm:pageContent contentCode="sideBar"/>
+						</div>
+					</c:if>
+				</div>
 
-				<!-- Related items -->
-				<div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+				<!-- Related items: a separate row below product details and sidebar. -->
+				<div class="row related-products">
+					<div class="col-xs-12">
 					<c:if test="${relatedProducts!=null}">
 						<div
 							class="feature-preduct-area hyperion home-page-2 pb-50 pb-50-md"
@@ -286,21 +293,17 @@
 											<!-- Iterate over featuredItems -->
 											<c:set var="ITEMS" value="${relatedProducts}" scope="request" />
 											<jsp:include
-												page="/pages/shop/templates/generic/sections/productBox.jsp" />
+												page="/pages/shop/templates/december/sections/productBox.jsp" />
 										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</c:if>
-					<c:if test="${requestScope.CONTENT['sideBar']!=null}">
-									<sm:pageContent contentCode="sideBar"/>
-					</c:if>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 </div>
 
 <script>

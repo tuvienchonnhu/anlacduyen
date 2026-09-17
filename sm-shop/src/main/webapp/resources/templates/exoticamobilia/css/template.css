@@ -983,3 +983,23 @@ fieldset {
 .row-cart {
     margin-left: -15px;
 }
+/* Keep product actions available in product cards, including related products. */
+.box-style-1 .product-box-actions {
+    display: block;
+    min-height: 45px;
+}
+.box-style-1 .product-box-actions .btn {
+    margin-top: 15px;
+}
+.box-style-1 .product-box-actions .btn-buy {
+    display: inline-block;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+    color: #f7f7f7;
+}
+.box-style-1 .product-box-actions .btn-buy:hover,
+.box-style-1 .product-box-actions .btn-buy:focus {
+    background-color: #449d44;
+    border-color: #398439;
+    color: #fff !important;
+}

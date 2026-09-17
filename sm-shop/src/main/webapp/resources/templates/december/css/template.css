@@ -1746,3 +1746,353 @@ div[class^="col-"] {
 }
 
 
+
+/* Product cards used by productBox.jsp. Keep related products in a clean row. */
+.product-box-grid {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+.product-box-grid > [class*="col-"] {
+    margin-bottom: 30px;
+}
+.product-box-grid .product-box {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #eee;
+    transition: box-shadow .3s ease;
+}
+.product-box-grid .product-box:hover {
+    box-shadow: 0 0 5px 3px rgba(0,0,0,.18);
+}
+.product-box-grid .product-image {
+    height: 200px;
+    text-align: center;
+    background: #fff;
+}
+.product-box-grid .product-image img {
+    max-width: 100%;
+    height: 200px;
+    object-fit: contain;
+}
+.product-box-grid .caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: 100px;
+    padding: 0;
+    background: rgba(255,255,255,.96);
+    transform: translateY(0);
+    transition: transform .25s ease;
+}
+.product-box-grid .product-box:hover .caption {
+    transform: translateY(-55px);
+}
+.product-box-grid .product-details {
+    padding: 0 20px;
+}
+.product-box-grid .product-details h3 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 18px;
+}
+.product-box-grid .product-box-actions {
+    min-height: 45px;
+    padding-bottom: 10px;
+}
+.product-box-grid .product-box-actions .btn-default,
+.product-box-grid .product-box-actions .btn-buy {
+    color: #fff;
+    border-radius: 0;
+}
+.product-box-grid .product-box-actions .btn-default {
+    background-color: #c2a773;
+    border-color: #b29461;
+}
+.product-box-grid .product-box-actions .btn-default:hover,
+.product-box-grid .product-box-actions .btn-default:focus {
+    color: #fff;
+    background-color: #a88b59;
+    border-color: #967847;
+}
+.product-box-grid .product-box-actions .btn-buy {
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+.product-box-grid .product-box-actions .btn-buy:hover,
+.product-box-grid .product-box-actions .btn-buy:focus {
+    color: #fff !important;
+    background-color: #449d44;
+    border-color: #398439;
+}
+@media (max-width: 767px) {
+    .product-box-grid .product-box:hover .caption {
+        transform: none;
+    }
+}
+
+/* Match exoticamobilia product hover and card dimensions for related products. */
+.product-box-grid .product-box {
+    max-height: 300px;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    -webkit-transition: all 0.5s ease-in 0s;
+    -moz-transition: all 0.5s ease-in 0s;
+    -o-transition: all 0.5s ease-in 0s;
+    transition: all 0.5s ease-in 0s;
+}
+.product-box-grid .product-box:hover {
+    -webkit-box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.3);
+}
+.product-box-grid .product-image {
+    display: block;
+    height: 200px;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    background: transparent;
+}
+.product-box-grid .product-image img {
+    max-width: 100%;
+    height: 200px;
+    object-fit: contain;
+}
+.product-box-grid .caption {
+    -webkit-transition: all 0.2s ease-out 0s;
+    -moz-transition: all 0.2s ease-out 0s;
+    -o-transition: all 0.2s ease-out 0s;
+    transition: all 0.2s ease-out 0s;
+    background: rgba(255, 255, 255, 0.5) none repeat scroll 0 0;
+    bottom: 0;
+    padding: 0;
+    width: 100%;
+    -webkit-transform: translateY(45px);
+    -moz-transform: translateY(45px);
+    -ms-transform: translateY(45px);
+    -o-transform: translateY(45px);
+    transform: translateY(45px);
+}
+.product-box-grid .product-box:hover .caption {
+    -webkit-transform: translateY(-70px);
+    -moz-transform: translateY(-70px);
+    -ms-transform: translateY(-70px);
+    -o-transform: translateY(-70px);
+    transform: translateY(-70px);
+}
+.product-box-grid .product-box-actions {
+    opacity: 0;
+    pointer-events: none;
+    -webkit-transition: all 0.2s ease-out 0s;
+    -moz-transition: all 0.2s ease-out 0s;
+    transition: all 0.2s ease-out 0s;
+}
+.product-box-grid .product-box:hover .product-box-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+.product-box-grid .product-box-actions .btn {
+    margin-top: 15px;
+}
+.related-products .product-box-grid > .col-sm-4 {
+    width: 200px;
+    flex: 0 0 200px;
+}
+.related-products .product-box-grid .product-box {
+    width: 200px;
+}
+.product-box-grid .product-details {
+    padding: 0 20px;
+}
+.product-box-grid .product-details h3 {
+    font-size: 18px;
+    font-weight: 200;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.product-box-grid .product-box-actions {
+    min-height: 45px;
+}
+.product-box-grid .product-box-actions .btn {
+    margin-top: 15px;
+}
+.product-box-grid .product-box-actions .btn-default {
+    background-color: #d8d8d8;
+    border-color: #d8d8d8;
+    color: #333;
+}
+.product-box-grid .product-box-actions .btn-default:hover,
+.product-box-grid .product-box-actions .btn-default:focus {
+    background-color: #c2a773;
+    border-color: #c2a773;
+    color: #fff;
+}
+.product-box-grid .product-box-actions .btn-buy {
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+    color: #f7f7f7;
+}
+.product-box-grid .product-box-actions .btn-buy:hover,
+.product-box-grid .product-box-actions .btn-buy:focus {
+    background-color: #449d44;
+    border-color: #398439;
+    color: #f7f7f7 !important;
+}
+
+/* Related product controls: show price only until the card is hovered. */
+.product-box-grid .caption {
+    -webkit-transform: translateY(35px);
+    -moz-transform: translateY(35px);
+    -ms-transform: translateY(35px);
+    -o-transform: translateY(35px);
+    transform: translateY(35px);
+}
+.product-box-grid .product-box:hover .caption {
+    -webkit-transform: translateY(-70px);
+    -moz-transform: translateY(-70px);
+    -ms-transform: translateY(-70px);
+    -o-transform: translateY(-70px);
+    transform: translateY(-70px);
+}
+.product-box-grid .product-details .product-name {
+    opacity: 0;
+    transition: opacity .2s ease-out;
+}
+.product-box-grid .product-box:hover .product-details .product-name {
+    opacity: 1;
+}
+.product-box-grid .product-box-actions {
+    opacity: 0;
+    pointer-events: none;
+}
+.product-box-grid .product-box:hover .product-box-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+.related-products .product-box-grid > .col-sm-4 {
+    width: 200px;
+    max-width: 200px;
+    flex: 0 0 200px;
+}
+.related-products .product-box-grid .product-box {
+    width: 200px;
+}
+.product-box-grid .ribbon-wrapper-green {
+    width: 85px;
+    height: 88px;
+    overflow: hidden;
+    position: absolute;
+    top: 18px;
+    right: 14px;
+    z-index: 1000;
+}
+.product-box-grid .ribbon-green {
+    font: bold 14px Serif;
+    text-align: center;
+    text-shadow: rgba(255,255,255,.5) 0 1px 0;
+    position: relative;
+    padding: 7px 0;
+    left: -10px;
+    top: 5px;
+    width: 130px;
+    color: #6a6340;
+    background: linear-gradient(to bottom, #BFDC7A, #8EBF45);
+    box-shadow: 0 0 3px rgba(0,0,0,.3);
+    transform: rotate(45deg);
+}
+
+/* Match the exoticamobilia highlight ribbon placement. */
+.product-box-grid .ribbon-green {
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+}
+
+/* Final related-product layout: price remains visible; actions sit at the card bottom on hover. */
+.related-products .product-box-grid > .col-sm-4 {
+    width: 260px;
+    max-width: 260px;
+    flex: 0 0 260px;
+}
+.related-products .product-box-grid .product-box {
+    width: 260px;
+}
+.product-box-grid .caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: 110px;
+    background: rgba(255, 255, 255, 0.5);
+    -webkit-transform: translateY(70px);
+    -moz-transform: translateY(70px);
+    -ms-transform: translateY(70px);
+    -o-transform: translateY(70px);
+    transform: translateY(70px);
+}
+.product-box-grid .product-box:hover .caption {
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0);
+}
+.product-box-grid .product-details .product-name {
+    opacity: 0;
+}
+.product-box-grid .product-box:hover .product-details .product-name {
+    opacity: 1;
+}
+.product-box-grid .product-box-actions {
+    opacity: 0;
+    pointer-events: none;
+    min-height: 45px;
+    padding-bottom: 10px;
+}
+.product-box-grid .product-box:hover .product-box-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+.product-box-grid .product-box-actions .btn {
+    margin-top: 15px;
+}
+
+/* Keep the action buttons attached to the bottom edge of the related-product card. */
+.product-box-grid .product-box .caption {
+    height: 110px;
+    min-height: 110px;
+}
+.product-box-grid .product-box .product-details {
+    height: 100%;
+    padding-bottom: 52px;
+}
+.product-box-grid .product-box .product-box-actions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 52px;
+    min-height: 52px;
+    padding: 0 20px 10px;
+    opacity: 0;
+    pointer-events: none;
+}
+.product-box-grid .product-box:hover .product-box-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+.product-box-grid .product-box .product-box-actions .btn {
+    margin-top: 0;
+}

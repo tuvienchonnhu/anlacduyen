@@ -1,0 +1,14 @@
+
+{
+	"analysis": {
+		"analyzer": {
+			"nameAnalyzer": {
+				"tokenizer": "standard",
+				"filter": [
+					"lowercase",
+					"asciifolding"
+				]
+			}
+		}
+	}
+}
