@@ -62,14 +62,12 @@ public class LanguageServiceImpl extends SalesManagerEntityServiceImpl<Integer, 
 				countryCode = "US";
 			}
 			
-			           // The store uses the legacy internal code "vn"; Java/Tiles use ISO code "vi".
-			           String localeLanguage = "vn".equalsIgnoreCase(language.getCode()) ? "vi" : language.getCode();
-			           return new Locale(localeLanguage, countryCode);
+			return new Locale(language.getCode(), countryCode);
+		
+		} else {
+			
+			return new Locale(language.getCode());
 
-			} else {
-
-			           String localeLanguage = "vn".equalsIgnoreCase(language.getCode()) ? "vi" : language.getCode();
-			           return new Locale(localeLanguage);
 		}
 	}
 	

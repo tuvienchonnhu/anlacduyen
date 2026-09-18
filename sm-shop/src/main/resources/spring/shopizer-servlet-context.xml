@@ -27,7 +27,7 @@
 	
 	<beans:bean id="localeResolver"
         class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
-        <beans:property name="defaultLocale" value="vi_VN"/>
+        <beans:property name="defaultLocale" value="vn"/>
     </beans:bean>
 	
 	<beans:bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
