@@ -163,8 +163,9 @@ public class ShopApplicationConfiguration implements WebMvcConfigurer {
   @Bean
   public SessionLocaleResolver localeResolver() {
     SessionLocaleResolver slr = new SessionLocaleResolver();
-    // Vietnam is the default locale (language code "vn")
-    slr.setDefaultLocale(new Locale("vn", "VN"));
+    // Java/Tiles require the ISO-639 code "vi" for Vietnamese.
+    // The store's internal language code remains "vn".
+    slr.setDefaultLocale(new Locale("vi", "VN"));
     //slr.setDefaultLocale(Locale.getDefault());
     return slr;
   }

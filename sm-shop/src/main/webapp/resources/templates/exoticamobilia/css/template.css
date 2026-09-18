@@ -296,8 +296,9 @@ a.overlay {
 /** **/
 
 .box-style-1 {
-	max-height:300px;
-	height:300px;
+	max-height:340px;
+	height:340px;
+    width:300px;
 	position: relative;
 	overflow: hidden;
 }
@@ -846,7 +847,7 @@ fieldset {
 .box-style-1 .caption {
 	transition: all 0.2s ease-out 0s;
   	background: rgba(255, 255, 255, 0.5) none repeat scroll 0 0;
-  	bottom: 0;
+  	bottom: -40px;
   	padding: 0;
   	/**position: absolute;**/
   	-webkit-transform: translateY(0px);
@@ -1002,4 +1003,25 @@ fieldset {
     background-color: #449d44;
     border-color: #398439;
     color: #fff !important;
+}
+
+/* Lower the product caption by 30px so the action buttons remain inside the card. */
+.box-style-1 .caption {
+    -webkit-transform: translateY(30px);
+    -moz-transform: translateY(30px);
+    -ms-transform: translateY(30px);
+    -o-transform: translateY(30px);
+    transform: translateY(30px);
+}
+.box-style-1:hover .caption {
+    -webkit-transform: translateY(-70px);
+    -moz-transform: translateY(-70px);
+    -ms-transform: translateY(-70px);
+    -o-transform: translateY(-70px);
+    transform: translateY(-70px);
+}
+.box-style-1:hover .product-box-actions {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }

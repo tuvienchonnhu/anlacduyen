@@ -117,15 +117,15 @@ public class CustomerPopulator extends
 				billing.setTelephone(sourceBilling.getPhone());
 				billing.setPostalCode(sourceBilling.getPostalCode());
 				billing.setState(sourceBilling.getStateProvince());
-				Country billingCountry = null;
+					Country billingCountry = null;
 				if(!StringUtils.isBlank(sourceBilling.getCountry())) {
-					billingCountry = countries.get(sourceBilling.getCountry());
-					if(billingCountry==null) {
-						throw new ConversionException("Unsuported country code " + sourceBilling.getCountry());
-					}
-					billing.setCountry(billingCountry);
+				billingCountry = resolveCountry(countries, sourceBilling.getCountry());
+				if(billingCountry==null) {
+				throw new ConversionException("Unsupported country code " + sourceBilling.getCountry());
 				}
-				
+				billing.setCountry(billingCountry);
+				}
+
 				if(billingCountry!=null && !StringUtils.isBlank(sourceBilling.getZone())) {
 					Zone zone = zoneService.getByCode(sourceBilling.getZone());
 					if(zone==null) {
@@ -142,11 +142,11 @@ public class CustomerPopulator extends
 			    Billing billing = new Billing();
 			    Country billingCountry = null;
 			    if(StringUtils.isNotBlank( source.getBilling().getCountry() )) {
-                    billingCountry = countries.get(source.getBilling().getCountry());
-                    if(billingCountry==null) {
-                        throw new ConversionException("Unsuported country code " + sourceBilling.getCountry());
-                    }
-                    billing.setCountry(billingCountry);
+			                                  billingCountry = resolveCountry(countries, source.getBilling().getCountry());
+			                                  if(billingCountry==null) {
+			                                      throw new ConversionException("Unsupported country code " + source.getBilling().getCountry());
+			                                  }
+			                      billing.setCountry(billingCountry);
                     target.setBilling( billing );
                 }
 			}
@@ -162,17 +162,17 @@ public class CustomerPopulator extends
 				delivery.setPostalCode(sourceShipping.getPostalCode());
 				delivery.setState(sourceShipping.getStateProvince());
 				Country deliveryCountry = null;
-				
-				
-				
-				if(!StringUtils.isBlank(sourceShipping.getCountry())) {
-					deliveryCountry = countries.get(sourceShipping.getCountry());
-					if(deliveryCountry==null) {
-						throw new ConversionException("Unsuported country code " + sourceShipping.getCountry());
-					}
+
+
+
+					if(!StringUtils.isBlank(sourceShipping.getCountry())) {
+					deliveryCountry = resolveCountry(countries, sourceShipping.getCountry());
+				if(deliveryCountry==null) {
+				throw new ConversionException("Unsupported country code " + sourceShipping.getCountry());
+				}
 					delivery.setCountry(deliveryCountry);
 				}
-				
+
 				if(deliveryCountry!=null && !StringUtils.isBlank(sourceShipping.getZone())) {
 					Zone zone = zoneService.getByCode(sourceShipping.getZone());
 					if(zone==null) {
@@ -183,30 +183,30 @@ public class CustomerPopulator extends
 				}
 				target.setDelivery(delivery);
 			}
-			
+
 			if(source.getRating() != null && source.getRating().doubleValue() > 0) {
 				target.setCustomerReviewAvg(new BigDecimal(source.getRating().doubleValue()));
 			}
-			
+
 			if(source.getRatingCount() > 0) {
 				target.setCustomerReviewCount(source.getRatingCount());
 			}
 
-			
+
 			if(target.getDelivery() ==null && source.getDelivery()!=null){
 			    LOG.info( "Setting default value for delivery" );
 			    Delivery delivery = new Delivery();
 			    Country deliveryCountry = null;
                 if(StringUtils.isNotBlank( source.getDelivery().getCountry() )) {
-                    deliveryCountry = countries.get(source.getDelivery().getCountry());
+                    deliveryCountry = resolveCountry(countries, source.getDelivery().getCountry());
                     if(deliveryCountry==null) {
-                        throw new ConversionException("Unsuported country code " + sourceShipping.getCountry());
+                        throw new ConversionException("Unsupported country code " + source.getDelivery().getCountry());
                     }
                     delivery.setCountry(deliveryCountry);
                     target.setDelivery( delivery );
                 }
 			}
-			
+
 			if(source.getAttributes()!=null) {
 				for(PersistableCustomerAttribute attr : source.getAttributes()) {
 
@@ -214,55 +214,70 @@ public class CustomerPopulator extends
 					if(customerOption==null) {
 						throw new ConversionException("Customer option id " + attr.getCustomerOption().getId() + " does not exist");
 					}
-					
+
 					CustomerOptionValue customerOptionValue = customerOptionValueService.getById(attr.getCustomerOptionValue().getId());
 					if(customerOptionValue==null) {
 						throw new ConversionException("Customer option value id " + attr.getCustomerOptionValue().getId() + " does not exist");
 					}
-					
+
 					if(customerOption.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
 						throw new ConversionException("Invalid customer option id ");
 					}
-					
+
 					if(customerOptionValue.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
 						throw new ConversionException("Invalid customer option value id ");
 					}
-					
+
 					CustomerAttribute attribute = new CustomerAttribute();
 					attribute.setCustomer(target);
 					attribute.setCustomerOption(customerOption);
 					attribute.setCustomerOptionValue(customerOptionValue);
 					attribute.setTextValue(attr.getTextValue());
-					
+
 					target.getAttributes().add(attribute);
-					
+
 				}
 			}
-			
+
 			if(target.getDefaultLanguage()==null) {
-				
+
 				Language lang = source.getLanguage() == null ?
 						language : languageService.getByCode(source.getLanguage());
 
-				
+
 				target.setDefaultLanguage(lang);
 			}
 
-		
+
 		} catch (Exception e) {
 			throw new ConversionException(e);
 		}
-		
-		
-		
-		
+
+
+
+
 		return target;
 	}
 
-	@Override
-	protected Customer createTarget() {
+		private Country resolveCountry(Map<String, Country> countries, String countryCode) throws Exception {
+		String normalizedCode = countryCode == null ? null : countryCode.trim().toUpperCase(java.util.Locale.ROOT);
+		if (StringUtils.isBlank(normalizedCode)) {
+		return null;
+		}
+
+		Country country = countries.get(normalizedCode);
+		if (country == null) {
+		// Country maps are language-specific and may be incomplete when a
+		// customer is loaded with a language that has no country description.
+		// Resolve by ISO code as a language-independent fallback.
+		country = countryService.getByCode(normalizedCode);
+		}
+		return country;
+		}
+
+		@Override
+		protected Customer createTarget() {
 		return new Customer();
+		}
+
 	}
-
-
-}

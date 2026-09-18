@@ -62,21 +62,30 @@ public class LanguageServiceImpl extends SalesManagerEntityServiceImpl<Integer, 
 				countryCode = "US";
 			}
 			
-			return new Locale(language.getCode(), countryCode);
-		
-		} else {
-			
-			return new Locale(language.getCode());
+			           // The store uses the legacy internal code "vn"; Java/Tiles use ISO code "vi".
+			           String localeLanguage = "vn".equalsIgnoreCase(language.getCode()) ? "vi" : language.getCode();
+			           return new Locale(localeLanguage, countryCode);
+
+			} else {
+
+			           String localeLanguage = "vn".equalsIgnoreCase(language.getCode()) ? "vi" : language.getCode();
+			           return new Locale(localeLanguage);
 		}
 	}
 	
 	@Override
 	public Language toLanguage(Locale locale) {
 		Language language = null;
-		try {
-			language = getLanguagesMap().get(locale.getLanguage());
+			try {
+		String languageCode = locale.getLanguage();
+		// The database keeps the legacy Vietnamese code "vn", while
+		// java.util.Locale and servlet containers use the ISO-639 code "vi".
+		if ("vi".equalsIgnoreCase(languageCode)) {
+		languageCode = "vn";
+		}
+		language = getLanguagesMap().get(languageCode);
 		} catch (Exception e) {
-			LOGGER.error("Cannot convert locale " + locale.getLanguage() + " to language");
+		LOGGER.error("Cannot convert locale " + locale.getLanguage() + " to language");
 		}
 		if(language == null) {
 			language = new Language(Constants.DEFAULT_LANGUAGE);

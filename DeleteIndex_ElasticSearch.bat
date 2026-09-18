@@ -1,0 +1,1 @@
+Invoke-WebRequest  -Uri "http://localhost:9200/keyword_vn_default"   -Method Delete

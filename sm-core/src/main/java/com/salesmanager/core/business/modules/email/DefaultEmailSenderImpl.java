@@ -64,6 +64,9 @@ public class DefaultEmailSenderImpl implements EmailModule {
           Properties prop = new Properties();
           prop.put("mail.smtp.auth", emailConfig.isSmtpAuth());
           prop.put("mail.smtp.starttls.enable", emailConfig.isStarttls());
+          prop.put("mail.smtp.starttls.required", emailConfig.isStarttls());
+          // Java 11 disables obsolete TLS protocols; Gmail SMTP requires TLS 1.2+.
+          prop.put("mail.smtp.ssl.protocols", "TLSv1.2");
           impl.setJavaMailProperties(prop);
         }
 
