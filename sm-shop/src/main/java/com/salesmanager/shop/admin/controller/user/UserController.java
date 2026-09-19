@@ -265,16 +265,16 @@ public class UserController {
 
 		User dbUser = userService.getById(id);
 		
-		if(dbUser==null) {
-			LOGGER.info("User is null for id " + id);
-			return "redirect://admin/users/list.html";
+			if(dbUser==null) {
+		LOGGER.info("User is null for id " + id);
+		return "redirect:/admin/users/list.html";
 		}
-		
-		
+
+
 		return displayUser(dbUser,model,request,response,locale);
 
 	}
-	
+
 	/**
 	 * From user profile
 	 * @param model
@@ -287,16 +287,16 @@ public class UserController {
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/users/displayUser.html", method=RequestMethod.GET)
 	public String displayUserEdit(Model model, HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
-		
-		
+
+
 		String userName = request.getRemoteUser();
 		User user = userService.getByUserName(userName);
 		return displayUser(user,model,request,response,locale);
 
 	}
-	
+
 	private void populateUserObjects(User user, MerchantStore store, Model model, Locale locale) throws Exception {
-		
+
 		//get groups
 		List<Group> groups = new ArrayList<Group>();
 		List<Group> userGroups = groupService.listGroup(GroupType.ADMIN);
@@ -305,98 +305,98 @@ public class UserController {
 				groups.add(group);
 			}
 		}
-		
-		
+
+
 		List<MerchantStore> stores = new ArrayList<MerchantStore>();
 		//stores.add(store);
 		stores = merchantStoreService.list();
-		
-		
+
+
 		//questions
 		List<SecurityQuestion> questions = new ArrayList<SecurityQuestion>();
-		
+
 		SecurityQuestion question = new SecurityQuestion();
 		question.setId("1");
 		question.setLabel(messages.getMessage("security.question.1", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("2");
 		question.setLabel(messages.getMessage("security.question.2", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("3");
 		question.setLabel(messages.getMessage("security.question.3", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("4");
 		question.setLabel(messages.getMessage("security.question.4", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("5");
 		question.setLabel(messages.getMessage("security.question.5", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("6");
 		question.setLabel(messages.getMessage("security.question.6", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("7");
 		question.setLabel(messages.getMessage("security.question.7", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("8");
 		question.setLabel(messages.getMessage("security.question.8", locale));
 		questions.add(question);
-		
+
 		question = new SecurityQuestion();
 		question.setId("9");
 		question.setLabel(messages.getMessage("security.question.9", locale));
 		questions.add(question);
-		
+
 		model.addAttribute("questions", questions);
 		model.addAttribute("stores", stores);
 		model.addAttribute("languages", store.getLanguages());
 		model.addAttribute("groups", groups);
-		
-		
+
+
 	}
-	
-	
-	
+
+
+
 	private String displayUser(User user, Model model, HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
-		
+
 
 		//display menu
 		setMenu(model,request);
-		
+
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
 
 
 
-		
+
 		if(user==null) {
 			user = new User();
 		} else {
 			user.setAdminPassword("TRANSIENT");
 		}
-		
+
 		this.populateUserObjects(user, store, model, locale);
-		
+
 
 		model.addAttribute("user", user);
-		
-		
+
+
 
 		return ControllerConstants.Tiles.User.profile;
 	}
-	
+
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/users/checkUserCode.html", method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> checkUserCode(HttpServletRequest request, HttpServletResponse response, Locale locale) {
@@ -404,25 +404,25 @@ public class UserController {
 		String id = request.getParameter("id");
 
 		AjaxResponse resp = new AjaxResponse();
-		
+
 		final HttpHeaders httpHeaders= new HttpHeaders();
 	    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		
+
 		try {
-			
+
 			if(StringUtils.isBlank(code)) {
 				resp.setStatus(AjaxResponse.CODE_ALREADY_EXIST);
 				String returnString =  resp.toJSONString();
 				return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 			}
-			
+
 			User user = userService.getByUserName(code);
-		
-		
+
+
 			if(!StringUtils.isBlank(id)&& user!=null) {
 				try {
 					Long lid = Long.parseLong(id);
-					
+
 					if(user.getAdminName().equals(code) && user.getId()==lid) {
 						resp.setStatus(AjaxResponse.RESPONSE_STATUS_SUCCESS);
 						String returnString =  resp.toJSONString();
@@ -433,10 +433,10 @@ public class UserController {
 					String returnString =  resp.toJSONString();
 					return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 				}
-	
+
 			}
 
-			
+
 			if(StringUtils.isBlank(code)) {
 				resp.setStatus(AjaxResponse.CODE_ALREADY_EXIST);
 				String returnString =  resp.toJSONString();
@@ -448,7 +448,7 @@ public class UserController {
 				String returnString =  resp.toJSONString();
 				return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 			}
-			
+
 
 			resp.setStatus(AjaxResponse.RESPONSE_OPERATION_COMPLETED);
 
@@ -457,41 +457,41 @@ public class UserController {
 			resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 			resp.setErrorMessage(e);
 		}
-		
+
 		String returnString = resp.toJSONString();
 		return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 
 	}
-	
+
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/users/save.html", method=RequestMethod.POST)
 	public String saveUser(@Valid @ModelAttribute("user") User user, BindingResult result, Model model, HttpServletRequest request, Locale locale) throws Exception {
 
 
 		setMenu(model,request);
-		
+
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
 
-		
+
 		this.populateUserObjects(user, store, model, locale);
-		
+
 		Language language = user.getDefaultLanguage();
-		
+
 		Language l = languageService.getById(language.getId());
-		
+
 		user.setDefaultLanguage(l);
-		
+
 		Locale userLocale = LocaleUtils.getLocale(l);
-		
-		
-		
+
+
+
 		User dbUser = null;
-		
+
 		//edit mode, need to get original user important information
 		if(user.getId()!=null) {
 			dbUser = userService.getByUserName(user.getAdminName());
-			if(dbUser==null) {
-				return "redirect:///admin/users/displayUser.html";
+				if(dbUser==null) {
+			return "redirect:/admin/users/displayUser.html";
 			}
 		}
 
@@ -500,43 +500,43 @@ public class UserController {
 		for(Group group : submitedGroups) {
 			ids.add(group.getId());
 		}
-		
 
-		
+
+
 		//validate security questions not empty
 		if(StringUtils.isBlank(user.getAnswer1())) {
 			ObjectError error = new ObjectError("answer1",messages.getMessage("security.answer.question1.message", locale));
 			result.addError(error);
 		}
-		
+
 		if(StringUtils.isBlank(user.getAnswer2())) {
 			ObjectError error = new ObjectError("answer2",messages.getMessage("security.answer.question2.message", locale));
 			result.addError(error);
 		}
-		
+
 		if(StringUtils.isBlank(user.getAnswer3())) {
 			ObjectError error = new ObjectError("answer3",messages.getMessage("security.answer.question3.message", locale));
 			result.addError(error);
 		}
-		
+
 		if(user.getQuestion1().equals(user.getQuestion2()) || user.getQuestion1().equals(user.getQuestion3())
 				|| user.getQuestion2().equals(user.getQuestion1()) || user.getQuestion1().equals(user.getQuestion3())
 				|| user.getQuestion3().equals(user.getQuestion1()) || user.getQuestion1().equals(user.getQuestion2()))
-		
-		
+
+
 		{
 			ObjectError error = new ObjectError("question1",messages.getMessage("security.questions.differentmessages", locale));
 			result.addError(error);
 		}
-		
-		
+
+
 		Group superAdmin = null;
-		
+
 		if(user.getId()!=null && user.getId()>0) {
-			if(user.getId().longValue()!=dbUser.getId().longValue()) {
-				return "redirect:///admin/users/displayUser.html";
+				if(user.getId().longValue()!=dbUser.getId().longValue()) {
+			return "redirect:/admin/users/displayUser.html";
 			}
-			
+
 			List<Group> groups = dbUser.getGroups();
 			//boolean removeSuperAdmin = true;
 			for(Group group : groups) {
@@ -547,28 +547,28 @@ public class UserController {
 			}
 
 		} else {
-			
+
 			if(user.getAdminPassword().length()<6) {
 				ObjectError error = new ObjectError("adminPassword",messages.getMessage("message.password.length", locale));
 				result.addError(error);
 			}
-			
+
 		}
-		
+
 		if(superAdmin!=null) {
 			ids.add(superAdmin.getId());
 		}
 
-		
+
 		List<Group> newGroups = groupService.listGroupByIds(ids);
 
 		//set actual user groups
 		user.setGroups(newGroups);
-		
+
 		if (result.hasErrors()) {
 			return ControllerConstants.Tiles.User.profile;
 		}
-		
+
 		String decodedPassword = user.getAdminPassword();
 		if(user.getId()!=null && user.getId()>0) {
 			user.setAdminPassword(dbUser.getAdminPassword());
@@ -576,13 +576,13 @@ public class UserController {
 			String encoded = passwordEncoder.encode(user.getAdminPassword());
 			user.setAdminPassword(encoded);
 		}
-		
-		
+
+
 		if(user.getId()==null || user.getId().longValue()==0) {
-			
+
 			//save or update user
 			userService.saveOrUpdate(user);
-			
+
 			try {
 
 				//creation of a user, send an email
@@ -591,8 +591,8 @@ public class UserController {
 					userName = user.getAdminName();
 				}
 				String[] userNameArg = {userName};
-				
-				
+
+
 				Map<String, String> templateTokens = emailUtils.createEmailObjectsMap(request.getContextPath(), store, messages, userLocale);
 				templateTokens.put(EmailConstants.EMAIL_NEW_USER_TEXT, messages.getMessage("email.greeting", userNameArg, userLocale));
 				templateTokens.put(EmailConstants.EMAIL_USER_FIRSTNAME, user.getFirstName());
@@ -604,8 +604,8 @@ public class UserController {
 				templateTokens.put(EmailConstants.EMAIL_ADMIN_PASSWORD, decodedPassword);
 				templateTokens.put(EmailConstants.EMAIL_ADMIN_URL_LABEL, messages.getMessage("label.adminurl",userLocale));
 				templateTokens.put(EmailConstants.EMAIL_ADMIN_URL, filePathUtils.buildAdminUri(store, request));
-	
-				
+
+
 				Email email = new Email();
 				email.setFrom(store.getStorename());
 				email.setFromEmail(store.getStoreEmailAddress());
@@ -613,26 +613,27 @@ public class UserController {
 				email.setTo(user.getAdminEmail());
 				email.setTemplateName(NEW_USER_TMPL);
 				email.setTemplateTokens(templateTokens);
-	
-	
-				
+
+
+
 				emailService.sendHtmlEmail(store, email);
-			
+
 			} catch (Exception e) {
 				LOGGER.error("Cannot send email to user",e);
 			}
-			
+
 		} else {
 			//save or update user
 			userService.saveOrUpdate(user);
 		}
 
-		model.addAttribute("success","success");
-		return ControllerConstants.Tiles.User.profile;
-	}
-	
-	@PreAuthorize("hasRole('AUTH')")
-	@RequestMapping(value="/admin/users/remove.html", method=RequestMethod.POST)
+			// Use PRG (Post/Redirect/Get) so the browser stays on the canonical
+		// profile URL and refreshing the page does not resubmit the form.
+		return "redirect:/admin/users/displayUser.html";
+		}
+
+		@PreAuthorize("hasRole('AUTH')")
+		@RequestMapping(value="/admin/users/remove.html", method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> removeUser(HttpServletRequest request, Locale locale) throws Exception {
 		
 		//do not remove super admin
