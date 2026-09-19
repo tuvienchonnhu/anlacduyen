@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,16 +40,16 @@ import com.salesmanager.shop.constants.Constants;
 
 @Controller
 public class ShippingConfigsController {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShippingConfigsController.class);
 
-	
+
 	@Inject
 	private ShippingService shippingService;
-	
+
 	@Inject
 	private CountryService countryService;
-	
+
 	/**
 	 * Configures the shipping mode, shows shipping countries
 	 * @param request
@@ -64,47 +65,47 @@ public class ShippingConfigsController {
 		this.setMenu(model, request);
 
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-		
 
-		
+
+
 		ShippingConfiguration shippingConfiguration =  shippingService.getShippingConfiguration(store);
-		
+
 		if(shippingConfiguration==null) {
 			shippingConfiguration = new ShippingConfiguration();
 			shippingConfiguration.setShippingType(ShippingType.INTERNATIONAL);
 		}
-		
+
 
 		model.addAttribute("configuration", shippingConfiguration);
 		return "shipping-configs";
-		
-		
+
+
 	}
-	
+
 	@PreAuthorize("hasRole('SHIPPING')")
 	@RequestMapping(value="/admin/shipping/saveShippingConfiguration.html", method=RequestMethod.POST)
 	public String saveShippingConfiguration(@ModelAttribute("configuration") ShippingConfiguration configuration, Model model, HttpServletRequest request, HttpServletResponse response, Locale locale) throws Exception {
-		
+
 		this.setMenu(model, request);
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-		
+
 		//get original configuration
 		ShippingConfiguration shippingConfiguration =  shippingService.getShippingConfiguration(store);
-		
+
 		if(shippingConfiguration==null) {
 			shippingConfiguration = new ShippingConfiguration();
 		}
-		
+
 		shippingConfiguration.setShippingType(configuration.getShippingType());
-		
+
 		shippingService.saveShippingConfiguration(shippingConfiguration, store);
-		
+
 		model.addAttribute("configuration", shippingConfiguration);
 		model.addAttribute("success","success");
 		return "shipping-configs";
-		
+
 	}
-	
+
 	@SuppressWarnings({ "unchecked"})
 	@PreAuthorize("hasRole('SHIPPING')")
 	@RequestMapping(value="/admin/shipping/countries/paging.html", method=RequestMethod.POST)
@@ -113,32 +114,34 @@ public class ShippingConfigsController {
 		AjaxResponse resp = new AjaxResponse();
 
 		try {
-			
+
 			Language language = (Language)request.getAttribute("LANGUAGE");
 			MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-			
+
 			//get list of countries
 			Map<String,Country> countries = countryService.getCountriesMap(language);
-			
+
 			//get inclusions
-			List<String> includedCountries = shippingService.getSupportedCountries(store);
-			
+				List<String> includedCountries = shippingService.getSupportedCountries(store);
+			if(includedCountries == null) {
+			includedCountries = new java.util.ArrayList<String>();
+			}
 
 			for(String key : countries.keySet()) {
-				
-				Country country = (Country)countries.get(key);
+
+			Country country = countries.get(key);
 
 				@SuppressWarnings("rawtypes")
 				Map entry = new HashMap();
 				entry.put("code", country.getIsoCode());
 				entry.put("name", country.getName());
-				
-				if(includedCountries.contains(key)) {
-					entry.put("supported", true);
+
+					if(includedCountries.contains(country.getIsoCode())) {
+				entry.put("supported", true);
 				} else {
-					entry.put("supported", false);
+				entry.put("supported", false);
 				}
-				
+
 				if(!StringUtils.isBlank(countryName)) {
 					if(country.getName().contains(countryName)){
 						resp.addDataEntry(entry);
@@ -147,54 +150,61 @@ public class ShippingConfigsController {
 					resp.addDataEntry(entry);
 				}
 			}
-			
+
 			resp.setStatus(AjaxResponse.RESPONSE_STATUS_SUCCESS);
 
 		} catch (Exception e) {
 			LOGGER.error("Error while paging shipping countries", e);
 			resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 		}
-		
+
 		String returnString = resp.toJSONString();
 		final HttpHeaders httpHeaders= new HttpHeaders();
 	    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 	}
-	
+
 	@PreAuthorize("hasRole('SHIPPING')")
 	@RequestMapping(value="/admin/shipping/countries/update.html", method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> updateCountry(HttpServletRequest request, HttpServletResponse response) {
-		String values = request.getParameter("_oldValues");
+			String values = request.getParameter("_oldValues");
 		String supported = request.getParameter("supported");
-		
-		
-		
 
-		
-		
 		AjaxResponse resp = new AjaxResponse();
 
 		try {
-			
+
+				if(StringUtils.isBlank(values) || StringUtils.isBlank(supported)) {
+			throw new IllegalArgumentException("Missing country update parameters");
+			}
+				// SmartGWT sends _oldValues as HTML-escaped JSON (for example &quot;code&quot;).
+			// Decode it before passing the value to Jackson.
+			values = StringEscapeUtils.unescapeHtml4(values);
 			ObjectMapper mapper = new ObjectMapper();
 			@SuppressWarnings("rawtypes")
 			Map conf = mapper.readValue(values, Map.class);
-			
 			String countryCode = (String)conf.get("code");
+			if(StringUtils.isBlank(countryCode)) {
+			throw new IllegalArgumentException("Missing country code");
+			}
 
 			MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-			
+
 			//get list of countries
-			List<String> includedCountries = shippingService.getSupportedCountries(store);
-			
-			if(!StringUtils.isBlank(supported)) {
-				if("true".equals(supported)) {
-					includedCountries.add(countryCode);
-				} else {
-					includedCountries.remove(countryCode);
-				}
+				List<String> includedCountries = shippingService.getSupportedCountries(store);
+			if(includedCountries == null) {
+			includedCountries = new java.util.ArrayList<String>();
 			}
-			
+
+			if("true".equalsIgnoreCase(supported)) {
+			if(!includedCountries.contains(countryCode)) {
+			includedCountries.add(countryCode);
+			}
+			} else if("false".equalsIgnoreCase(supported)) {
+			includedCountries.remove(countryCode);
+			} else {
+			throw new IllegalArgumentException("Invalid supported value: " + supported);
+			}
 			
 			shippingService.setSupportedCountries(store, includedCountries);
 			
@@ -202,18 +212,19 @@ public class ShippingConfigsController {
 			
 
 		
-		} catch (Exception e) {
-			LOGGER.error("Error while paging shipping countries", e);
-			resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
+			} catch (Exception e) {
+		LOGGER.error("Error while updating shipping country", e);
+		resp.setErrorString(e.getMessage() == null ? "Unable to update shipping country" : e.getMessage());
+		resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 		}
-		
+
 		String returnString = resp.toJSONString();
 		final HttpHeaders httpHeaders= new HttpHeaders();
-	    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 		return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
-	}
-	
-	private void setMenu(Model model, HttpServletRequest request) throws Exception {
+		}
+
+		private void setMenu(Model model, HttpServletRequest request) throws Exception {
 		
 		//display menu
 		Map<String,String> activeMenus = new HashMap<String,String>();
