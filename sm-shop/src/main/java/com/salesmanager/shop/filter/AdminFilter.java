@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -53,50 +54,39 @@ public class AdminFilter extends HandlerInterceptorAdapter {
 		@SuppressWarnings("unchecked")
 		Map<String,Menu> menus = (Map<String,Menu>) cache.getFromCache("MENUMAP");
 		
-		User user = (User)request.getSession().getAttribute(Constants.ADMIN_USER);
-		
-
-		String storeCode = MerchantStore.DEFAULT_STORE;
-		MerchantStore store = (MerchantStore)request.getSession().getAttribute(Constants.ADMIN_STORE);
-		
-		
+			HttpSession session = request.getSession();
+		User user = (User)session.getAttribute(Constants.ADMIN_USER);
+		MerchantStore store = (MerchantStore)session.getAttribute(Constants.ADMIN_STORE);
 		String userName = request.getRemoteUser();
-		
+		String storeCode = MerchantStore.DEFAULT_STORE;
+
 		if(userName==null) {//** IMPORTANT FOR SPRING SECURITY **//
-			//response.sendRedirect(new StringBuilder().append(request.getContextPath()).append("/").append("/admin").toString());
+		// Spring Security handles the unauthenticated request.
 		} else {
-		
-			if(user==null) {
-				user = userService.getByUserName(userName);
-				request.getSession().setAttribute(Constants.ADMIN_USER, user);
-				if(user!=null) {
-					storeCode = user.getMerchantStore().getCode();
-				} else {
-					LOGGER.warn("User name not found " + userName);
-				}
-				store=null;
-			}
-			
-			if(user==null) {
-				response.sendRedirect(request.getContextPath() + "/admin/unauthorized.html");
-				return true;
-			}
-			
-			if(!user.getAdminName().equals(userName)) {
-				user = userService.getByUserName(userName);
-				if(user!=null) {
-					storeCode = user.getMerchantStore().getCode();
-				} else {
-					LOGGER.warn("User name not found " + userName);
-				}
-				store=null;
-			}
-		
+		// Never trust a user cached in the session when the authenticated
+		// username is different. This can happen after logging in with a
+		// second admin account in the same browser session and previously
+		// caused ADMIN_CATALOGUE to be displayed as ADMIN.
+		if(user==null || !userName.equals(user.getAdminName())) {
+		user = userService.getByUserName(userName);
+		if(user==null) {
+		LOGGER.warn("User name not found " + userName);
+		response.sendRedirect(request.getContextPath() + "/admin/unauthorized.html");
+		return true;
 		}
-		
-		if(store==null) {
+			session.setAttribute(Constants.ADMIN_USER, user);
+		store = null;
+		}
+
+		if(user.getMerchantStore()!=null) {
+		storeCode = user.getMerchantStore().getCode();
+		}
+		}
+
+		if(store==null || (user!=null && user.getMerchantStore()!=null
+		&& !user.getMerchantStore().getCode().equals(store.getCode()))) {
 				store = merchantService.getByCode(storeCode);
-				request.getSession().setAttribute(Constants.ADMIN_STORE, store);
+				session.setAttribute(Constants.ADMIN_STORE, store);
 		}
 		request.setAttribute(Constants.ADMIN_STORE, store);
 		

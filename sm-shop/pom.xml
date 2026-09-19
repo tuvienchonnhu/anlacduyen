@@ -12,8 +12,8 @@
 	</parent>
 
 	<artifactId>sm-shop</artifactId>
-	<name>sm-shop</name>
-	<url>http://www.shopizer.com</url>
+	<name>AnLacDuyen</name>
+	<url>https://tuvienchonnhu.net</url>
 
 	<properties>
 		<main.basedir>${basedir}/../..</main.basedir>

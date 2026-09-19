@@ -249,12 +249,11 @@ public class MultipleEntryPointsSecurityConfig {
 					.antMatchers("/admin/**").hasRole("AUTH")
 					.antMatchers("/admin/**").hasRole("AUTH")
 					.antMatchers("/admin/users/resetPasswordSecurityQtn*").permitAll()
-					.anyRequest()
+						.anyRequest()
 					.authenticated()
 					.and()
-					.httpBasic()
-					.authenticationEntryPoint(adminAuthenticationEntryPoint())
-					.and()
+					// Admin uses form login only. HTTP Basic makes browsers resend
+					// cached credentials (often ADMIN) on catalogue requests.
 					.formLogin().usernameParameter("username").passwordParameter("password")
 					.loginPage("/admin/logon.html")
 					.loginProcessingUrl("/admin/performUserLogin")

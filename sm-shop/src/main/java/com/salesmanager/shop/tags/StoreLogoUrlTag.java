@@ -27,8 +27,8 @@ public class StoreLogoUrlTag extends RequestContextAwareTag {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StoreLogoUrlTag.class);
 	private static final String RESOURCES = "resources";
 	private static final String IMG = "img";
-	private static final String SHOPIZER_LOGO = "shopizer_small.png";
-	
+	private static final String STORE_LOGO = "anlacduyen_small.png";
+
 	@Inject
 	private FilePathUtils filePathUtils;
 
@@ -39,7 +39,7 @@ public class StoreLogoUrlTag extends RequestContextAwareTag {
 
 	public int doStartTagInternal() throws JspException {
 		try {
-			
+
 			if (filePathUtils==null || imageUtils!=null) {
 	            WebApplicationContext wac = getRequestContext().getWebApplicationContext();
 	            AutowireCapableBeanFactory factory = wac.getAutowireCapableBeanFactory();
@@ -48,19 +48,19 @@ public class StoreLogoUrlTag extends RequestContextAwareTag {
 
 			HttpServletRequest request = (HttpServletRequest) pageContext
 					.getRequest();
-			
+
 			MerchantStore merchantStore = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 
 			StringBuilder imagePath = new StringBuilder();
-			
+
 			String baseUrl = filePathUtils.buildRelativeStoreUri(request, merchantStore);
 			imagePath.append(baseUrl);
-			
+
 			if(StringUtils.isBlank(merchantStore.getStoreLogo())){
 
 				imagePath
 					.append(RESOURCES).append("/")
-					.append(IMG).append("/").append(SHOPIZER_LOGO);
+						.append(IMG).append("/").append(STORE_LOGO);
 			} else {
 				
 				imagePath

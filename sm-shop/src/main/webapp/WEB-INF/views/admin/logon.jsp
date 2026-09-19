@@ -315,8 +315,8 @@
 							</p>
 						</div>
 						<div style="float: right;">
-							<img alt="go to http://www.tuvienchonnhu.net"
-								src="<c:url value="/resources/img/shopizer_small.png" />">
+							<img alt="AN LẠC DUYÊN"
+									src="<c:url value="/resources/img/anlacduyen_small.png" />">
 						</div>
 					</div>
 
@@ -490,7 +490,7 @@
 							×
 						</button>
 						<h3 id="myModalLabel" style="color:#333333;">
-						<s:message code="" text="Shopizer"/>
+						<s:message code="" text="AN LẠC DUYÊN"/>
 						</h3>
 					</div>
 					<form method="post" id="resetPasswordForm" class="form-horizontal"
