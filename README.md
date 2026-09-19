@@ -1,14 +1,7 @@
-Shopizer (for java 1.8 +)
+anlacduyen (for java 1.8 +)
 -------------------
 
-[![last_version](https://img.shields.io/badge/last_version-v2.16.0-blue.svg?style=flat)](https://github.com/shopizer-ecommerce/shopizer/tree/2.16.0)
-[![Official site](https://img.shields.io/website-up-down-green-red/https/shields.io.svg?label=official%20site)](http://www.shopizer.com/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/shopizerecomm/shopizer.svg)](https://hub.docker.com/r/shopizerecomm/shopizer)
-[![stackoverflow](https://img.shields.io/badge/shopizer-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/shopizer)
-[![CircleCI](https://circleci.com/gh/shopizer-ecommerce/shopizer.svg?style=svg)](https://circleci.com/gh/shopizer-ecommerce/shopizer)
-
-
-Java open source e-commerce software
+Java e-commerce software
 
 - Headless commerce
 - Shopping cart
@@ -18,30 +11,23 @@ Java open source e-commerce software
 - Administration
 - REST API
 
-See the demo (jsp):
--------------------
-http://aws-demo.shopizer.com:8080/
-
-See the demo (React):
--------------------
-Available soon
-
 
 Get the code:
 -------------------
 Clone the repository:
      
-	 $ git clone git://github.com/shopizer-ecommerce/shopizer.git
+	 $ git clone git://github.com/tuvienchonnhu/anlacduyen.git
+	 
 
 If this is your first time using Github, review http://help.github.com to learn the basics.
 
-You can also download the zip file containing the code from https://github.com/shopizer-ecommerce/shopizer 
+You can also download the zip file containing the code from https://github.com/tuvienchonnhu/anlacduyen 
 
 To build the application:
 -------------------	
 From the command line:
 
-	$ cd shopizer
+	$ cd anlacduyen
 	$ mvnw clean install
 	
 
@@ -82,10 +68,6 @@ In Run/Debug Configurations, set to the option Working directory the path of the
 
 run ShopApplication
 
-Run Docker image with working demo
--------------------
-
-	docker run -p 80:8080 shopizerecomm/shopizer:latest
 
 
 ### Access the application:
@@ -95,7 +77,7 @@ Access the deployed web application at: http://localhost:8080/
 
 Access the admin section at: http://localhost:8080/admin
 
-username : admin@shopizer.com
+username : anlacduyen01@gmail.com
 
 password : password
 
@@ -108,15 +90,5 @@ Please read the instructions on how to connect to MySQL, configure an email serv
 
 Documentation available <http://documentation.shopizer.com>
 
-ChatOps <https://shopizer.slack.com>  - Join our Slack channel https://shopizer-slackin.herokuapp.com/
-
-More information is available on shopizer web site here <http://www.shopizer.com>
-
-### Participation:
--------------------
-
-If you have interest in giving feedback or for participating to Shopizer project in any way
-Feel to use the contact form <http://www.shopizer.com/contact.html> and share your email address
-so we can send an invite to our Slack channel
 
 
