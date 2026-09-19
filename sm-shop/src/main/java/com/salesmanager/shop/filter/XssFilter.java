@@ -34,6 +34,13 @@ public class XssFilter implements Filter {
 	 @Override
 	 public void doFilter(ServletRequest srequest, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
+	 		// This filter reads request parameters through XssHttpServletRequestWrapper.
+	 		// Force UTF-8 before the first parameter is parsed; otherwise a container
+	 		// using its default ISO-8859-1/Cp1252 encoding permanently turns Vietnamese
+	 		// characters into '?'.
+	 		srequest.setCharacterEncoding("UTF-8");
+	 		response.setCharacterEncoding("UTF-8");
+
 	 		HttpServletRequest request = (HttpServletRequest) srequest;
 	 		filterChain.doFilter(new XssHttpServletRequestWrapper(request) {}, response);
 
