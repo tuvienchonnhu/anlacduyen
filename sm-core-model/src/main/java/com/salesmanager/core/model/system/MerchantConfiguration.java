@@ -66,7 +66,7 @@ public class MerchantConfiguration extends SalesManagerEntity<Long, MerchantConf
   private Boolean active = new Boolean(false);
 
 
-  @Column(name = "VALUE")
+  @Column(name = "VALUE", columnDefinition = "LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
   @Type(type = "org.hibernate.type.TextType")
   private String value;
 

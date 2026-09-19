@@ -74,11 +74,11 @@ public class DefaultEmailSenderImpl implements EmailModule {
 
         InternetAddress inetAddress = new InternetAddress();
 
-        inetAddress.setPersonal(eml);
+        inetAddress.setPersonal(eml, CHARSET);
         inetAddress.setAddress(from);
 
         mimeMessage.setFrom(inetAddress);
-        mimeMessage.setSubject(subject);
+        mimeMessage.setSubject(subject, CHARSET);
 
         Multipart mp = new MimeMultipart("alternative");
 
@@ -105,7 +105,7 @@ public class DefaultEmailSenderImpl implements EmailModule {
           }
 
           public String getContentType() {
-            return "text/plain";
+            return "text/plain; charset=" + CHARSET;
           }
 
           public String getName() {
@@ -130,7 +130,7 @@ public class DefaultEmailSenderImpl implements EmailModule {
           public InputStream getInputStream() throws IOException {
             // return new StringBufferInputStream(htmlWriter
             // .toString());
-            return new ByteArrayInputStream(textWriter.toString().getBytes(CHARSET));
+            return new ByteArrayInputStream(htmlWriter.toString().getBytes(CHARSET));
           }
 
           public OutputStream getOutputStream() throws IOException {
@@ -138,7 +138,7 @@ public class DefaultEmailSenderImpl implements EmailModule {
           }
 
           public String getContentType() {
-            return "text/html";
+            return "text/html; charset=" + CHARSET;
           }
 
           public String getName() {
@@ -151,6 +151,7 @@ public class DefaultEmailSenderImpl implements EmailModule {
         mp.addBodyPart(htmlPart);
 
         mimeMessage.setContent(mp);
+        mimeMessage.saveChanges();
 
         // if(attachment!=null) {
         // MimeMessageHelper messageHelper = new

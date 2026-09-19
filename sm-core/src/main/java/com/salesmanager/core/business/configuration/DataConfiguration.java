@@ -78,7 +78,9 @@ public class DataConfiguration {
     	dataSource.setIdleTimeout(minPoolSize);
     	dataSource.setMaximumPoolSize(maxPoolSize);
     	dataSource.setConnectionTestQuery(testQuery);
-    	
+    	    	// Ensure Vietnamese and other Unicode text is exchanged as UTF-8.
+    	dataSource.setConnectionInitSql("SET NAMES utf8mb4");
+
     	return dataSource;
     }
 

@@ -107,8 +107,9 @@
 	<!-- Email -->
 	<beans:bean id="freemarkerMailConfiguration"
 		class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
-		<!-- Uses HTML with templates and freemarker template engine -->
+			<!-- Uses UTF-8 HTML/text templates with the Freemarker template engine -->
 		<beans:property name="templateLoaderPath" value="classpath:/templates/email" />
+		<beans:property name="defaultEncoding" value="UTF-8" />
 	</beans:bean>
 
 

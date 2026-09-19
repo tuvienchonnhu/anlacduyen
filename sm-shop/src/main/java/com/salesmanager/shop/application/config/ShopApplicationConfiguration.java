@@ -24,6 +24,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -74,7 +75,21 @@ public class ShopApplicationConfiguration implements WebMvcConfigurer {
     resolver.setOrder(0);
     return resolver;
   }
-  
+
+
+  @Bean
+  public FilterRegistrationBean<CharacterEncodingFilter> characterEncodingFilter() {
+      CharacterEncodingFilter filter = new CharacterEncodingFilter();
+      filter.setEncoding("UTF-8");
+      filter.setForceEncoding(true);
+
+      FilterRegistrationBean<CharacterEncodingFilter> registrationBean =
+          new FilterRegistrationBean<>();
+      registrationBean.setFilter(filter);
+      registrationBean.addUrlPatterns("/*");
+      registrationBean.setOrder(Integer.MIN_VALUE);
+      return registrationBean;
+  }
 
   @Bean
   public FilterRegistrationBean<XssFilter> croseSiteFilter(){
