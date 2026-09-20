@@ -1,4 +1,4 @@
-﻿﻿<%
+﻿<%
 response.setCharacterEncoding("UTF-8");
 response.setHeader("Cache-Control","no-cache");
 response.setHeader("Pragma","no-cache");
@@ -53,9 +53,15 @@ response.setDateHeader ("Expires", -1);
 
 					</div><!-- /col-md-9 -->
         
-        			<sidebar class="col-md-3">
-        						<h3 id="categoryLabel"><s:message code="label.categories.title" text="Categories"/></h3>
-        			            <ul id="categoriesFacets" class="nav nav-list"></ul>
+        				<sidebar class="col-md-3">
+        			<h3 id="categoryLabel"><s:message code="label.categories.title" text="Categories"/></h3>
+        			<ul id="categoriesFacets" class="nav nav-list">
+        			<c:forEach items="${requestScope.categoryFacets}" var="facet">
+        			<c:if test="${facet.visible}">
+        			<li><a href="<c:url value="/shop/category/${facet.description.friendlyUrl}.html"/><sm:breadcrumbParam categoryId="${facet.id}"/>"><c:out value="${facet.description.name}"/> <c:if test="${facet.productCount > 0}">(<c:out value="${facet.productCount}"/>)</c:if></a></li>
+        			</c:if>
+        			</c:forEach>
+        			</ul>
         			</sidebar>
         
 

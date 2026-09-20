@@ -237,7 +237,18 @@ public class SearchServiceImpl implements com.salesmanager.core.business.service
 		
 						//Map<String,Object> metaEntries = hit.getMetaEntries();
 						Map<String,Object> metaEntries = hit.getItem();
-						IndexProduct indexProduct = new IndexProduct();
+							IndexProduct indexProduct = new IndexProduct();
+
+						Object categories = metaEntries.get("categories");
+						if (categories instanceof Collection) {
+						List<String> categoryCodes = new ArrayList<String>();
+						for (Object category : (Collection<?>) categories) {
+						if (category != null) {
+						categoryCodes.add(String.valueOf(category));
+						}
+						}
+						indexProduct.setCategories(categoryCodes);
+						}
 
 						Object desc = metaEntries.get("description");
 						if(desc instanceof JsonNull == false) {

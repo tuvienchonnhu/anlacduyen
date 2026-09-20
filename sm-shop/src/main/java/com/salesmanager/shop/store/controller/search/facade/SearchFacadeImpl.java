@@ -163,17 +163,19 @@ public class SearchFacadeImpl implements SearchFacade {
 
 	private List<ReadableCategory> getCategoryFacets(MerchantStore merchantStore, Language language,
 			Map<String, List<SearchFacet>> facets) {
-		List<SearchFacet> categoriesFacets = facets.entrySet().stream()
-				.filter(e -> CATEGORY_FACET_NAME.equals(e.getKey())).findFirst().map(Entry::getValue)
-				.orElse(Collections.emptyList());
+			List<SearchFacet> categoriesFacets = facets.entrySet().stream()
+		.filter(e -> CATEGORY_FACET_NAME.equals(e.getKey()) || "category".equals(e.getKey()))
+		.findFirst().map(Entry::getValue)
+		.orElse(Collections.emptyList());
 
 		if (CollectionUtils.isNotEmpty(categoriesFacets)) {
 
-			List<String> categoryCodes = categoriesFacets.stream().map(SearchFacet::getName)
-					.collect(Collectors.toList());
+				List<String> categoryCodes = categoriesFacets.stream()
+			.map(facet -> facet.getName() != null ? facet.getName() : facet.getKey())
+			.collect(Collectors.toList());
 
 			Map<String, Long> productCategoryCount = categoriesFacets.stream()
-					.collect(Collectors.toMap(SearchFacet::getKey, SearchFacet::getCount));
+			.collect(Collectors.toMap(facet -> facet.getKey() != null ? facet.getKey() : facet.getName(), SearchFacet::getCount, Long::sum));
 
 			List<Category> categories = categoryService.listByCodes(merchantStore, categoryCodes, language);
 			return categories.stream().map(category -> convertCategoryToReadableCategory(merchantStore, language,

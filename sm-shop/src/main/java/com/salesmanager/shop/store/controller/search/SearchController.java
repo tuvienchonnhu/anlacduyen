@@ -158,11 +158,12 @@ public class SearchController {
 
 			SearchProductList productList = searchFacade.search(store, language, searchRequest);
 
-			if(productList!=null) {
-				model.addAttribute("products", productList.getProducts());
+				if(productList!=null) {
+			model.addAttribute("products", productList.getProducts());
+			model.addAttribute("categoryFacets", productList.getCategoryFacets());
 			}
 
-		} catch(Exception e) {
+			} catch(Exception e) {
 			LOGGER.error("Error while searching products for query " + q, e);
 		}
 		

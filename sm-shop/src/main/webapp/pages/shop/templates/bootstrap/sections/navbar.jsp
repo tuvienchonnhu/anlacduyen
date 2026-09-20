@@ -78,25 +78,27 @@ $(document).ready(function() {
 	                	  </c:choose>  
 						</nav>
 				</div>
-				<div class="span8 pull-right">
+					<div class="span8 pull-right">
 
-						<nav id="menu" class="pull-right">
-                    					<ul id="mainMenu">
-                    						<!-- request contains url and url contains /shop -->
-											<li class="">  
-	                    					       <a href="<c:url value="/shop"/>" class="current">          
-	                    					            <span class="name"><s:message code="menu.home" text="Home"/></span>                                     
-	                    						   </a>                         
+				<nav id="menu" class="pull-right">
+				                    		<ul id="mainMenu">
+						                   		<!-- request contains url and url contains /shop -->
+						                   		<li class="<sm:activeLink linkCode="HOME" activeReturnCode="active"/>">
+	                    					       <a href="<c:url value="/shop"/>" class="current">
+	                    					            <span class="name"><s:message code="menu.home" text="Home"/></span>
+	                    						   </a>
 	                    					</li>
-	
-	                    		            
-	                    		            <c:forEach items="${requestScope.TOP_CATEGORIES}" var="category">
-	    										<li class="">
-	    											<a href="<c:url value="/shop/category/${category.description.friendlyUrl}.html"/><sm:breadcrumbParam categoryId="${category.id}"/>" class="current"> 
+
+
+	                    		                         		<c:forEach items="${requestScope.TOP_CATEGORIES}" var="category">
+	                    		            <c:if test="${category.visible}">
+	                    		            <li class="<sm:activeLink linkCode="${category.description.friendlyUrl}" activeReturnCode="active"/>">
+	                    		            <a href="<c:url value="/shop/category/${category.description.friendlyUrl}.html"/><sm:breadcrumbParam categoryId="${category.id}"/>" class="current">
 	    												<span class="name">${category.description.name}</span>
 	    											</a>
-	    										</li> 
-											</c:forEach>
+	    											</li>
+	    											</c:if>
+	    											</c:forEach>
                     		            </ul>
                     		            
                     		            <div id="searchGroup" class="btn-group pull-right">

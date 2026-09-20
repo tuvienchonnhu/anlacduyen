@@ -107,9 +107,12 @@ $(document).ready(function() {
 				<div class="row">
 					<div class="col-lg-12 col-md-12 col-sm-12 hidden-xs">
 						<div class="mainmenu hidden-xs">
-							<nav>
-								<ul>
-								<c:set var="code" value="${category.code}"/>
+								<nav>
+							<ul>
+							<li class="<sm:activeLink linkCode="HOME" activeReturnCode="active"/>">
+							<a href="<c:url value="/shop"/>"><s:message code="menu.home" text="Home"/></a>
+							</li>
+							<c:set var="code" value="${category.code}"/>
 								<c:forEach items="${requestScope.TOP_CATEGORIES}" var="category">
 									   <c:if test="${category.visible}">
 									   <li class="<sm:activeLink linkCode="${category.description.friendlyUrl}" activeReturnCode="active"/>"><a href="<c:url value="/shop/category/${category.description.friendlyUrl}.html"/><sm:breadcrumbParam categoryId="${category.id}"/>"><c:out value="${category.description.name}"/></a>
@@ -143,9 +146,12 @@ $(document).ready(function() {
 				<div class="row">
 					<div class="col-md-12">
 						<div class="mobile-menu">
-							<nav id="mobile-menu">
-								<ul>
-								<c:set var="code" value="${category.code}"/>
+								<nav id="mobile-menu">
+							<ul>
+							<li class="<sm:activeLink linkCode="HOME" activeReturnCode="active"/>">
+							<a href="<c:url value="/shop"/>"><s:message code="menu.home" text="Home"/></a>
+							</li>
+							<c:set var="code" value="${category.code}"/>
 								<c:forEach items="${requestScope.TOP_CATEGORIES}" var="category">
 									   <li class="<sm:activeLink linkCode="${category.description.friendlyUrl}" activeReturnCode="active"/>"><a href="<c:url value="/shop/category/${category.description.friendlyUrl}.html"/><sm:breadcrumbParam categoryId="${category.id}"/>"><c:out value="${category.description.name}"/></a>
 										<c:if test="${fn:length(category.children)>0}">

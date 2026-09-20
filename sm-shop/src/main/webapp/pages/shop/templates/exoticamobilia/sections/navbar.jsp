@@ -54,9 +54,12 @@ response.setDateHeader ("Expires", -1);
 	
 					<div id="mainNavigation" class="collapse navbar-collapse">
 	
-						<ul class="nav navbar-nav navbar-right" id="topMain">
+							<ul class="nav navbar-nav navbar-right" id="topMain">
+						<li class="<sm:activeLink linkCode="HOME" activeReturnCode="active"/>">
+						<a href="<c:url value="/shop"/>"><span class="name"><s:message code="menu.home" text="Home"/></span></a>
+						</li>
 
-							<c:set var="code" value="${category.code}"/>
+						<c:set var="code" value="${category.code}"/>
 							<c:forEach items="${requestScope.TOP_CATEGORIES}" var="category">
 								<li
 									class="<sm:activeLink linkCode="${category.description.friendlyUrl}" activeReturnCode="active"/> <c:if test="${fn:length(category.children)>0}">dropdown mega-menu</c:if>">
