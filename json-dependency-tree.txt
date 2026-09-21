@@ -1,0 +1,25 @@
+﻿Found "C:\web\anlacduyen\.mvn\wrapper\maven-wrapper.jar"
+[INFO] Scanning for projects...
+[INFO] Inspecting build with total of 1 modules...
+[INFO] Installing Nexus Staging features:
+[INFO]   ... total of 1 executions of maven-deploy-plugin replaced with nexus-staging-maven-plugin
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Building sm-core 2.17.0
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-dependency-plugin:3.1.2:tree (default-cli) @ sm-core ---
+[INFO] Verbose not supported since maven-dependency-plugin 3.0
+[INFO] com.shopizer:sm-core:jar:2.17.0
+[INFO] +- com.braintreepayments.gateway:braintree-java:jar:2.73.0:compile
+[INFO] |  \- org.json:json:jar:20160810:compile
+[INFO] \- org.springframework.boot:spring-boot-starter-test:jar:2.3.6.RELEASE:compile
+[INFO]    \- org.skyscreamer:jsonassert:jar:1.5.0:compile
+[INFO]       \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:compile
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 7.196 s
+[INFO] Finished at: 2026-09-21T16:20:01+07:00
+[INFO] Final Memory: 55M/190M
+[INFO] ------------------------------------------------------------------------

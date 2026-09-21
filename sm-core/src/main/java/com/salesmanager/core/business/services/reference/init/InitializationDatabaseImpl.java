@@ -27,7 +27,6 @@ import com.salesmanager.core.business.services.tax.TaxClassService;
 import com.salesmanager.core.business.services.user.GroupService;
 import com.salesmanager.core.business.services.user.PermissionService;
 import com.salesmanager.core.business.constants.Constants;
-import com.salesmanager.core.business.constants.Constants;
 import com.salesmanager.core.business.utils.SecurityGroupsBuilder;
 import com.salesmanager.core.constants.SchemaConstant;
 import com.salesmanager.core.model.catalog.product.manufacturer.Manufacturer;
@@ -250,6 +249,9 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		for (String code : SchemaConstant.CURRENCY_MAP.keySet()) {
 
             try {
+                if (currencyService.getByCode(code) != null) {
+                    continue;
+                }
             	java.util.Currency c = java.util.Currency.getInstance(code);
 
             	if(c==null) {
@@ -273,20 +275,30 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 	private void createCountries() throws ServiceException {
 		LOGGER.info(String.format("%s : Populating Countries ", name));
 		List<Language> languages = languageService.list();
-		for(String code : SchemaConstant.COUNTRY_ISO_CODE) {
-			Locale locale = SchemaConstant.LOCALES.get(code);
-			if (locale != null) {
-				Country country = new Country(code);
-				countryService.create(country);
+			for(String code : SchemaConstant.COUNTRY_ISO_CODE) {
+		Locale locale = SchemaConstant.LOCALES.get(code);
+		if (locale != null) {
+			Country country = countryService.getByCode(code);
+		boolean created = false;
+		if (country == null) {
+		country = new Country(code);
+		countryService.create(country);
+		created = true;
+		}
 
-				for (Language language : languages) {
-					String name = locale.getDisplayCountry(new Locale(language.getCode()));
-					//byte[] ptext = value.getBytes(Constants.ISO_8859_1);
-					//String name = new String(ptext, Constants.UTF_8);
-					CountryDescription description = new CountryDescription(language, name);
-					countryService.addCountryDescription(country, description);
-				}
-			}
+		if (created) {
+		for (Language language : languages) {
+		String name = locale.getDisplayCountry(new Locale(language.getCode()));
+		//byte[] ptext = value.getBytes(Constants.ISO_8859_1);
+		//String name = new String(ptext, Constants.UTF_8);
+		if (name == null || name.trim().isEmpty()) {
+		name = code;
+		}
+		CountryDescription description = new CountryDescription(language, name);
+			description.setCountry(country);
+		countryService.addCountryDescription(country, description);
+		}
+		}
 		}
 	}
 
@@ -391,7 +403,10 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		defaultLanguage = new Language(Constants.DEFAULT_LANGUAGE);
 		languageService.create(defaultLanguage);
 		}
-		Language en = languageService.getByCode("en");
+			Language en = languageService.getByCode("en");
+		if (en == null) {
+			en = defaultLanguage;
+		}
 		Language zh = languageService.getByCode("zh");
 		Country defaultCountry = countryService.getByCode(Constants.DEFAULT_COUNTRY);
 			Currency currency = currencyService.getByCode("VND");
