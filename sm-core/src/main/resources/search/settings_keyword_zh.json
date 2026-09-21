@@ -1,49 +1,33 @@
  {   
-  "index": {
-     "max_ngram_diff": 1
-  },
+  "index": {"max_ngram_diff": 1},
   "analysis": {
-         "filter": {
-            "nGram_filter": {
-               "type": "nGram",
-               "min_gram": 2,
-                               "max_gram": 3,
-               "token_chars": [
-                  "letter",
-                  "digit",
-                  "punctuation",
-                  "symbol"
-               ]
-            }
-         },
-         "analyzer": {
-            "nGram_analyzer": {
-               "type": "custom",
-               "tokenizer": "whitespace",
-               "filter": [
-                  "lowercase",
-                  "asciifolding",
-                  "nGram_filter"
-               ]
-            },
-            "whitespace_analyzer": {
-               "type": "custom",
-               "tokenizer": "whitespace",
-               "filter": [
-                  "lowercase",
-                  "asciifolding"
-               ]
-            },
-            "tokenizer": {
-          	"edge_ngram_tokenizer": {
-            	"type": "edge_ngram",
-            		"min_gram": 2,
-            		"max_gram": 3,
-            		"token_chars": [
-              			"letter"
-            		]
-          		}
-         	}
-         }
+    "filter": {
+      "nGram_filter": {
+        "type": "nGram",
+        "min_gram": 2,
+        "max_gram": 3,
+        "token_chars": ["letter", "digit", "punctuation", "symbol"]
       }
+    },
+    "analyzer": {
+      "nGram_analyzer": {
+        "type": "custom",
+        "tokenizer": "whitespace",
+        "filter": ["lowercase", "asciifolding", "nGram_filter"]
+      },
+      "whitespace_analyzer": {
+        "type": "custom",
+        "tokenizer": "whitespace",
+        "filter": ["lowercase", "asciifolding"]
+      }
+    },
+    "tokenizer": {
+      "edge_ngram_tokenizer": {
+        "type": "edge_ngram",
+        "min_gram": 2,
+        "max_gram": 3,
+        "token_chars": ["letter"]
+      }
+    }
   }
+}

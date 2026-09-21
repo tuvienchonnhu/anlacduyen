@@ -64,9 +64,12 @@ public class ProductDescriptionUrlTag extends RequestContextAwareTag {
 			if(!StringUtils.isBlank(this.getProductDescription().getSeUrl())) {
 				productPath.append(Constants.PRODUCT_URI).append("/");
 				productPath.append(this.getProductDescription().getSeUrl());
+				} else if (this.getProductDescription().getProduct() != null) {
+			productPath.append(Constants.PRODUCT_ID_URI).append("/");
+			productPath.append(this.getProductDescription().getProduct().getSku());
 			} else {
-				productPath.append(Constants.PRODUCT_ID_URI).append("/");
-				productPath.append(this.getProductDescription().getProduct().getSku());
+			LOGGER.warn("Product description has no product; cannot build product URL");
+			return SKIP_BODY;
 			}
 			
 			productPath.append(Constants.URL_EXTENSION);

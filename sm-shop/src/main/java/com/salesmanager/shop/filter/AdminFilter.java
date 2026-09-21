@@ -71,8 +71,8 @@ public class AdminFilter extends HandlerInterceptorAdapter {
 		user = userService.getByUserName(userName);
 		if(user==null) {
 		LOGGER.warn("User name not found " + userName);
-		response.sendRedirect(request.getContextPath() + "/admin/unauthorized.html");
-		return true;
+			response.sendRedirect(request.getContextPath() + "/admin/unauthorized.html");
+		return false;
 		}
 			session.setAttribute(Constants.ADMIN_USER, user);
 		store = null;

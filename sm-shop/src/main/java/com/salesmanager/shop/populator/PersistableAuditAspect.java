@@ -42,9 +42,15 @@ public class PersistableAuditAspect {
 					
 					Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 					if(auth!=null) {
-						if(auth instanceof UsernamePasswordAuthenticationToken) {//api only is captured
-							com.salesmanager.shop.store.security.user.JWTUser user = (com.salesmanager.shop.store.security.user.JWTUser)auth.getPrincipal();
+							if(auth instanceof UsernamePasswordAuthenticationToken) {//api only is captured
+						Object principal = auth.getPrincipal();
+						if (principal instanceof com.salesmanager.shop.store.security.user.JWTUser) {
+						com.salesmanager.shop.store.security.user.JWTUser user =
+						(com.salesmanager.shop.store.security.user.JWTUser) principal;
 							audit.setModifiedBy(user.getUsername());
+						} else if (principal instanceof org.springframework.security.core.userdetails.UserDetails) {
+							audit.setModifiedBy(((org.springframework.security.core.userdetails.UserDetails) principal).getUsername());
+						}
 						}
 					}
 					//TODO put in log audit log trail

@@ -252,7 +252,7 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
                 if (currencyService.getByCode(code) != null) {
                     continue;
                 }
-            	java.util.Currency c = java.util.Currency.getInstance(code);
+                java.util.Currency c = java.util.Currency.getInstance(code);
 
             	if(c==null) {
             		LOGGER.info(String.format("%s : Populating Currencies : no currency for code : %s", name, code));
@@ -297,12 +297,13 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		CountryDescription description = new CountryDescription(language, name);
 			description.setCountry(country);
 		countryService.addCountryDescription(country, description);
+			}
 		}
 		}
 		}
-	}
+		}
 
-	private void createZones() throws ServiceException {
+		private void createZones() throws ServiceException {
 		LOGGER.info(String.format("%s : Populating Zones ", name));
         try {
 
