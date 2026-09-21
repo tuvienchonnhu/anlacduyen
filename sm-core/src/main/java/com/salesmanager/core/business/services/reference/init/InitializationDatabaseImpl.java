@@ -369,11 +369,14 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 	}
 
 	private void createLanguages() throws ServiceException {
-		LOGGER.info(String.format("%s : Populating Languages ", name));
-		for(String code : SchemaConstant.LANGUAGE_ISO_CODE) {
-			Language language = new Language(code);
-			languageService.create(language);
-		}
+	LOGGER.info(String.format("%s : Populating Languages ", name));
+	for(String code : SchemaConstant.LANGUAGE_ISO_CODE) {
+	// The database may be partially initialized. Create only missing
+	// languages so createMerchant() can always resolve the default one.
+	if (languageService.getByCode(code) == null) {
+	languageService.create(new Language(code));
+	}
+	}
 	}
 
 	private void createMerchant() throws ServiceException {
@@ -381,16 +384,38 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 
 		Date date = new Date(System.currentTimeMillis());
 
-		Language defaultLanguage = languageService.getByCode(Constants.DEFAULT_LANGUAGE);
+			Language defaultLanguage = languageService.getByCode(Constants.DEFAULT_LANGUAGE);
+		if (defaultLanguage == null) {
+		// Initialization may be running against a partially populated database.
+		// Ensure the language referenced by MerchantStore exists before persist.
+		defaultLanguage = new Language(Constants.DEFAULT_LANGUAGE);
+		languageService.create(defaultLanguage);
+		}
 		Language en = languageService.getByCode("en");
 		Language zh = languageService.getByCode("zh");
 		Country defaultCountry = countryService.getByCode(Constants.DEFAULT_COUNTRY);
-		Currency currency = currencyService.getByCode("VND");
+			Currency currency = currencyService.getByCode("VND");
+
+		if (defaultLanguage == null) {
+		throw new ServiceException("Cannot initialize merchant: language '" + Constants.DEFAULT_LANGUAGE
+		+ "' is missing from LANGUAGE. Check the database initialization and language codes.");
+		}
+		if (defaultCountry == null) {
+		throw new ServiceException("Cannot initialize merchant: country '" + Constants.DEFAULT_COUNTRY
+		+ "' is missing from COUNTRY.");
+		}
+		if (currency == null) {
+		throw new ServiceException("Cannot initialize merchant: currency 'VND' is missing from CURRENCY.");
+		}
 
 		List<Language> supportedLanguages = new ArrayList<Language>();
-		supportedLanguages.add(defaultLanguage);
-		supportedLanguages.add(en);
-		supportedLanguages.add(zh);
+			supportedLanguages.add(defaultLanguage);
+		if (en != null && !supportedLanguages.contains(en)) {
+			supportedLanguages.add(en);
+		}
+		if (zh != null && !supportedLanguages.contains(zh)) {
+			supportedLanguages.add(zh);
+		}
 
 		//create a merchant
 		MerchantStore store = new MerchantStore();

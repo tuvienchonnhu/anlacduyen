@@ -159,12 +159,25 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 				}
 			}
 
-			if (store == null) {
-				store = setMerchantStoreInSession(request, MerchantStore.DEFAULT_STORE);
+				if (store == null) {
+			store = setMerchantStoreInSession(request, MerchantStore.DEFAULT_STORE);
 			}
-			
+
+			// Initialization may have failed before the default merchant was created.
+			// Do not dereference a missing store or continue into the error page, which
+			// also requires a merchant store.
+			if (store == null) {
+			LOGGER.error("Merchant store '{}' was not found; refusing to process request {}",
+			MerchantStore.DEFAULT_STORE, request.getRequestURI());
+			if (!response.isCommitted()) {
+			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+			"The merchant store is not initialized");
+			}
+			return false;
+			}
+
 			if(StringUtils.isBlank(store.getStoreTemplate())) {
-				store.setStoreTemplate(Constants.DEFAULT_TEMPLATE);
+			store.setStoreTemplate(Constants.DEFAULT_TEMPLATE);
 			}
 			request.setAttribute(Constants.MERCHANT_STORE, store);
 			
