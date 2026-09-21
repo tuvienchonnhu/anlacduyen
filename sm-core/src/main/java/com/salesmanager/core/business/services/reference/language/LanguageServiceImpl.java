@@ -78,12 +78,12 @@ public class LanguageServiceImpl extends SalesManagerEntityServiceImpl<Integer, 
 		String languageCode = locale.getLanguage();
 		// The database keeps the legacy Vietnamese code "vn", while
 		// java.util.Locale and servlet containers use the ISO-639 code "vi".
-		if ("vi".equalsIgnoreCase(languageCode)) {
-		languageCode = "vn";
-		}
-		language = getLanguagesMap().get(languageCode);
+		//if ("vi".equalsIgnoreCase(languageCode)) {
+		//languageCode = "vn";
+		//}
+			language = getLanguagesMap().get(languageCode);
 		} catch (Exception e) {
-		LOGGER.error("Cannot convert locale " + locale.getLanguage() + " to language");
+			LOGGER.error("Cannot convert locale " + locale.getLanguage() + " to language");
 		}
 		if(language == null) {
 			language = new Language(Constants.DEFAULT_LANGUAGE);

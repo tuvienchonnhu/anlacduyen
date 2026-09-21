@@ -352,7 +352,7 @@
 												<s:message code="label.logonform.rememberusername"
 													text="Remember my user name" />
 												<br/>
-												<a href="#" id="changePassword"><s:message code="label.logonform.forgotpassword" text="Forgot Password"/>?</a>
+												<a href="#" id="changePassword"><s:message code="label.logonform.forgotpassword" text="Forgot Password"/></a>
 										</label>
 										<a href="#" class="btn" id="formSubmitButton"> <s:message
 												code="button.label.logon" text="button.label.submit2" /> </a>

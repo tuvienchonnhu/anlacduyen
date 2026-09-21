@@ -125,12 +125,10 @@ response.setDateHeader ("Expires", -1);
 
        <jsp:include page="/pages/shop/templates/bootstrap/sections/breadcrumb.jsp" />
  
-	   <c:if test="${category.description.description!=null}">
+	   <c:if test="${not empty category.description}">
 	   		<!-- category description -->
-		   	<div class="row-fluid">
-		   	<p>
-		   		<c:out value="${category.description.description}"/>
-		   	</p>
+		   	<div class="row-fluid category-description">
+		   		<c:out value="${category.description.description.description}" escapeXml="true"/>
 		   	</div>
 	   
 	   </c:if>
