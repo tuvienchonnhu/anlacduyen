@@ -1,8 +1,10 @@
 package com.salesmanager.shop.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -12,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,6 +24,9 @@ import com.salesmanager.core.business.services.content.ContentService;
 import com.salesmanager.core.model.catalog.product.file.ProductImageSize;
 import com.salesmanager.core.model.content.FileContentType;
 import com.salesmanager.core.model.content.OutputContentFile;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import java.io.InputStream;
 
 /**
  * When handling images and files from the application server
@@ -31,34 +35,52 @@ import com.salesmanager.core.model.content.OutputContentFile;
  */
 @Controller
 public class ImagesController {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ImagesController.class);
-	
 
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ImagesController.class);
+
+
+
 	@Inject
 	private ContentService contentService;
-	
+
 	@Inject
 	private ProductImageService productImageService;
-	
-	private byte[] tempImage = null;
-	
+
+	private byte[] tempImage;
+
+	/**
+	 * Image URLs are stable and are requested frequently. Keep a bounded cache
+	 * here to avoid reading the database/storage for every browser request.
+	 * The cache is intentionally small so image traffic cannot grow the heap
+	 * without limit.
+	 */
+	private final Map<String, byte[]> imageCache = Collections.synchronizedMap(
+	new LinkedHashMap<String, byte[]>(128, 0.75f, true) {
+	private static final long serialVersionUID = 1L;
+
+	@Override
+	protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
+	return super.size() > 512;
+	}
+	});
+
 	@PostConstruct
 	public void init() {
-		try {
-			File file = ResourceUtils.getFile("classpath:static/not-found.png");
-			if(file != null) {
-				byte[] bFile = Files.readAllBytes(file.toPath());
-				this.tempImage = bFile;
-			}
+		Resource resource = new ClassPathResource("static/not-found.png");
+		try (InputStream inputStream = resource.getInputStream()){
+			//File file = ResourceUtils.getFile("classpath:static/not-found.png");
+			//if(file != null) {
+			//byte[] bFile = Files.readAllBytes(file.toPath());
+			byte[] bFile = inputStream.readAllBytes();
+			this.tempImage = bFile;
+			//}
 
-			
+
 		} catch (Exception e) {
 			LOGGER.error("Can't load temporary default image", e);
 		}
 	}
-	
+
 	/**
 	 * Logo, content image
 	 * @param storeId
@@ -66,38 +88,46 @@ public class ImagesController {
 	 * @param imageName
 	 * @return
 	 * @throws IOException
-	 * @throws ServiceException 
+	 * @throws ServiceException
 	 */
 	@RequestMapping("/static/files/{storeCode}/{imageType}/{imageName}.{extension}")
 	public @ResponseBody byte[] printImage(@PathVariable final String storeCode, @PathVariable final String imageType, @PathVariable final String imageName, @PathVariable final String extension) throws IOException, ServiceException {
 
 		// example -> /static/files/DEFAULT/CONTENT/myImage.png
-		
+
 		FileContentType imgType = null;
-		
+
 		if(FileContentType.LOGO.name().equals(imageType)) {
 			imgType = FileContentType.LOGO;
 		}
-		
+
 		if(FileContentType.IMAGE.name().equals(imageType)) {
 			imgType = FileContentType.IMAGE;
 		}
-		
+
 		if(FileContentType.PROPERTY.name().equals(imageType)) {
 			imgType = FileContentType.PROPERTY;
 		}
-		
-		OutputContentFile image =contentService.getContentFile(storeCode, imgType, new StringBuilder().append(imageName).append(".").append(extension).toString());
-		
-		
-		if(image!=null) {
-			return image.getFile().toByteArray();
-		} else {
-			return tempImage;
+
+			if (imgType == null) {
+		return tempImage;
 		}
 
+			String fileName = imageName + "." + extension;
+		final FileContentType resolvedImageType = imgType;
+		String cacheKey = "content:" + storeCode + ":" + resolvedImageType + ":" + fileName;
+		return getCachedImage(cacheKey, () -> {
+		try {
+			OutputContentFile image = contentService.getContentFile(storeCode, resolvedImageType, fileName);
+			return image == null ? tempImage : image.getFile().toByteArray();
+		} catch (ServiceException e) {
+			LOGGER.warn("Cannot retrieve content image {}", fileName, e);
+			return tempImage;
+		}
+		});
+
 	}
-	
+
 
 	/**
 	 * For product images
@@ -115,39 +145,28 @@ public class ImagesController {
 
 		// product image
 		// example small product image -> /static/DEFAULT/products/TB12345/product1.jpg
-		
+
 		// example large product image -> /static/DEFAULT/products/TB12345/product1.jpg
 
-		
+
 		/**
 		 * List of possible imageType
-		 * 
+		 *
 		 */
-		
+
 
 		ProductImageSize size = ProductImageSize.SMALL;
-		
+
 		if(imageType.equals(FileContentType.PRODUCTLG.name())) {
 			size = ProductImageSize.LARGE;
-		} 
-		
+		}
 
-		
-		OutputContentFile image = null;
-		try {
-			image = productImageService.getProductImage(storeCode, productCode, new StringBuilder().append(imageName).append(".").append(extension).toString(), size);
-		} catch (ServiceException e) {
-			LOGGER.error("Cannot retrieve image " + imageName, e);
-		}
-		if(image!=null) {
-			return image.getFile().toByteArray();
-		} else {
-			//empty image placeholder
-			return tempImage;
-		}
+
+
+		return getProductImageBytes(storeCode, productCode, imageName, extension, size);
 
 	}
-	
+
 	/**
 	 * Exclusive method for dealing with product images
 	 * @param storeCode
@@ -164,40 +183,29 @@ public class ImagesController {
 
 		// product image small
 		// example small product image -> /static/products/DEFAULT/TB12345/SMALL/product1.jpg
-		
+
 		// example large product image -> /static/products/DEFAULT/TB12345/LARGE/product1.jpg
 
 
 		/**
 		 * List of possible imageType
-		 * 
+		 *
 		 */
-		
-		
+
+
 		ProductImageSize size = ProductImageSize.SMALL;
-		
+
 		if(FileContentType.PRODUCTLG.name().equals(imageSize)) {
 			size = ProductImageSize.LARGE;
-		} 
-		
-	
+		}
 
-		
-		OutputContentFile image = null;
-		try {
-			image = productImageService.getProductImage(storeCode, productCode, new StringBuilder().append(imageName).append(".").append(extension).toString(), size);
-		} catch (ServiceException e) {
-			LOGGER.error("Cannot retrieve image " + imageName, e);
-		}
-		if(image!=null) {
-			return image.getFile().toByteArray();
-		} else {
-			//empty image placeholder
-			return tempImage;
-		}
+
+
+
+		return getProductImageBytes(storeCode, productCode, imageName, extension, size);
 
 	}
-	
+
 	/**
 	 * Exclusive method for dealing with product images
 	 * @param storeCode
@@ -214,43 +222,59 @@ public class ImagesController {
 
 		// product image
 		// example small product image -> /static/products/DEFAULT/TB12345/product1.jpg?size=small
-		
+
 		// example large product image -> /static/products/DEFAULT/TB12345/product1.jpg
 		// or
 		//example large product image -> /static/products/DEFAULT/TB12345/product1.jpg?size=large
-		
+
 
 		/**
 		 * List of possible imageType
-		 * 
+		 *
 		 */
-		
+
 
 		ProductImageSize size = ProductImageSize.LARGE;
-		
-				
+
+
 		if(StringUtils.isNotBlank(request.getParameter("size"))) {
 			String requestSize = request.getParameter("size");
 			if(requestSize.equals(ProductImageSize.SMALL.name())) {
 				size = ProductImageSize.SMALL;
-			} 
-		}
-		
-
-		
-		OutputContentFile image = null;
-		try {
-			image = productImageService.getProductImage(storeCode, productCode, new StringBuilder().append(imageName).append(".").append(extension).toString(), size);
-		} catch (ServiceException e) {
-			LOGGER.error("Cannot retrieve image " + imageName, e);
-		}
-		if(image!=null) {
-			return image.getFile().toByteArray();
-		} else {
-			//empty image placeholder
-			return tempImage;
+			}
 		}
 
+
+
+		return getProductImageBytes(storeCode, productCode, imageName, extension, size);
+
+	}
+
+	private byte[] getProductImageBytes(String storeCode, String productCode, String imageName,
+	String extension, ProductImageSize size) {
+	String fileName = imageName + "." + extension;
+	String cacheKey = "product:" + storeCode + ":" + productCode + ":" + size + ":" + fileName;
+	return getCachedImage(cacheKey, () -> {
+	try {
+	OutputContentFile image = productImageService.getProductImage(storeCode, productCode, fileName, size);
+	return image == null ? tempImage : image.getFile().toByteArray();
+	} catch (ServiceException e) {
+	LOGGER.warn("Cannot retrieve image {}", fileName, e);
+	return tempImage;
+	}
+	});
+	}
+
+	private byte[] getCachedImage(String key, Supplier<byte[]> loader) {
+	byte[] cached = imageCache.get(key);
+	if (cached != null) {
+	return cached;
+	}
+	byte[] loaded = loader.get();
+	if (loaded != null) {
+	imageCache.put(key, loaded);
+	}
+	return loaded;
 	}
 
 }

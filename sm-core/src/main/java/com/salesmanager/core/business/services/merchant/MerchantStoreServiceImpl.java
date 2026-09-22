@@ -48,7 +48,7 @@ public class MerchantStoreServiceImpl extends SalesManagerEntityServiceImpl<Inte
 	}
 
 	@Override
-	@Cacheable(value = "store")
+	@Cacheable(value = "store", unless = "#result == null")
 	public MerchantStore getByCode(String code) throws ServiceException {
 		return merchantRepository.findByCode(code);
 	}

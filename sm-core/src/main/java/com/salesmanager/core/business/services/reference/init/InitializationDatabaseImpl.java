@@ -97,8 +97,17 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 
 	private String name;
 
-	public boolean isEmpty() {
-		return languageService.count() == 0;
+	public boolean isEmpty() throws ServiceException {
+	if (languageService.count() == 0
+	|| merchantService.getByCode(MerchantStore.DEFAULT_STORE) == null) {
+	return true;
+	}
+	for (String code : SchemaConstant.LANGUAGE_ISO_CODE) {
+	if (languageService.getByCode(code) == null) {
+	return true;
+	}
+	}
+	return false;
 	}
 
 	@Transactional
@@ -119,7 +128,12 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 
 	private void createSecurityGroups() throws ServiceException {
 
-		  //create permissions
+	  if (permissionService.count() > 0 || groupService.count() > 0) {
+	    LOGGER.info("Security groups already exist; skipping security initialization");
+	    return;
+	  }
+
+	  //create permissions
 		  //Map name object
 		  Map<String, Permission> permissionKeys = new HashMap<String, Permission>();
 		  Permission AUTH = new Permission("AUTH");
@@ -278,13 +292,17 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 			for(String code : SchemaConstant.COUNTRY_ISO_CODE) {
 		Locale locale = SchemaConstant.LOCALES.get(code);
 		if (locale != null) {
-			Country country = countryService.getByCode(code);
-		boolean created = false;
-		if (country == null) {
-		country = new Country(code);
-		countryService.create(country);
-		created = true;
-		}
+				Country country = countryService.getByCode(code);
+			boolean created = false;
+			if (country == null) {
+			country = new Country(code);
+			countryService.create(country);
+			country = countryService.getByCode(code);
+			if (country == null) {
+			throw new ServiceException("Country '" + code + "' was created but cannot be reloaded");
+			}
+			created = true;
+			}
 
 		if (created) {
 		for (Language language : languages) {
@@ -390,6 +408,13 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 	languageService.create(new Language(code));
 	}
 	}
+	// Reload all required language entities after creation so callers do not
+	// keep a stale null value from the reference cache.
+	for (String code : SchemaConstant.LANGUAGE_ISO_CODE) {
+	if (languageService.getByCode(code) == null) {
+	throw new ServiceException("Required language '" + code + "' was not initialized");
+	}
+	}
 	}
 
 	private void createMerchant() throws ServiceException {
@@ -408,9 +433,23 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		if (en == null) {
 			en = defaultLanguage;
 		}
-		Language zh = languageService.getByCode("zh");
+			Language zh = languageService.getByCode("zh");
 		Country defaultCountry = countryService.getByCode(Constants.DEFAULT_COUNTRY);
+		if (defaultCountry == null) {
+		LOGGER.warn("Country '{}' was not created during reference initialization; creating it now",
+		Constants.DEFAULT_COUNTRY);
+		defaultCountry = new Country(Constants.DEFAULT_COUNTRY);
+		countryService.create(defaultCountry);
+		}
 			Currency currency = currencyService.getByCode("VND");
+		if (currency == null) {
+		LOGGER.warn("Currency 'VND' was not created during reference initialization; creating it now");
+		java.util.Currency vnd = java.util.Currency.getInstance("VND");
+		currency = new Currency();
+		currency.setName(vnd.getCurrencyCode());
+		currency.setCurrency(vnd);
+		currencyService.create(currency);
+		}
 
 		if (defaultLanguage == null) {
 		throw new ServiceException("Cannot initialize merchant: language '" + Constants.DEFAULT_LANGUAGE
@@ -420,8 +459,14 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		throw new ServiceException("Cannot initialize merchant: country '" + Constants.DEFAULT_COUNTRY
 		+ "' is missing from COUNTRY.");
 		}
-		if (currency == null) {
+			if (currency == null) {
 		throw new ServiceException("Cannot initialize merchant: currency 'VND' is missing from CURRENCY.");
+		}
+
+		MerchantStore existingStore = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
+		if (existingStore != null) {
+		LOGGER.info("Merchant '{}' already exists; skipping merchant initialization", MerchantStore.DEFAULT_STORE);
+		return;
 		}
 
 		List<Language> supportedLanguages = new ArrayList<Language>();
@@ -450,63 +495,67 @@ public class InitializationDatabaseImpl implements InitializationDatabase {
 		store.setStoreTemplate("generic");
 		store.setRetailer(true);
 		store.setLanguages(supportedLanguages);
-		
+
 		merchantService.create(store);
-		
-		
+
+
 		TaxClass taxclass = new TaxClass(TaxClass.DEFAULT_TAX_CLASS);
 		taxclass.setMerchantStore(store);
-		
+
 		taxClassService.create(taxclass);
-		
+
 		//create default manufacturer
 		Manufacturer defaultManufacturer = new Manufacturer();
 		defaultManufacturer.setCode("DEFAULT");
 		defaultManufacturer.setMerchantStore(store);
-		
+
 		ManufacturerDescription manufacturerDescription = new ManufacturerDescription();
 		manufacturerDescription.setLanguage(en);
 		manufacturerDescription.setName("DEFAULT");
 		manufacturerDescription.setManufacturer(defaultManufacturer);
 		manufacturerDescription.setDescription("DEFAULT");
 		defaultManufacturer.getDescriptions().add(manufacturerDescription);
-		
+
 		manufacturerService.create(defaultManufacturer);
-		
+
 	   Optin newsletter = new Optin();
 	   newsletter.setCode(OptinType.NEWSLETTER.name());
 	   newsletter.setMerchant(store);
 	   newsletter.setOptinType(OptinType.NEWSLETTER);
 	   optinService.create(newsletter);
-		
-		
+
+
 	}
 
 	private void createModules() throws ServiceException {
-		
+
 		try {
-			
+
 			List<IntegrationModule> modules = modulesLoader.loadIntegrationModules("reference/integrationmodules.json");
             for (IntegrationModule entry : modules) {
         	    moduleConfigurationService.create(entry);
           }
-			
-			
+
+
 		} catch (Exception e) {
 			throw new ServiceException(e);
 		}
-		
-		
+
+
 	}
-	
+
 	private void createSubReferences() throws ServiceException {
-		
-		LOGGER.info(String.format("%s : Loading catalog sub references ", name));
-		
-		
-		ProductType productType = new ProductType();
-		productType.setCode(ProductType.GENERAL_TYPE);
-		productTypeService.create(productType);
+
+
+	LOGGER.info(String.format("%s : Loading catalog sub references ", name));
+
+
+	if (productTypeService.getProductType(ProductType.GENERAL_TYPE) != null) {
+	return;
+	}
+	ProductType productType = new ProductType();
+	productType.setCode(ProductType.GENERAL_TYPE);
+	productTypeService.create(productType);
 
 
 		

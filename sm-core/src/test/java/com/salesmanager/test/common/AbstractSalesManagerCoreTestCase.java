@@ -40,6 +40,7 @@ import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.currency.CurrencyService;
 import com.salesmanager.core.business.services.reference.init.InitializationDatabase;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
+import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.business.services.reference.zone.ZoneService;
 import com.salesmanager.core.business.services.shoppingcart.ShoppingCartService;
 import com.salesmanager.core.business.services.system.EmailService;
@@ -56,105 +57,111 @@ import com.salesmanager.test.configuration.ConfigurationTest;
 @Ignore
 public class AbstractSalesManagerCoreTestCase {
 
-	
-	
+
+
 	protected static String CAD_CURRENCY_CODE = "CAD";
 	protected static String USD_CURRENCY_CODE = "USD";
-	
+
 	protected static String ENGLISH_LANGUAGE_CODE = "en";
 	protected static String FRENCH_LANGUAGE_CODE = "fr";
-	
+
 	@Inject
 	protected InitializationDatabase   initializationDatabase;
-	
+
 	@Inject
 	protected ProductService productService;
-	
+
 	@Inject
 	protected PricingService pricingService;
-	
+
 	@Inject
 	protected ProductPriceService productPriceService;
-	
+
 	@Inject
 	protected ProductAttributeService productAttributeService;
-	
+
 	@Inject
 	protected ProductOptionService productOptionService;
-	
+
 	@Inject
 	protected ProductOptionSetService productOptionSetService;
-	
+
 	@Inject
 	protected ProductOptionValueService productOptionValueService;
-	
+
 	@Inject
 	protected ProductAvailabilityService productAvailabilityService;
-	
+
 	@Inject
 	protected ProductReviewService productReviewService;
-	
+
 	@Inject
 	protected ProductImageService productImageService;
-	
+
 	@Inject
 	protected ProductRelationshipService productRelationshipService;
-	
+
 	@Inject
 	protected CategoryService categoryService;
-	
+
 	@Inject
 	protected MerchantStoreService merchantService;
-	
+
 	@Inject
 	protected ProductTypeService productTypeService;
-	
+
 	@Inject
 	protected LanguageService languageService;
-	
+
 	@Inject
 	protected CountryService countryService;
-	
+
 	@Inject
 	protected CurrencyService currencyService;
-	
+
 	@Inject
 	protected ManufacturerService manufacturerService;
-	
+
 	@Inject
 	protected ZoneService zoneService;
-	
+
 	@Inject
 	protected CustomerService customerService;
-	
+
 	@Inject
 	protected CustomerOptionService customerOptionService;
-	
+
 	@Inject
 	protected CustomerOptionValueService customerOptionValueService;
-	
+
 	@Inject
 	protected CustomerOptionSetService customerOptionSetService;
-	
+
 	@Inject
 	protected OrderService orderService;
-	
+
 	@Inject
 	protected PaymentService paymentService;
-	
+
 	@Inject
 	protected ShoppingCartService shoppingCartService;
-	
+
 	@Inject
 	protected EmailService emailService;
-	
+
 	@Before
 	public void init() throws ServiceException {
-		if(initializationDatabase.isEmpty()) {
-		  populate();
+				if (initializationDatabase.isEmpty()) {
+			  populate();
+			}
+
+			MerchantStore store = merchantService.getByCode(MerchantStore.DEFAULT_STORE);
+		if (store == null) {
+		throw new IllegalStateException(
+		"Test database initialization failed: DEFAULT merchant store was not created");
 		}
 
-	}
+		}
 	
 	@After
 	public void close() throws ServiceException {
