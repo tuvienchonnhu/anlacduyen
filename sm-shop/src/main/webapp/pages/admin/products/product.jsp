@@ -18,7 +18,11 @@ var AI_I18N = {
 	parseError : '<s:message code="message.ai.parseError" text="Lỗi xử lý kết quả từ AI." />',
 	serverError : '<s:message code="message.ai.serverError" text="Lỗi từ server" />',
 	noConnection : '<s:message code="message.ai.noConnection" text="Không thể kết nối đến server." />',
-	imageRemoved : '<s:message code="message.ai.imageRemoved" text="Đã xóa ảnh sản phẩm." />'
+	imageRemoved : '<s:message code="message.ai.imageRemoved" text="Đã xóa ảnh sản phẩm." />',
+	noSourceLanguage : '<s:message code="message.ai.noSourceLanguage" text="Không tìm thấy tab ngôn ngữ nguồn để dịch." />',
+	needSourceText : '<s:message code="message.ai.needSourceText" text="Vui lòng nhập tên hoặc mô tả sản phẩm ở tab tiếng Việt trước khi dịch." />',
+	translating : '<s:message code="message.ai.translating" text="Đang dịch thông tin sản phẩm, vui lòng chờ 10-30 giây..." />',
+	translateSuccess : '<s:message code="message.ai.translateSuccess" text="Đã dịch thông tin sản phẩm sang tất cả các ngôn ngữ!" />'
 };
 </script>
 
@@ -191,6 +195,19 @@ var AI_I18N = {
                               <span id="aiStatus" style="margin-left:10px;color:#d9534f;"></span>
                               <p class="help-inline" style="margin-top:5px;">
                                     <s:message code="button.label.AI_Description" text="Capture or upload the product image above, then click this button — AI will automatically fill in the SKU, name, URL, description, and SEO for all store languages."/>
+                              </p>
+                        </div>
+                  </div>
+
+                  <div class="control-group" id="aiTranslateGroup">
+                        <label><s:message code="button.label.translate_product_information_with_AI" text="Translate product information with AI"/></label>
+                        <div class="controls">
+                              <button type="button" id="aiTranslateBtn" class="btn btn-info" style="margin-bottom:5px;">
+                                    <i class="icon-globe"></i> <s:message code="button.label.translate_product_information_with_AI" text="Translate product information with AI"/>
+                              </button>
+                              <span id="aiTranslateStatus" style="margin-left:10px;color:#d9534f;"></span>
+                              <p class="help-inline" style="margin-top:5px;">
+                                    <s:message code="button.label.AI_Translate_Description" text="Enter the product information in the source language tab (Vietnamese), then click this button — AI will translate the name, URL, description, and SEO into the other store languages."/>
                               </p>
                         </div>
                   </div>
@@ -659,81 +676,179 @@ var AI_I18N = {
 								xhr.send(JSON.stringify({ imageBase64: imageBase64, mimeType: mimeType }));
 							}
 
-							function apply(data) {
-								// map ngon ngu -> chi so descriptions trong form
-								var langIndex = {};
-								<c:forEach items="${product.descriptions}" var="description" varStatus="counter">
-								langIndex['${description.language.code}'] = '${counter.index}';
-								</c:forEach>
+								function apply(data) {
+							// map ngon ngu -> chi so descriptions trong form
+							var langIndex = {};
+							<c:forEach items="${product.descriptions}" var="description" varStatus="counter">
+							langIndex['${description.language.code}'] = '${counter.index}';
+							</c:forEach>
 
-								var languages = data.languages || {};
-								aiLog('apply() nhan duoc languages =', Object.keys(languages), 'langIndex =', langIndex);
+							var languages = data.languages || {};
+							aiLog('apply() nhan duoc languages =', Object.keys(languages), 'langIndex =', langIndex);
 
-								for (var lang in languages) {
-									if (!languages.hasOwnProperty(lang)) continue;
-									var idx = langIndex[lang];
-									if (idx === undefined) {
-										aiLog('BO QUA ngon ngu', lang, '- khong khop voi langIndex', langIndex, '. Cac o tren form co ma ngon ngu:', Object.keys(langIndex));
-										continue;
-									}
-									var l = languages[lang] || {};
-									aiLog('xu ly ngon ngu', lang, '=> index', idx, ', cac truong =', Object.keys(l));
+							fillLanguages(languages, langIndex);
 
-									if (l.name) {
-										var nameEl = getSel('descriptions[' + idx + '].name');
-										if (nameEl) nameEl.value = l.name;
-									}
-									if (l.seUrl) {
-										var seUrlEl = getSel('descriptions[' + idx + '].seUrl');
-										if (seUrlEl) seUrlEl.value = l.seUrl;
-									}
-									if (l.shortDescription) {
-										var hlEl = getSel('descriptions[' + idx + '].productHighlight');
-										if (hlEl) hlEl.value = l.shortDescription;
-									}
-									if (l.description) {
-										// luu lai de dien lai khi CKEditor khoi tao xong (tranh bi ghi de)
-										window.__aiDescriptionPending = window.__aiDescriptionPending || {};
-										window.__aiDescriptionPending['descriptions[' + idx + '].description'] = l.description;
-										aiLog('description ngon ngu', lang, '-> index', idx, ', do dai =', (l.description || '').length);
-										setCkEditorValue('descriptions[' + idx + '].description', l.description);
-									} else {
-										aiLog('CANH BAO: ngon ngu', lang, 'khong co truong description!');
-									}
-									if (l.metaTitle) {
-										var titleEl = getSel('descriptions[' + idx + '].metatagTitle');
-										if (titleEl) titleEl.value = l.metaTitle;
-									}
-									if (l.metaDescription) {
-										var descEl = getSel('descriptions[' + idx + '].metatagDescription');
-										if (descEl) descEl.value = l.metaDescription;
-									}
-								}
+							if (data.sku) {
+							var skuEl = document.getElementById('sku');
+							if (skuEl && !skuEl.value) skuEl.value = data.sku;
+							}
+							if (data.refCode) {
+							var refEl = document.getElementById('refSku');
+							if (refEl && !refEl.value) refEl.value = data.refCode;
+							}
+							}
 
-								if (data.sku) {
-									var skuEl = document.getElementById('sku');
-									if (skuEl && !skuEl.value) skuEl.value = data.sku;
-								}
-								if (data.refCode) {
-									var refEl = document.getElementById('refSku');
-									if (refEl && !refEl.value) refEl.value = data.refCode;
-								}
+							// Dien du lieu da ngon ngu vao cac o input/CKEditor cua form.
+							// Dung chung cho ca luong "tao bang AI tu anh" va "dich tu tieng Viet".
+							function fillLanguages(languages, langIndex) {
+							for (var lang in languages) {
+							if (!languages.hasOwnProperty(lang)) continue;
+							var idx = langIndex[lang];
+							if (idx === undefined) {
+							aiLog('BO QUA ngon ngu', lang, '- khong khop voi langIndex', langIndex, '. Cac o tren form co ma ngon ngu:', Object.keys(langIndex));
+							continue;
+							}
+							var l = languages[lang] || {};
+							aiLog('xu ly ngon ngu', lang, '=> index', idx, ', cac truong =', Object.keys(l));
+
+							if (l.name) {
+							var nameEl = getSel('descriptions[' + idx + '].name');
+							if (nameEl) nameEl.value = l.name;
+							}
+							if (l.seUrl) {
+							var seUrlEl = getSel('descriptions[' + idx + '].seUrl');
+							if (seUrlEl) seUrlEl.value = l.seUrl;
+							}
+							if (l.shortDescription) {
+							var hlEl = getSel('descriptions[' + idx + '].productHighlight');
+							if (hlEl) hlEl.value = l.shortDescription;
+							}
+							if (l.description) {
+							// luu lai de dien lai khi CKEditor khoi tao xong (tranh bi ghi de)
+							window.__aiDescriptionPending = window.__aiDescriptionPending || {};
+							window.__aiDescriptionPending['descriptions[' + idx + '].description'] = l.description;
+							aiLog('description ngon ngu', lang, '-> index', idx, ', do dai =', (l.description || '').length);
+								setCkEditorValue('descriptions[' + idx + '].description', l.description);
+							} else {
+							aiLog('CANH BAO: ngon ngu', lang, 'khong co truong description!');
+							}
+							if (l.metaTitle) {
+							var titleEl = getSel('descriptions[' + idx + '].metatagTitle');
+							if (titleEl) titleEl.value = l.metaTitle;
+							}
+							if (l.metaDescription) {
+							var descEl = getSel('descriptions[' + idx + '].metatagDescription');
+							if (descEl) descEl.value = l.metaDescription;
+							}
+							}
 							}
 
 							// Neu no luong AI chay truoc khi CKEditor khoi tao xong (hoac editor bi khoi tao lai),
 							// dien lai mo ta chi tiet tu bo dem tam de khong bi mat noi dung.
 							function flushPendingDescriptions() {
-								var pending = window.__aiDescriptionPending;
-								if (!pending) return;
-								for (var name in pending) {
-									if (!pending.hasOwnProperty(name)) continue;
-									setCkEditorValue(name, pending[name]);
-								}
+							var pending = window.__aiDescriptionPending;
+							if (!pending) return;
+							for (var name in pending) {
+							if (!pending.hasOwnProperty(name)) continue;
+								setCkEditorValue(name, pending[name]);
+							}
 							}
 							if (window.CKEDITOR) {
-								CKEDITOR.on('instanceReady', flushPendingDescriptions);
+							CKEDITOR.on('instanceReady', flushPendingDescriptions);
 							}
-						})();
+
+							// ===== DICH THONG TIN SAN PHAM TU TIENG VIET SANG CAC NGON NGU KHAC =====
+							(function() {
+							var translateBtn = document.getElementById('aiTranslateBtn');
+							var translateStatus = document.getElementById('aiTranslateStatus');
+							if (!translateBtn) return;
+
+							function setTranslateStatus(msg, color) {
+							if (translateStatus) {
+								translateStatus.textContent = msg || '';
+								translateStatus.style.color = color || '#d9534f';
+							}
+							}
+
+							// lay gia tri cua input theo name (tra ve '' neu khong co)
+							function valOf(name) {
+							var el = getSel(name);
+							return el && el.value ? el.value : '';
+							}
+
+								translateBtn.addEventListener('click', function() {
+							// map ngon ngu -> chi so descriptions (giong apply)
+							var langIndex = {};
+							<c:forEach items="${product.descriptions}" var="description" varStatus="counter">
+							langIndex['${description.language.code}'] = '${counter.index}';
+							</c:forEach>
+
+							// ngon ngu nguon: mac dinh tieng Viet, neu khong co thi lay tab dau tien
+							var sourceLang = (langIndex['vi'] !== undefined) ? 'vi' : (Object.keys(langIndex)[0] || '');
+							var srcIdx = langIndex[sourceLang];
+							if (srcIdx === undefined) {
+								setTranslateStatus(AI_I18N.noSourceLanguage);
+							return;
+							}
+
+							// thu thap cac truong se dich tu tab nguon
+							var payload = {
+								sourceLanguage: sourceLang,
+							languages: Object.keys(langIndex).join(','),
+							name: valOf('descriptions[' + srcIdx + '].name'),
+							seUrl: valOf('descriptions[' + srcIdx + '].seUrl'),
+								shortDescription: valOf('descriptions[' + srcIdx + '].productHighlight'),
+								description: (function() {
+							var ed = findEditor('descriptions[' + srcIdx + '].description');
+							if (ed && ed.mode && ed.getMode(ed.mode)) {
+								try { return ed.getMode(ed.mode).getData() || ''; } catch (ignored) {}
+							}
+							return valOf('descriptions[' + srcIdx + '].description');
+							})(),
+							metaTitle: valOf('descriptions[' + srcIdx + '].metatagTitle'),
+							metaDescription: valOf('descriptions[' + srcIdx + '].metatagDescription'),
+								sku: valOf('sku')
+							};
+
+							if (!payload.name && !payload.shortDescription && !payload.description && !payload.metaTitle && !payload.metaDescription) {
+								setTranslateStatus(AI_I18N.needSourceText);
+							return;
+							}
+
+								setTranslateStatus(AI_I18N.translating, '#333');
+								translateBtn.disabled = true;
+
+							var xhr = new XMLHttpRequest();
+							xhr.open('POST', '<c:url value="/admin/product/gemini/translate"/>', true);
+							xhr.setRequestHeader('Content-Type', 'application/json');
+							xhr.onload = function() {
+								translateBtn.disabled = false;
+							if (xhr.status === 200) {
+								try {
+							var data = JSON.parse(xhr.responseText);
+							fillLanguages(data.languages || {}, langIndex);
+								setTranslateStatus(AI_I18N.translateSuccess, '#468847');
+								setTimeout(function(){ setTranslateStatus(''); }, 8000);
+							} catch (e) {
+								setTranslateStatus(AI_I18N.parseError);
+							}
+							} else {
+							var msg = AI_I18N.serverError + ' (' + xhr.status + ')';
+								try {
+							var err = JSON.parse(xhr.responseText);
+							if (err && err.message) msg = err.message;
+							} catch (ignored) {}
+								setTranslateStatus(msg);
+							}
+							};
+							xhr.onerror = function() {
+								translateBtn.disabled = false;
+								setTranslateStatus(AI_I18N.noConnection);
+							};
+							xhr.send(JSON.stringify(payload));
+							});
+							})();
+							})();
 						//]]>
 				</script>
                   

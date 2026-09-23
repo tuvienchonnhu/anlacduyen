@@ -78,6 +78,83 @@ public class GoogleAiController {
 	private RestTemplate restTemplate = new RestTemplate();
 
 	/**
+	 * POST /admin/product/gemini/translate
+	 * Body: { "sourceLanguage": "vi",
+	 *         "languages": "en,fr,zh" (optional - cac ngon ngu dich, khong gom ngon ngu nguon),
+	 *         "name": "...", "seUrl": "...", "shortDescription": "...",
+	 *         "description": "...", "metaTitle": "...", "metaDescription": "...", "sku": "..." }
+	 *
+	 * Dich toan bo thong tin san pham dang nhap o tab ngon ngu nguon (mac dinh tieng Viet)
+	 * sang cac ngon ngu con lai cua cua hang.
+	 *
+	 * Returns ProductAiDTO JSON voi "languages" chi chua cac ngon ngu dich.
+	 */
+	@PostMapping("/translate")
+	public ProductAiDTO translateProduct(@RequestBody Map<String, String> body, HttpServletRequest request) {
+
+	MerchantStore store = storeFacade.getByCode(request);
+	if (store == null) {
+	throw new RestApiException("Merchant store not found");
+	}
+
+	String apiKey = resolveApiKey(store);
+	if (StringUtils.isBlank(apiKey)) {
+	LOGGER.warn("Gemini API key is not configured (config " + GEMINI_API_KEY_CONFIG
+	+ " or property googleai.gemini.apikey)");
+	throw new RestApiException(
+	"Chưa cấu hình Gemini API key. Vào Admin > Configuration thêm cấu hình GEMINI_API_KEY hoặc đặt googleai.gemini.apikey trong shopizer-properties.properties");
+	}
+
+	// Ngong ngu nguon (mac dinh tieng Viet)
+	String sourceLanguage = StringUtils.defaultIfBlank(body.get("sourceLanguage"), "vi")
+	.trim().toLowerCase(Locale.ROOT);
+
+	// Tap hop cac truong can dich tu nguon
+	ProductAiDTO.ProductAiLanguage source = new ProductAiDTO.ProductAiLanguage();
+		source.setName(StringUtils.trimToEmpty(body.get("name")));
+		source.setSeUrl(StringUtils.trimToEmpty(body.get("seUrl")));
+		source.setShortDescription(StringUtils.trimToEmpty(body.get("shortDescription")));
+		source.setDescription(StringUtils.trimToEmpty(body.get("description")));
+		source.setMetaTitle(StringUtils.trimToEmpty(body.get("metaTitle")));
+		source.setMetaDescription(StringUtils.trimToEmpty(body.get("metaDescription")));
+
+	if (StringUtils.isBlank(source.getName())
+	&& StringUtils.isBlank(source.getShortDescription())
+	&& StringUtils.isBlank(source.getDescription())
+	&& StringUtils.isBlank(source.getMetaTitle())
+	&& StringUtils.isBlank(source.getMetaDescription())) {
+	throw new RestApiException(
+	"Không có nội dung để dịch. Vui lòng nhập tên hoặc mô tả sản phẩm ở tab ngôn ngữ nguồn trước.");
+	}
+
+	// Danh sach ngon ngu dich: uu tien tham so, loai bo ngon ngu nguon
+	List<String> languages = new ArrayList<>(parseLanguages(body.get("languages")));
+	languages.remove(sourceLanguage);
+	if (languages.isEmpty()) {
+	throw new RestApiException("Không xác định được ngôn ngữ đích để dịch.");
+	}
+
+	String prompt = buildTranslatePrompt(sourceLanguage, source, languages);
+
+		try {
+	String generatedText = callGemini(apiKey, null, null, prompt);
+	if (StringUtils.isBlank(generatedText)) {
+	throw new RestApiException("Gemini không trả về dữ liệu");
+	}
+	ProductAiDTO dto = OBJECT_MAPPER.readValue(generatedText, ProductAiDTO.class);
+	// Giu nguyen SKU / refCode nguon neu co (dich khong nen doi SKU)
+		dto.setSku(StringUtils.trimToNull(body.get("sku")));
+		sanitizeSlugs(dto);
+	return dto;
+	} catch (RestApiException e) {
+	throw e;
+	} catch (Exception e) {
+	LOGGER.error("Error calling Gemini API or parsing translation response", e);
+	throw new RestApiException("Lỗi khi gọi Gemini API dịch: " + e.getMessage());
+	}
+	}
+
+	/**
 	 * POST /admin/product/gemini/generate
 	 * Body: { "imageBase64": "...", "mimeType": "image/jpeg",
 	 *         "languages": "vi,en,fr,zh" (optional),
@@ -208,13 +285,58 @@ public class GoogleAiController {
 			} else {
 				sb.append("- sku tự sinh ngẫu nhiên hợp lý dạng CHỮ_IN_HOA + '-' + số.\n");
 			}
-			return sb.toString();
-		}
+				return sb.toString();
+			}
 
-		/**
-		 * Nhan danh sach ngon ngu tu Admin (dang "vi,en,fr,zh"), chi giu ngon ngu
-		 * he thong ho tro, mac dinh la vi,en,fr,zh.
-		 */
+			/**
+			 * Xay dung prompt dich toan bo thong tin san pham tu ngon ngu nguon sang
+			 * cac ngon ngu dich. Giu nguyen dinh dang HTML cua mo ta chi tiet.
+			 */
+			private String buildTranslatePrompt(String sourceLanguage, ProductAiDTO.ProductAiLanguage source,
+			List<String> languages) {
+			String langCsv = String.join(", ", languages);
+			StringBuilder sb = new StringBuilder();
+				sb.append("Bạn là chuyên gia dịch thuật thương mại điện tử.");
+				sb.append("Dịch toàn bộ thông tin sản phẩm sau từ ngôn ngữ \"").append(sourceLanguage)
+			.append("\" sang các ngôn ngữ: [").append(langCsv).append("].\n\n");
+				sb.append("NỘI DUNG NGUỒN:\n");
+				sb.append("- name: ").append(source.getName()).append("\n");
+				sb.append("- shortDescription: ").append(source.getShortDescription()).append("\n");
+				sb.append("- description (HTML): ").append(source.getDescription()).append("\n");
+				sb.append("- metaTitle: ").append(source.getMetaTitle()).append("\n");
+				sb.append("- metaDescription: ").append(source.getMetaDescription()).append("\n\n");
+				sb.append("Trả về kết quả đúng định dạng JSON với cấu trúc sau:\n");
+				sb.append("{\n");
+				sb.append("  \"languages\": {\n");
+			for (int i = 0; i < languages.size(); i++) {
+			String lang = languages.get(i);
+				sb.append("    \"").append(lang).append("\": {\n");
+				sb.append("      \"name\": \"Ten san pham da dich\",\n");
+				sb.append("      \"seUrl\": \"duong-dan-than-thien-seo\",\n");
+				sb.append("      \"shortDescription\": \"Mo ta ngan da dich\",\n");
+				sb.append("      \"description\": \"Mo ta chi tiet da dich (HTML)\",\n");
+				sb.append("      \"metaTitle\": \"Tieu de SEO da dich\",\n");
+				sb.append("      \"metaDescription\": \"Mo ta Meta SEO da dich\"\n");
+				sb.append("    }");
+			if (i < languages.size() - 1) {
+				sb.append(",");
+			}
+				sb.append("\n");
+			}
+				sb.append("  }\n");
+				sb.append("}\n");
+				sb.append("Lưu ý: chỉ trả về JSON thuần, không thêm bất kỳ chữ nào khác.\n");
+				sb.append("- Dịch sát nghĩa, tự nhiên, phù hợp văn phong bán hàng của ngôn ngữ đích.\n");
+				sb.append("- Với mọi ngôn ngữ: seUrl là đường dẫn thân thiện SEO, chỉ chữ thường, số và dấu '-', không dấu, không ký tự đặc biệt.\n");
+				sb.append("- description phải giữ nguyên cấu trúc thẻ HTML (<p>, <ul>, <li>, <strong>) như bản gốc, chỉ dịch phần văn bản bên trong.\n");
+				sb.append("- Không dịch tên thương hiệu riêng, SKU, hoặc mã sản phẩm nếu có trong nội dung.\n");
+			return sb.toString();
+			}
+
+			/**
+			 * Nhan danh sach ngon ngu tu Admin (dang "vi,en,fr,zh"), chi giu ngon ngu
+			 * he thong ho tro, mac dinh la vi,en,fr,zh.
+			 */
 		private List<String> parseLanguages(String languagesRaw) {
 			List<String> result = new ArrayList<>();
 			if (StringUtils.isNotBlank(languagesRaw)) {
@@ -246,20 +368,25 @@ public class GoogleAiController {
 
 	private String callGemini(String apiKey, String mimeType, String imageBase64, String prompt) throws IOException {
 
-		Map<String, Object> generationConfig = Map.of(
-				// bat buoc Gemini tra ve JSON - tranh markdown/ky tu la
-				"responseMimeType", "application/json",
-				// cang de nhiet do thap ket qua cang on dinh, it suy dien tu do
-				"temperature", 0.4);
+	Map<String, Object> generationConfig = Map.of(
+	// bat buoc Gemini tra ve JSON - tranh markdown/ky tu la
+	"responseMimeType", "application/json",
+	// cang de nhiet do thap ket qua cang on dinh, it suy dien tu do
+	"temperature", 0.4);
 
-			Map<String, Object> payload = Map.of(
-					"contents", List.of(Map.of(
-							"parts", List.of(
-									Map.of("text", prompt),
-									Map.of("inline_data", Map.of(
-											"mime_type", mimeType,
-											"data", imageBase64))))),
-					"generationConfig", generationConfig);
+	// Neu co anh (inline_data) thi gui kem - dung cho generate tu anh.
+	// Neu chi dich van ban (imageBase64 == null) thi chi gui phan text.
+	List<Map<String, Object>> parts = new ArrayList<>();
+	parts.add(Map.of("text", prompt));
+	if (StringUtils.isNotBlank(imageBase64)) {
+	parts.add(Map.of("inline_data", Map.of(
+	"mime_type", StringUtils.defaultIfBlank(mimeType, "image/jpeg"),
+	"data", imageBase64)));
+	}
+
+	Map<String, Object> payload = Map.of(
+	"contents", List.of(Map.of("parts", parts)),
+	"generationConfig", generationConfig);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
