@@ -27,61 +27,32 @@ $(document).ready(function() {
 
 <c:if test="${requestScope.CONFIGS['google_analytics_url'] != null && confirmation!=null}">
 
-
+<!-- Google Analytics 4 (gtag.js) e-commerce purchase event -->
 <script type="text/javascript">
-//<![CDATA[ 
+//<![CDATA[
 
-	
-	if(_gaq) {
-		
-		
-	//console.log('GAQ ');
+	if (window.gtag) {
 
-	_gaq.push(['_trackPageview']);
-	_gaq.push(['_addTrans', 
-		'<c:out value="${order.id}"/>', // order ID - required 
-		'<c:out value="${requestScope.MERCHANT_STORE.storename}"/>', //Store Name
-	    '<sm:monetary value="${order.total.value}"/>',  // total - required
-		'<sm:monetary value="${order.tax.value}"/>',  // tax 
-		<c:choose>
-		<c:when test="${order.shipping!=null}">
-		'<sm:monetary value="${order.shipping.value}"/>', // shipping 
-		</c:when>
-		<c:otherwise>
-		'',
-		</c:otherwise>
-		</c:choose>
-		'<c:out value="${order.customer.billing.city}"/>', // city
-		<c:choose>
-		<c:when test="${order.customer.billing.zone!=null}">
-		'<c:out value="${order.customer.billing.zone}"/>',// state or province 
-		</c:when>
-		<c:otherwise>
-		'<c:out value="${order.customer.billing.zone.stateProvince}"/>',// state or province 
-		</c:otherwise>
-		</c:choose>
-		'<c:out value="${order.customer.billing.country}"/>' // country
-		 ]);
-
-
+		var items = [];
 	<c:forEach items="${order.products}" var="product" varStatus="status">
-
-	_gaq.push(['_addItem', 
-		'<c:out value="${order.id}"/>', // order ID - required 
-		'<c:out value="${product.sku}" />', // SKU/code - required 
-		'<c:out value="${product.productName}" />', // product name 
-		'<c:out value="${product.price}" />', // unit price - required 
-		'<c:out value="${product.orderedQuantity}" />' // quantity - required 
-		]); 
-
+		items.push({
+			item_id: '<c:out value="${product.sku}" />',
+			item_name: '<c:out value="${product.productName}" />',
+			price: <sm:monetary value="${product.price}" />,
+			quantity: <c:out value="${product.orderedQuantity}" />
+		});
 	</c:forEach>
 
-	_gaq.push(['_trackTrans']); //submits transaction to the Analytics servers 
-
+		gtag('event', 'purchase', {
+			transaction_id: '<c:out value="${order.id}"/>',
+			value: <sm:monetary value="${order.total.value}" />,
+			tax: <sm:monetary value="${order.tax.value}" />,
+			shipping: <c:choose><c:when test="${order.shipping!=null}"><sm:monetary value="${order.shipping.value}" /></c:when><c:otherwise>0</c:otherwise></c:choose>,
+			items: items
+		});
 	}
 
-
-	//]]> 
+//]]> 
 </script>
 
 </c:if>

@@ -116,6 +116,15 @@ public class ConfigurationController {
 		}
 		configs.add(twitterConfiguration);
 		
+		// Gemini AI API key configuration (Admin > Configuration > Accounts Configuration)
+		MerchantConfiguration geminiApiKeyConfiguration = merchantConfigurationService.getMerchantConfiguration(Constants.KEY_GEMINI_API_KEY, store);
+		if (null == geminiApiKeyConfiguration) {
+			geminiApiKeyConfiguration = new MerchantConfiguration();
+			geminiApiKeyConfiguration.setKey(Constants.KEY_GEMINI_API_KEY);
+			geminiApiKeyConfiguration.setMerchantConfigurationType(MerchantConfigurationType.CONFIG);
+		}
+		configs.add(geminiApiKeyConfiguration);
+
 		ConfigListWrapper configWrapper = new ConfigListWrapper();
 		configWrapper.setMerchantConfigs(configs);
 		model.addAttribute("configuration",configWrapper);

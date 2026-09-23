@@ -169,6 +169,13 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Slugify - chuan hoa SEO URL tu ten san pham AI sinh ra -->
+		<dependency>
+			<groupId>com.github.slugify</groupId>
+			<artifactId>slugify</artifactId>
+			<version>3.0.6</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-rng-simple -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

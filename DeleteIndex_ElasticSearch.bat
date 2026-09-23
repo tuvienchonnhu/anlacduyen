@@ -1,1 +1,1 @@
-Invoke-WebRequest  -Uri "http://localhost:9200/keyword_vi_default"   -Method Delete
+powershell -Command Invoke-WebRequest  -Uri "http://localhost:9200/keyword_vi_default"   -Method Delete

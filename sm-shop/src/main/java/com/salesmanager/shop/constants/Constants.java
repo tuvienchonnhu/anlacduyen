@@ -102,10 +102,11 @@ public class Constants {
 
 	public final static String KEY_FACEBOOK_PAGE_URL = "facebook_page_url";
 	public final static String KEY_PINTEREST_PAGE_URL = "pinterest";
-	public final static String KEY_GOOGLE_ANALYTICS_URL = "google_analytics_url";
+	public final static String KEY_GOOGLE_ANALYTICS_URL = "G-XGBQMT4DLR";
 	public final static String KEY_INSTAGRAM_URL = "instagram";
 	public final static String KEY_GOOGLE_API_KEY = "google_api_key";
 	public final static String KEY_TWITTER_HANDLE = "twitter_handle";
+	public final static String KEY_GEMINI_API_KEY = "GEMINI_API_KEY";
 	public final static String KEY_SESSION_ADDRESS = "readableDelivery";
 
 	public final static String CATEGORY_LINEAGE_DELIMITER = "/";
