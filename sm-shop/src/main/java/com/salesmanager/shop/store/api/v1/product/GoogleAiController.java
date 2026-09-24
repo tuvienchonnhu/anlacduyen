@@ -364,7 +364,7 @@ public class GoogleAiController {
 			private String callModel(AiChatModel chatModel, AiChatRequest request) throws AiException {
 			if (chatModel == null) {
 			throw new AiException(
-			"Chưa cấu hình nhà cung cấp AI. Vào Admin > Configuration > AI Configuration để chọn Gemini, OpenAI hoặc Groq.");
+			"Chưa cấu hình nhà cung cấp AI. Vào Admin > Configuration > AI Configuration để chọn Gemini, OpenAI, Groq hoặc Cerebras.");
 			}
 			AiChatResponse response = chatModel.call(request);
 			if (response == null) {

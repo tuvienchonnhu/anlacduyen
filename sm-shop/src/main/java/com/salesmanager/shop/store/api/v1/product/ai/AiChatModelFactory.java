@@ -54,6 +54,12 @@ public class AiChatModelFactory {
 	@Value("${groq.model:llama-3.3-70b-versatile}")
 	private String groqModelFromProperties;
 
+	@Value("${cerebras.apikey:}")
+	private String cerebrasApiKeyFromProperties;
+
+	@Value("${cerebras.model:llama3.1-8b}")
+	private String cerebrasModelFromProperties;
+
 	@Value("${ai.provider:" + Constants.AI_PROVIDER_GEMINI + "}")
 	private String defaultProvider;
 
@@ -84,6 +90,15 @@ public class AiChatModelFactory {
 					groqModelFromProperties);
 			LOGGER.debug("Using Groq chat model : {}", model);
 			return new GroqChatModel(apiKey, model, null);
+	}
+
+		if (Constants.AI_PROVIDER_CEREBRAS.equals(provider)) {
+			String apiKey = StringUtils.defaultIfBlank(readConfig(Constants.KEY_AI_CEREBRAS_API_KEY, store),
+					cerebrasApiKeyFromProperties);
+			String model = StringUtils.defaultIfBlank(readConfig(Constants.KEY_AI_CEREBRAS_MODEL, store),
+					cerebrasModelFromProperties);
+			LOGGER.debug("Using Cerebras chat model : {}", model);
+			return new CerebrasChatModel(apiKey, model, null);
 	}
 
 	// Mac dinh Gemini

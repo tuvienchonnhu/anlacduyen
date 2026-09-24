@@ -127,11 +127,14 @@ public class Constants {
 	public final static String KEY_AI_OPENAI_MODEL = "AI_OPENAI_MODEL";
 	public final static String KEY_AI_GROQ_API_KEY = "AI_GROQ_API_KEY";
 	public final static String KEY_AI_GROQ_MODEL = "AI_GROQ_MODEL";
+	public final static String KEY_AI_CEREBRAS_API_KEY = "AI_CEREBRAS_API_KEY";
+	public final static String KEY_AI_CEREBRAS_MODEL = "AI_CEREBRAS_MODEL";
 
 	/** Gia tri cua KEY_AI_PROVIDER tuong ung voi tung nha cung cap AI. */
 	public final static String AI_PROVIDER_GEMINI = "gemini";
 	public final static String AI_PROVIDER_OPENAI = "openai";
 	public final static String AI_PROVIDER_GROQ = "groq";
+	public final static String AI_PROVIDER_CEREBRAS = "cerebras";
 
 	public final static String KEY_SESSION_ADDRESS = "readableDelivery";
 
