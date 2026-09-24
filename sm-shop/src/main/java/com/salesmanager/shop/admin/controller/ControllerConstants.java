@@ -87,11 +87,12 @@ public interface ControllerConstants
             final String ordersTransactions="admin-orders-transactions";
         }
         
-        interface Configuration{
-            final String accounts="config-accounts";
-            final String email="config-email";
-            final String cache="admin-cache";
-            final String system="config-system";
+        	interface Configuration{
+        final String accounts="config-accounts";
+        final String email="config-email";
+        final String cache="admin-cache";
+        final String system="config-system";
+        final String ai="config-ai";
         }
         
         interface Tax{

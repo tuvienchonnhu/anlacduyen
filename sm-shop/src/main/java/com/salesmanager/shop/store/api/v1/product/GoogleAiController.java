@@ -1,6 +1,5 @@
 package com.salesmanager.shop.store.api.v1.product;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -13,50 +12,42 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.slugify.Slugify;
-import com.salesmanager.core.business.services.system.MerchantConfigurationService;
 import com.salesmanager.core.model.merchant.MerchantStore;
-import com.salesmanager.core.model.system.MerchantConfiguration;
-import com.salesmanager.shop.store.controller.store.facade.StoreFacade;
 import com.salesmanager.shop.store.api.exception.RestApiException;
+import com.salesmanager.shop.store.api.v1.product.ai.AiChatModel;
+import com.salesmanager.shop.store.api.v1.product.ai.AiChatModelFactory;
+import com.salesmanager.shop.store.api.v1.product.ai.AiChatRequest;
+import com.salesmanager.shop.store.api.v1.product.ai.AiChatResponse;
+import com.salesmanager.shop.store.api.v1.product.ai.AiException;
+import com.salesmanager.shop.store.controller.store.facade.StoreFacade;
 
 /**
- * REST API tao dong bo san pham bang AI (Google Gemini).
+ * REST API tao dong bo san pham bang AI.
  *
  * Workflow:
  * 1. Admin chup/tai anh san pham.
- * 2. Backend dong goi anh (Base64) + danh sach ngon ngu he thong ho tro
- *    (vi, en, fr, zh) trong prompt JSON Schema -> goi Gemini API.
+ * 2. Backend dong goi anh (Base64) + danh sach ngon ngu he thong he tro
+ *    (vi, en, fr, zh) trong prompt JSON Schema -> goi mo hinh AI.
  * 3. Parse JSON tra ve (ObjectMapper) -> ProductAiDTO -> Frontend tu dong
  *    populate vao tung o input/CKEditor theo tung ngon ngu.
+ *
+ * Nha cung cap AI (Gemini / OpenAI) va API key duoc quyet dinh boi
+ * {@link AiChatModelFactory} dua tren cau hinh trong Admin, nen controller
+ * nay khong phu thuoc vao mot nha cung cap cu the.
  */
 @RestController
 @RequestMapping("/admin/product/gemini")
 public class GoogleAiController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GoogleAiController.class);
-
-	private static final String GEMINI_API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
-
-	// co the ghi de bang property googleai.gemini.model trong shopizer-properties.properties
-	@Value("${googleai.gemini.model:gemini-3.5-flash}")
-	private String geminiModel;
-
-	private static final String GEMINI_API_KEY_CONFIG = "GEMINI_API_KEY";
 
 	/** Danh sach ngon ngu mac dinh he thong ho tro. */
 	private static final List<String> DEFAULT_LANGUAGES = List.of("vi", "en", "fr", "zh");
@@ -70,12 +61,7 @@ public class GoogleAiController {
 	private StoreFacade storeFacade;
 
 	@Inject
-	private MerchantConfigurationService merchantConfigurationService;
-
-	@Value("${googleai.gemini.apikey:}")
-	private String apiKeyFromProperties;
-
-	private RestTemplate restTemplate = new RestTemplate();
+	private AiChatModelFactory aiChatModelFactory;
 
 	/**
 	 * POST /admin/product/gemini/translate
@@ -97,12 +83,13 @@ public class GoogleAiController {
 	throw new RestApiException("Merchant store not found");
 	}
 
-	String apiKey = resolveApiKey(store);
-	if (StringUtils.isBlank(apiKey)) {
-	LOGGER.warn("Gemini API key is not configured (config " + GEMINI_API_KEY_CONFIG
-	+ " or property googleai.gemini.apikey)");
-	throw new RestApiException(
-	"Chưa cấu hình Gemini API key. Vào Admin > Configuration thêm cấu hình GEMINI_API_KEY hoặc đặt googleai.gemini.apikey trong shopizer-properties.properties");
+		AiChatModel chatModel = null;
+		try {
+	// Chon nha cung cap AI theo cau hinh trong Admin (Gemini / OpenAI)
+	chatModel = aiChatModelFactory.getChatModel(store);
+	} catch (AiException e) {
+	LOGGER.warn("AI provider is not configured: {}", e.getMessage());
+	throw new RestApiException(e.getMessage());
 	}
 
 	// Ngong ngu nguon (mac dinh tieng Viet)
@@ -134,12 +121,12 @@ public class GoogleAiController {
 	throw new RestApiException("Không xác định được ngôn ngữ đích để dịch.");
 	}
 
-	String prompt = buildTranslatePrompt(sourceLanguage, source, languages);
+		String prompt = buildTranslatePrompt(sourceLanguage, source, languages);
 
 		try {
-	String generatedText = callGemini(apiKey, null, null, prompt);
+	String generatedText = callModel(chatModel, AiChatRequest.text(prompt));
 	if (StringUtils.isBlank(generatedText)) {
-	throw new RestApiException("Gemini không trả về dữ liệu");
+	throw new RestApiException("AI không trả về dữ liệu");
 	}
 	ProductAiDTO dto = OBJECT_MAPPER.readValue(generatedText, ProductAiDTO.class);
 	// Giu nguyen SKU / refCode nguon neu co (dich khong nen doi SKU)
@@ -149,8 +136,8 @@ public class GoogleAiController {
 	} catch (RestApiException e) {
 	throw e;
 	} catch (Exception e) {
-	LOGGER.error("Error calling Gemini API or parsing translation response", e);
-	throw new RestApiException("Lỗi khi gọi Gemini API dịch: " + e.getMessage());
+	LOGGER.error("Error calling AI API or parsing translation response", e);
+	throw new RestApiException("Lỗi khi gọi AI API dịch: " + e.getMessage());
 	}
 	}
 
@@ -173,13 +160,14 @@ public class GoogleAiController {
 			throw new RestApiException("Merchant store not found");
 	}
 
-		String apiKey = resolveApiKey(store);
-		if (StringUtils.isBlank(apiKey)) {
-			LOGGER.warn("Gemini API key is not configured (config " + GEMINI_API_KEY_CONFIG
-					+ " or property googleai.gemini.apikey)");
-			throw new RestApiException(
-					"Chưa cấu hình Gemini API key. Vào Admin > Configuration thêm cấu hình GEMINI_API_KEY hoặc đặt googleai.gemini.apikey trong shopizer-properties.properties");
-	}
+			AiChatModel chatModel = null;
+			try {
+		// Chon nha cung cap AI theo cau hinh trong Admin (Gemini / OpenAI)
+		chatModel = aiChatModelFactory.getChatModel(store);
+		} catch (AiException e) {
+		LOGGER.warn("AI provider is not configured: {}", e.getMessage());
+		throw new RestApiException(e.getMessage());
+		}
 
 		String imageBase64 = body.get("imageBase64");
 		if (StringUtils.isBlank(imageBase64)) {
@@ -217,25 +205,26 @@ public class GoogleAiController {
 
 			String prompt = buildPrompt(skuPrefix, languages);
 
-			try {
-				String generatedText = callGemini(apiKey, mimeType, imageBase64, prompt);
-				if (StringUtils.isBlank(generatedText)) {
-					throw new RestApiException("Gemini không trả về dữ liệu");
-				}
-				// Parse JSON tu Gemini -> DTO de frontend fill vao form Admin
-				ProductAiDTO dto = OBJECT_MAPPER.readValue(generatedText, ProductAiDTO.class);
+						try {
+					String generatedText = callModel(chatModel,
+					AiChatRequest.textAndImage(prompt, mimeType, imageBase64));
+			if (StringUtils.isBlank(generatedText)) {
+			throw new RestApiException("AI không trả về dữ liệu");
+			}
+			// Parse JSON tu AI -> DTO de frontend fill vao form Admin
+			ProductAiDTO dto = OBJECT_MAPPER.readValue(generatedText, ProductAiDTO.class);
 
-				// Chuan hoa seUrl (slug) tranh ky tu dac biet gay loi duong dan
+			// Chuan hoa seUrl (slug) tranh ky tu dac biet gay loi duong dan
 				sanitizeSlugs(dto);
 
-				return dto;
+			return dto;
 			} catch (RestApiException e) {
-				throw e;
+			throw e;
 			} catch (Exception e) {
-				LOGGER.error("Error calling Gemini API or parsing response", e);
-				throw new RestApiException("Lỗi khi gọi Gemini API: " + e.getMessage());
+			LOGGER.error("Error calling AI API or parsing response", e);
+			throw new RestApiException("Lỗi khi gọi AI API: " + e.getMessage());
 			}
-		}
+			}
 
 		/**
 		 * Xay dung prompt JSON Schema theo yeu cau Structured Output.
@@ -366,114 +355,22 @@ public class GoogleAiController {
 			}
 		}
 
-	private String callGemini(String apiKey, String mimeType, String imageBase64, String prompt) throws IOException {
-
-	Map<String, Object> generationConfig = Map.of(
-	// bat buoc Gemini tra ve JSON - tranh markdown/ky tu la
-	"responseMimeType", "application/json",
-	// cang de nhiet do thap ket qua cang on dinh, it suy dien tu do
-	"temperature", 0.4);
-
-	// Neu co anh (inline_data) thi gui kem - dung cho generate tu anh.
-	// Neu chi dich van ban (imageBase64 == null) thi chi gui phan text.
-	List<Map<String, Object>> parts = new ArrayList<>();
-	parts.add(Map.of("text", prompt));
-	if (StringUtils.isNotBlank(imageBase64)) {
-	parts.add(Map.of("inline_data", Map.of(
-	"mime_type", StringUtils.defaultIfBlank(mimeType, "image/jpeg"),
-	"data", imageBase64)));
-	}
-
-	Map<String, Object> payload = Map.of(
-	"contents", List.of(Map.of("parts", parts)),
-	"generationConfig", generationConfig);
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
-
-		String url = GEMINI_API_BASE_URL + geminiModel + ":generateContent?key=" + apiKey;
-
-		// Retry khi Gemini qua tai (503 SERVICE_UNAVAILABLE) hoac bi gioi han (429)
-		int maxAttempts = 3;
-		HttpStatusCodeException lastError = null;
-		for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-			try {
-				ResponseEntity<Map> response = restTemplate.postForEntity(url, entity, Map.class);
-				if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-					throw new IOException("Gemini API returned status " + response.getStatusCodeValue());
-				}
-				return extractText(response.getBody());
-			} catch (HttpStatusCodeException e) {
-				lastError = e;
-				int status = e.getStatusCode().value();
-				if ((status == 503 || status == 429) && attempt < maxAttempts) {
-					long waitMillis = attempt * 3000L; // 3s, 6s
-					LOGGER.warn("Gemini API {} (attempt {}/{}), retrying in {} ms", status, attempt, maxAttempts, waitMillis);
-					try {
-						Thread.sleep(waitMillis);
-					} catch (InterruptedException ie) {
-						Thread.currentThread().interrupt();
-						throw new IOException("Interrupted while waiting to retry Gemini API", ie);
-					}
-					continue;
-				}
-				// doc body loi cua Gemini de bao cao ro hon (404/400/403...)
-				String apiMessage = e.getResponseBodyAsString();
-				LOGGER.error("Gemini API HTTP error {} : {}", e.getStatusCode(), apiMessage);
-				throw new IOException("Gemini API tra ve " + e.getStatusCode() + ": " + apiMessage);
+			/**
+			 * Goi mo hinh AI da duoc chon trong cau hinh Admin va tra ve noi dung van ban.
+			 *
+			 * Controller khong biet cu the dang goi Gemini hay OpenAI - viec do nam o
+			 * {@link AiChatModelFactory}. Nho vay khi doi nha cung cap chi can doi cau hinh.
+			 */
+			private String callModel(AiChatModel chatModel, AiChatRequest request) throws AiException {
+			if (chatModel == null) {
+			throw new AiException(
+			"Chưa cấu hình nhà cung cấp AI. Vào Admin > Configuration > AI Configuration để chọn Gemini hoặc OpenAI.");
+			}
+			AiChatResponse response = chatModel.call(request);
+			if (response == null) {
+			return null;
+			}
+			LOGGER.debug("AI response from provider {}", response.getProvider());
+			return response.getText();
 			}
 		}
-		// het so lan retry van loi 503/429
-		String apiMessage = lastError != null ? lastError.getResponseBodyAsString() : "unknown";
-		throw new IOException("Gemini API qua tai (503) sau " + maxAttempts + " lan thu: " + apiMessage);
-	}
-
-	@SuppressWarnings("unchecked")
-	private String extractText(Map<String, Object> body) {
-		try {
-			List<Map<String, Object>> candidates = (List<Map<String, Object>>) body.get("candidates");
-			if (candidates == null || candidates.isEmpty()) {
-				return null;
-			}
-			Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-			if (content == null) {
-				return null;
-			}
-			List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-			if (parts == null || parts.isEmpty()) {
-				return null;
-			}
-			StringBuilder sb = new StringBuilder();
-			for (Map<String, Object> part : parts) {
-				Object text = part.get("text");
-				if (text != null) {
-					sb.append(text.toString());
-				}
-			}
-			return sb.length() > 0 ? sb.toString() : null;
-	} catch (Exception e) {
-			LOGGER.error("Cannot parse Gemini response", e);
-			return null;
-	}
-	}
-
-	/**
-	 * API key priority:
-	 * 1. Merchant configuration (Admin > Configuration) with key GEMINI_API_KEY
-	 * 2. Property googleai.gemini.apikey in shopizer-properties.properties
-	 */
-	private String resolveApiKey(MerchantStore store) {
-		try {
-			MerchantConfiguration config = merchantConfigurationService
-					.getMerchantConfiguration(GEMINI_API_KEY_CONFIG, store);
-			if (config != null && StringUtils.isNotBlank(config.getValue())) {
-				return config.getValue();
-			}
-	} catch (Exception e) {
-			LOGGER.error("Error reading GEMINI_API_KEY configuration", e);
-	}
-		return apiKeyFromProperties;
-	}
-}

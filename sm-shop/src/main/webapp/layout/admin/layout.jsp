@@ -339,8 +339,11 @@ response.setDateHeader ("Expires", -1);
 			$("#accounts-conf-link").click(function() {
   				window.location='<c:url value="/admin/configuration/accounts.html" />';
 			});
-			$("#email-conf-link").click(function() {
-  				window.location='<c:url value="/admin/configuration/email.html" />';
+				$("#email-conf-link").click(function() {
+			 		window.location='<c:url value="/admin/configuration/email.html" />';
+			});
+			$("#ai-conf-link").click(function() {
+			 		window.location='<c:url value="/admin/configuration/ai.html" />';
 			});
 			$("#system-configurations-link").click(function() {
   				window.location='<c:url value="/admin/configuration/system.html" />';

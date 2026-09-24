@@ -102,11 +102,34 @@ public class Constants {
 
 	public final static String KEY_FACEBOOK_PAGE_URL = "facebook_page_url";
 	public final static String KEY_PINTEREST_PAGE_URL = "pinterest";
-	public final static String KEY_GOOGLE_ANALYTICS_URL = "G-XGBQMT4DLR";
+	/**
+	 * Key cau hinh Google Analytics trong bang MerchantConfiguration.
+	 *
+	 * Luu y: KHONG duoc dat gia tri cua key bang ma tracking that (vi du
+	 * "G-XGBQMT4DLR") vi JSP hien thi nhan bang
+	 * label.configuration.<key> nen se bao "label not found". Ma tracking
+	 * phai nam o phan VALUE nguoi dung nhap trong Admin > Configuration.
+	 */
+	public final static String KEY_GOOGLE_ANALYTICS_URL = "google_analytics_url";
 	public final static String KEY_INSTAGRAM_URL = "instagram";
 	public final static String KEY_GOOGLE_API_KEY = "google_api_key";
 	public final static String KEY_TWITTER_HANDLE = "twitter_handle";
 	public final static String KEY_GEMINI_API_KEY = "GEMINI_API_KEY";
+
+	/*
+	 * AI configuration (Admin > Configuration > AI Configuration)
+	 * Cac key nay duoc luu trong bang MerchantConfiguration va duoc lop ChatModel
+	 * (AiChatModelFactory) doc de chon nha cung cap AI khi chay.
+	 */
+	public final static String KEY_AI_PROVIDER = "AI_PROVIDER";
+	public final static String KEY_AI_GEMINI_MODEL = "AI_GEMINI_MODEL";
+	public final static String KEY_AI_OPENAI_API_KEY = "AI_OPENAI_API_KEY";
+	public final static String KEY_AI_OPENAI_MODEL = "AI_OPENAI_MODEL";
+
+	/** Gia tri cua KEY_AI_PROVIDER tuong ung voi tung nha cung cap AI. */
+	public final static String AI_PROVIDER_GEMINI = "gemini";
+	public final static String AI_PROVIDER_OPENAI = "openai";
+
 	public final static String KEY_SESSION_ADDRESS = "readableDelivery";
 
 	public final static String CATEGORY_LINEAGE_DELIMITER = "/";

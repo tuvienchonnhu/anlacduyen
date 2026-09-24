@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.salesmanager.core.business.exception.ServiceException;
 import com.salesmanager.core.business.modules.email.EmailConfig;
 import com.salesmanager.core.business.services.system.EmailService;
 import com.salesmanager.core.business.services.system.MerchantConfigurationService;
@@ -116,22 +117,13 @@ public class ConfigurationController {
 		}
 		configs.add(twitterConfiguration);
 		
-		// Gemini AI API key configuration (Admin > Configuration > Accounts Configuration)
-		MerchantConfiguration geminiApiKeyConfiguration = merchantConfigurationService.getMerchantConfiguration(Constants.KEY_GEMINI_API_KEY, store);
-		if (null == geminiApiKeyConfiguration) {
-			geminiApiKeyConfiguration = new MerchantConfiguration();
-			geminiApiKeyConfiguration.setKey(Constants.KEY_GEMINI_API_KEY);
-			geminiApiKeyConfiguration.setMerchantConfigurationType(MerchantConfigurationType.CONFIG);
-		}
-		configs.add(geminiApiKeyConfiguration);
-
 		ConfigListWrapper configWrapper = new ConfigListWrapper();
 		configWrapper.setMerchantConfigs(configs);
 		model.addAttribute("configuration",configWrapper);
-		
+
 		return com.salesmanager.shop.admin.controller.ControllerConstants.Tiles.Configuration.accounts;
 	}
-	
+
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/configuration/saveConfiguration.html", method=RequestMethod.POST)
 	public String saveConfigurations(@ModelAttribute("configuration") ConfigListWrapper configWrapper, BindingResult result, Model model, HttpServletRequest request, Locale locale) throws Exception
@@ -141,8 +133,9 @@ public class ConfigurationController {
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
 		for(MerchantConfiguration mConfigs : configs)
 		{
-			mConfigs.setMerchantStore(store);
-			if(!StringUtils.isBlank(mConfigs.getValue())) {
+					mConfigs.setMerchantStore(store);
+				if(!StringUtils.isBlank(mConfigs.getValue())) {
+				// Tab Accounts chi con cac key SOCIAL (Facebook, Instagram, ...)
 				mConfigs.setMerchantConfigurationType(MerchantConfigurationType.SOCIAL);
 				merchantConfigurationService.saveOrUpdate(mConfigs);
 			} else {//remove if submited blank and exists
@@ -151,22 +144,92 @@ public class ConfigurationController {
 					merchantConfigurationService.delete(config);
 				}
 			}
-		}	
+		}
 		model.addAttribute("success","success");
 		model.addAttribute("configuration",configWrapper);
 		return com.salesmanager.shop.admin.controller.ControllerConstants.Tiles.Configuration.accounts;
-		
+
 	}
-	
+
+	/**
+	 * Hien thi trang cau hinh AI (Admin > Configuration > AI Configuration).
+	 *
+	 * Cac key o day duoc AiChatModelFactory doc de chon nha cung cap AI
+	 * (Gemini / OpenAI) khi tao mo ta san pham.
+	 */
+	@PreAuthorize("hasRole('AUTH')")
+	@RequestMapping(value="/admin/configuration/ai.html", method=RequestMethod.GET)
+	public String displayAiConfiguration(Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+	setAiConfigurationMenu(model, request);
+	MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
+	List<MerchantConfiguration> configs = new ArrayList<MerchantConfiguration>();
+	configs.add(aiConfig(Constants.KEY_AI_PROVIDER, store));
+	configs.add(aiConfig(Constants.KEY_GEMINI_API_KEY, store));
+	configs.add(aiConfig(Constants.KEY_AI_GEMINI_MODEL, store));
+	configs.add(aiConfig(Constants.KEY_AI_OPENAI_API_KEY, store));
+	configs.add(aiConfig(Constants.KEY_AI_OPENAI_MODEL, store));
+
+	ConfigListWrapper configWrapper = new ConfigListWrapper();
+	configWrapper.setMerchantConfigs(configs);
+	model.addAttribute("configuration",configWrapper);
+
+	return com.salesmanager.shop.admin.controller.ControllerConstants.Tiles.Configuration.ai;
+	}
+
+	/**
+	 * Luu cau hinh AI. Cac key AI luon duoc luu voi type CONFIG de
+	 * AiChatModelFactory doc dung.
+	 */
+	@PreAuthorize("hasRole('AUTH')")
+	@RequestMapping(value="/admin/configuration/saveAiConfiguration.html", method=RequestMethod.POST)
+	public String saveAiConfigurations(@ModelAttribute("configuration") ConfigListWrapper configWrapper, BindingResult result, Model model, HttpServletRequest request, Locale locale) throws Exception {
+
+	setAiConfigurationMenu(model, request);
+	List<MerchantConfiguration> configs = configWrapper.getMerchantConfigs();
+	MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
+	for(MerchantConfiguration mConfigs : configs)
+	{
+	mConfigs.setMerchantStore(store);
+	if(!StringUtils.isBlank(mConfigs.getValue())) {
+	mConfigs.setMerchantConfigurationType(MerchantConfigurationType.CONFIG);
+	merchantConfigurationService.saveOrUpdate(mConfigs);
+	} else {//remove if submited blank and exists
+	MerchantConfiguration config = merchantConfigurationService.getMerchantConfiguration(mConfigs.getKey(), store);
+	if(config!=null) {
+	merchantConfigurationService.delete(config);
+	}
+	}
+	}
+	model.addAttribute("success","success");
+	model.addAttribute("configuration",configWrapper);
+	return com.salesmanager.shop.admin.controller.ControllerConstants.Tiles.Configuration.ai;
+	}
+
+	/**
+	 * Doc mot cau hinh AI tu DB, neu chua co thi tra ve doi tuong rong voi key
+	 * tuong ung de form Admin hien thi o nhap.
+	 * @throws ServiceException 
+	 */
+	private MerchantConfiguration aiConfig(String key, MerchantStore store) throws ServiceException {
+	MerchantConfiguration config = merchantConfigurationService.getMerchantConfiguration(key, store);
+	if (config == null) {
+	config = new MerchantConfiguration();
+	config.setKey(key);
+	config.setMerchantConfigurationType(MerchantConfigurationType.CONFIG);
+	}
+	return config;
+	}
+
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/configuration/email.html", method=RequestMethod.GET)
 	public String displayEmailSettings(Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		setEmailConfigurationMenu(model, request);
+	setEmailConfigurationMenu(model, request);
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
 		EmailConfig emailConfig = emailService.getEmailConfiguration(store);
 		if(emailConfig == null){
 			emailConfig = new EmailConfig();
-			//TODO: Need to check below properties. When there are no record available in MerchantConfguration table with EMAIL_CONFIG key, 
+			//TODO: Need to check below properties. When there are no record available in MerchantConfguration table with EMAIL_CONFIG key,
 			// instead of showing blank fields in setup screen, show default configured values from email.properties
 			emailConfig.setProtocol(env.getProperty("mailSender.protocol"));
 			emailConfig.setHost(env.getProperty("mailSender.host"));
@@ -177,11 +240,11 @@ public class ConfigurationController {
 			emailConfig.setSmtpAuth(Boolean.parseBoolean(env.getProperty("mailSender.mail.smtp.auth")));
 			emailConfig.setStarttls(Boolean.parseBoolean(env.getProperty("mail.smtp.starttls.enable")));
 		}
-		
+
 		model.addAttribute("configuration", emailConfig);
 		return ControllerConstants.Tiles.Configuration.email;
 	}
-	
+
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/configuration/saveEmailConfiguration.html", method=RequestMethod.POST)
 	public String saveEmailSettings(@ModelAttribute("configuration") EmailConfig config, BindingResult result, Model model, HttpServletRequest request, Locale locale) throws Exception {
@@ -191,7 +254,7 @@ public class ConfigurationController {
 		if(emailConfig == null){
 			emailConfig = new EmailConfig();
 		}
-		
+
 		// populte EmailConfig model from UI values
 		emailConfig.setProtocol(config.getProtocol());
 		emailConfig.setHost(config.getHost());
@@ -205,16 +268,15 @@ public class ConfigurationController {
 		}
 		emailConfig.setSmtpAuth(config.isSmtpAuth());
 		emailConfig.setStarttls(config.isStarttls());
-		
+
 		emailService.saveEmailConfiguration(emailConfig, store);
-		
+
 		model.addAttribute("configuration", emailConfig);
 		model.addAttribute("success","success");
 		return ControllerConstants.Tiles.Configuration.email;
 	}
-	
+
 	private void setConfigurationMenu(Model model, HttpServletRequest request) throws Exception {
-		
 		Map<String,String> activeMenus = new HashMap<String,String>();
 		activeMenus.put("configuration", "configuration");
 		activeMenus.put("accounts-conf", "accounts-conf");
@@ -227,17 +289,29 @@ public class ConfigurationController {
 		model.addAttribute("activeMenus",activeMenus);
 	}
 	
-	private void setEmailConfigurationMenu(Model model, HttpServletRequest request) throws Exception {
-		
+		private void setEmailConfigurationMenu(Model model, HttpServletRequest request) throws Exception {
 		Map<String,String> activeMenus = new HashMap<String,String>();
 		activeMenus.put("configuration", "configuration");
 		activeMenus.put("email-conf", "email-conf");
-		
+
 		@SuppressWarnings("unchecked")
 		Map<String, Menu> menus = (Map<String, Menu>)request.getAttribute("MENUMAP");
-		
+
 		Menu currentMenu = (Menu)menus.get("configuration");
 		model.addAttribute("currentMenu",currentMenu);
 		model.addAttribute("activeMenus",activeMenus);
+		}
+
+		private void setAiConfigurationMenu(Model model, HttpServletRequest request) throws Exception {
+		Map<String,String> activeMenus = new HashMap<String,String>();
+		activeMenus.put("configuration", "configuration");
+		activeMenus.put("ai-conf", "ai-conf");
+
+		@SuppressWarnings("unchecked")
+		Map<String, Menu> menus = (Map<String, Menu>)request.getAttribute("MENUMAP");
+
+		Menu currentMenu = (Menu)menus.get("configuration");
+		model.addAttribute("currentMenu",currentMenu);
+		model.addAttribute("activeMenus",activeMenus);
+		}
 	}
-}
