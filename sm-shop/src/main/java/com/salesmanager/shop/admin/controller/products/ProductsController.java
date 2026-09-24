@@ -169,17 +169,33 @@ public class ProductsController {
 			
 			if(plist!=null) {
 			
-				for(Product product : plist) {
-					
-					Map entry = new HashMap();
-					entry.put("productId", product.getId());
-					
-					ProductDescription description = product.getDescriptions().iterator().next();
-					
-					entry.put("name", description.getName());
-					entry.put("sku", product.getSku());
-					entry.put("available", product.isAvailable());
-					resp.addDataEntry(entry);
+					for(Product product : plist) {
+
+				Map entry = new HashMap();
+				entry.put("productId", product.getId());
+
+				// Chon mo ta dung voi ngon ngu Admin dang hien thi (language)
+				// thay vi lay bua phan tu dau tien (gay tinh trang ten san pham
+				// hien thi lan lon nhieu ngon ngu). Neu khong co ban dich dung
+				// ngon ngu nay thi moi fallback ve mo ta dau tien.
+				ProductDescription description = null;
+				if(product.getDescriptions()!=null && !product.getDescriptions().isEmpty()) {
+				for(ProductDescription desc : product.getDescriptions()) {
+				if(desc.getLanguage()!=null && language!=null
+				&& desc.getLanguage().getCode().equals(language.getCode())) {
+					description = desc;
+				break;
+				}
+				}
+				if(description==null) {
+					description = product.getDescriptions().iterator().next();
+				}
+				}
+
+				entry.put("name", description!=null ? description.getName() : product.getSku());
+				entry.put("sku", product.getSku());
+				entry.put("available", product.isAvailable());
+				resp.addDataEntry(entry);
 					
 					
 					
