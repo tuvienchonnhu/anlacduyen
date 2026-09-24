@@ -7,6 +7,7 @@ import com.salesmanager.core.business.services.catalog.product.manufacturer.Manu
 import com.salesmanager.core.business.services.catalog.product.type.ProductTypeService;
 import com.salesmanager.core.business.services.tax.TaxClassService;
 import com.salesmanager.core.business.utils.CoreConfiguration;
+import com.salesmanager.core.business.utils.ProductImageResizeUtils;
 import com.salesmanager.core.business.utils.ProductPriceUtils;
 import com.salesmanager.core.business.utils.ajax.AjaxPageableResponse;
 import com.salesmanager.core.business.utils.ajax.AjaxResponse;
@@ -45,12 +46,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
-import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -319,54 +319,42 @@ public class ProductController {
 		
 
 		
-		//validate image
+			//validate image
+		// Anh qua lon (chieu rong/chieu cao) se duoc TU DONG THU NHO thay vi tu choi,
+		// de Admin co the luu san pham voi anh kich thuoc lon.
+		byte[] resizedImageBytes = null;
 		if(product.getImage()!=null && !product.getImage().isEmpty()) {
-			
-			try {
-				
-				String maxHeight = configuration.getProperty("PRODUCT_IMAGE_MAX_HEIGHT_SIZE");
-				String maxWidth = configuration.getProperty("PRODUCT_IMAGE_MAX_WIDTH_SIZE");
-				String maxSize = configuration.getProperty("PRODUCT_IMAGE_MAX_SIZE");
-				
-				
-				BufferedImage image = ImageIO.read(product.getImage().getInputStream());
-				
-				
-				if(!StringUtils.isBlank(maxHeight)) {
-					
-					int maxImageHeight = Integer.parseInt(maxHeight);
-					if(image.getHeight()>maxImageHeight) {
-						ObjectError error = new ObjectError("image",messages.getMessage("message.image.height", locale) + " {"+maxHeight+"}");
-						result.addError(error);
-					}
-					
-				}
-				
-				if(!StringUtils.isBlank(maxWidth)) {
-					
-					int maxImageWidth = Integer.parseInt(maxWidth);
-					if(image.getWidth()>maxImageWidth) {
-						ObjectError error = new ObjectError("image",messages.getMessage("message.image.width", locale) + " {"+maxWidth+"}");
-						result.addError(error);
-					}
-					
-				}
-				
-				if(!StringUtils.isBlank(maxSize)) {
-					
-					int maxImageSize = Integer.parseInt(maxSize);
-					if(product.getImage().getSize()>maxImageSize) {
-						ObjectError error = new ObjectError("image",messages.getMessage("message.image.size", locale) + " {"+maxSize+"}");
-						result.addError(error);
-					}
-					
-				}
-				
 
-				
-			} catch (Exception e) {
-				LOGGER.error("Cannot validate product image", e);
-			}
+			try {
+
+		String maxHeight = configuration.getProperty("PRODUCT_IMAGE_MAX_HEIGHT_SIZE");
+		String maxWidth = configuration.getProperty("PRODUCT_IMAGE_MAX_WIDTH_SIZE");
+		String maxSize = configuration.getProperty("PRODUCT_IMAGE_MAX_SIZE");
+
+		// chi con lai gioi han dung luong file la loi that su (khong the tu thu nho de giam size an toan)
+		if(!StringUtils.isBlank(maxSize)) {
+
+		int maxImageSize = Integer.parseInt(maxSize);
+		if(product.getImage().getSize()>maxImageSize) {
+		ObjectError error = new ObjectError("image",messages.getMessage("message.image.size", locale) + " {"+maxSize+"}");
+		result.addError(error);
+		}
+
+		}
+
+		// doc anh 1 lan duy nhat (InputStream chi doc duoc 1 lan)
+		byte[] originalBytes = product.getImage().getBytes();
+
+		int maxWidthInt = StringUtils.isBlank(maxWidth) ? 0 : Integer.parseInt(maxWidth);
+		int maxHeightInt = StringUtils.isBlank(maxHeight) ? 0 : Integer.parseInt(maxHeight);
+
+		// tu dong thu nho neu vuot gioi han (giu nguyen ti le khung hinh)
+		resizedImageBytes = ProductImageResizeUtils.resize(originalBytes, maxWidthInt, maxHeightInt);
+
+
+		} catch (Exception e) {
+		LOGGER.error("Cannot validate product image", e);
+		}
 
 		}
 		
@@ -502,18 +490,21 @@ public class ProductController {
 
 		
 		
-		if(product.getImage()!=null && !product.getImage().isEmpty()) {
-			
+			if(product.getImage()!=null && !product.getImage().isEmpty()) {
 
-			
-			String imageName = product.getImage().getOriginalFilename();
-			
 
-			
-			ProductImage productImage = new ProductImage();
-			productImage.setDefaultImage(true);
-			productImage.setImage(product.getImage().getInputStream());
-			productImage.setProductImage(imageName);
+		String imageName = product.getImage().getOriginalFilename();
+
+
+		ProductImage productImage = new ProductImage();
+		productImage.setDefaultImage(true);
+		// dung anh da duoc thu nho (neu co) de luu kich thuoc phu hop
+		if(resizedImageBytes != null && resizedImageBytes.length > 0) {
+		productImage.setImage(new ByteArrayInputStream(resizedImageBytes));
+		} else {
+		productImage.setImage(product.getImage().getInputStream());
+		}
+		productImage.setProductImage(imageName);
 			
 			
 			List<ProductImageDescription> imagesDescriptions = new ArrayList<ProductImageDescription>();
