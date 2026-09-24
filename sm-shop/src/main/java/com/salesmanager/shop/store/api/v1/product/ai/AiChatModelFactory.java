@@ -48,6 +48,12 @@ public class AiChatModelFactory {
 	@Value("${openai.model:gpt-4o-mini}")
 	private String openAiModelFromProperties;
 
+	@Value("${groq.apikey:}")
+	private String groqApiKeyFromProperties;
+
+	@Value("${groq.model:llama-3.3-70b-versatile}")
+	private String groqModelFromProperties;
+
 	@Value("${ai.provider:" + Constants.AI_PROVIDER_GEMINI + "}")
 	private String defaultProvider;
 
@@ -69,6 +75,15 @@ public class AiChatModelFactory {
 					openAiModelFromProperties);
 			LOGGER.debug("Using OpenAI chat model : {}", model);
 			return new OpenAiChatModel(apiKey, model, null);
+	}
+
+		if (Constants.AI_PROVIDER_GROQ.equals(provider)) {
+			String apiKey = StringUtils.defaultIfBlank(readConfig(Constants.KEY_AI_GROQ_API_KEY, store),
+					groqApiKeyFromProperties);
+			String model = StringUtils.defaultIfBlank(readConfig(Constants.KEY_AI_GROQ_MODEL, store),
+					groqModelFromProperties);
+			LOGGER.debug("Using Groq chat model : {}", model);
+			return new GroqChatModel(apiKey, model, null);
 	}
 
 	// Mac dinh Gemini

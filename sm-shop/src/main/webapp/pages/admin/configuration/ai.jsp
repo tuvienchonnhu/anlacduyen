@@ -45,11 +45,16 @@
 																			code="label.configuration.AI_PROVIDER.gemini"
 																			text="Google Gemini" />
 																	</form:option>
-																	<form:option value="openai">
-																		<s:message
-																			code="label.configuration.AI_PROVIDER.openai"
-																			text="OpenAI" />
-																	</form:option>
+																					<form:option value="openai">
+																						<s:message
+																							code="label.configuration.AI_PROVIDER.openai"
+																							text="OpenAI" />
+																					</form:option>
+																					<form:option value="groq">
+																						<s:message
+																	code="label.configuration.AI_PROVIDER.groq"
+																	text="Groq" />
+																					</form:option>
 																</form:select>
 																<form:hidden
 																	path="merchantConfigs[${counter.index}].key" />

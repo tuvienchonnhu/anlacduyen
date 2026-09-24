@@ -169,6 +169,8 @@ public class ConfigurationController {
 	configs.add(aiConfig(Constants.KEY_AI_GEMINI_MODEL, store));
 	configs.add(aiConfig(Constants.KEY_AI_OPENAI_API_KEY, store));
 	configs.add(aiConfig(Constants.KEY_AI_OPENAI_MODEL, store));
+	configs.add(aiConfig(Constants.KEY_AI_GROQ_API_KEY, store));
+	configs.add(aiConfig(Constants.KEY_AI_GROQ_MODEL, store));
 
 	ConfigListWrapper configWrapper = new ConfigListWrapper();
 	configWrapper.setMerchantConfigs(configs);
