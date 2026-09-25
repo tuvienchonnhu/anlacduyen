@@ -1820,7 +1820,7 @@ div[class^="col-"] {
     transition: transform .25s ease;
 }
 .product-box-grid .product-box:hover .caption {
-    transform: translateY(-55px);
+    transform: translateY(-35px);
 }
 .product-box-grid .product-details {
     padding: 0 20px;
@@ -1914,11 +1914,11 @@ div[class^="col-"] {
     transform: translateY(45px);
 }
 .product-box-grid .product-box:hover .caption {
-    -webkit-transform: translateY(-70px);
-    -moz-transform: translateY(-70px);
-    -ms-transform: translateY(-70px);
-    -o-transform: translateY(-70px);
-    transform: translateY(-70px);
+    -webkit-transform: translateY(-35px);
+    -moz-transform: translateY(-35px);
+    -ms-transform: translateY(-35px);
+    -o-transform: translateY(-35px);
+    transform: translateY(-35px);
 }
 .product-box-grid .product-box-actions {
     opacity: 0;
@@ -1989,11 +1989,11 @@ div[class^="col-"] {
     transform: translateY(35px);
 }
 .product-box-grid .product-box:hover .caption {
-    -webkit-transform: translateY(-70px);
-    -moz-transform: translateY(-70px);
-    -ms-transform: translateY(-70px);
-    -o-transform: translateY(-70px);
-    transform: translateY(-70px);
+    -webkit-transform: translateY(-35px);
+    -moz-transform: translateY(-35px);
+    -ms-transform: translateY(-35px);
+    -o-transform: translateY(-35px);
+    transform: translateY(-35px);
 }
 .product-box-grid .product-details .product-name {
     opacity: 0;
@@ -2128,11 +2128,11 @@ div[class^="col-"] {
 }
 
 .product-box-grid .product-box:hover .caption {
-    -webkit-transform: translateY(-8px);
-    -moz-transform: translateY(-8px);
-    -ms-transform: translateY(-8px);
-    -o-transform: translateY(-8px);
-    transform: translateY(-8px);
+    -webkit-transform: translateY(15px);
+    -moz-transform: translateY(15px);
+    -ms-transform: translateY(15px);
+    -o-transform: translateY(15px);
+    transform: translateY(15pxs);
 }
 
 /* Product names are visible by default in search and related product boxes. */
