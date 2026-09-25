@@ -49,8 +49,29 @@ public class GoogleAiController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GoogleAiController.class);
 
-	/** Danh sach ngon ngu mac dinh he thong ho tro. */
-	private static final List<String> DEFAULT_LANGUAGES = List.of("vi", "en", "fr", "zh");
+	/**
+	 * Danh sach ngon ngu ma cua hang dang ho tro, doc dong tu
+	 * MerchantStore.getLanguages() - lay tu cau hinh that su thay vi thiet lap cung.
+	 * Khong con dung danh sach ngon ngu hardcode.
+	 */
+	private List<String> storeLanguages(MerchantStore store) {
+		List<String> codes = new ArrayList<>();
+		try {
+			if (store != null && store.getLanguages() != null) {
+				for (com.salesmanager.core.model.reference.language.Language language : store.getLanguages()) {
+					if (language != null && StringUtils.isNotBlank(language.getCode())) {
+						String code = language.getCode().trim().toLowerCase(Locale.ROOT);
+						if (!codes.contains(code)) {
+							codes.add(code);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Cannot read store supported languages", e);
+		}
+		return codes;
+	}
 
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -114,11 +135,11 @@ public class GoogleAiController {
 	"Không có nội dung để dịch. Vui lòng nhập tên hoặc mô tả sản phẩm ở tab ngôn ngữ nguồn trước.");
 	}
 
-	// Danh sach ngon ngu dich: uu tien tham so, loai bo ngon ngu nguon
-	List<String> languages = new ArrayList<>(parseLanguages(body.get("languages")));
+	// Danh sach ngon ngu dich: lay tu cau hinh cua cua hang, uu tien tham so, loai bo ngon ngu nguon
+	List<String> languages = new ArrayList<>(parseLanguages(body.get("languages"), storeLanguages(store)));
 	languages.remove(sourceLanguage);
 	if (languages.isEmpty()) {
-	throw new RestApiException("Không xác định được ngôn ngữ đích để dịch.");
+		throw new RestApiException("Không xác định được ngôn ngữ đích để dịch.");
 	}
 
 		String prompt = buildTranslatePrompt(sourceLanguage, source, languages);
@@ -197,8 +218,8 @@ public class GoogleAiController {
 			throw new RestApiException("Ảnh không hợp lệ (Base64 decode failed)");
 	}
 
-			// danh sach ngon ngu Admin chon ("vi,en,fr,zh"), mac dinh theo he thong
-			List<String> languages = parseLanguages(body.get("languages"));
+			// danh sach ngon ngu Admin chon ("vi,en,fr,zh"), lay tu cau hinh cua hang
+			List<String> languages = parseLanguages(body.get("languages"), storeLanguages(store));
 
 			// tien to SKU theo danh muc (ten danh muc tieng Viet khong dau,vd: tui-xach)
 			String skuPrefix = StringUtils.trimToEmpty(body.get("skuPrefix"));
@@ -324,19 +345,20 @@ public class GoogleAiController {
 
 			/**
 			 * Nhan danh sach ngon ngu tu Admin (dang "vi,en,fr,zh"), chi giu ngon ngu
-			 * he thong ho tro, mac dinh la vi,en,fr,zh.
+			 * ma cua hang dang ho tro (supportedLanguages lay tu cau hinh cua cua hang).
+			 * Neu tham so rong thi dung luon danh sach ngon ngu cua cua hang.
 			 */
-		private List<String> parseLanguages(String languagesRaw) {
+		private List<String> parseLanguages(String languagesRaw, List<String> supportedLanguages) {
 			List<String> result = new ArrayList<>();
 			if (StringUtils.isNotBlank(languagesRaw)) {
 				for (String lang : languagesRaw.split(",")) {
 					String code = lang.trim().toLowerCase(Locale.ROOT);
-					if (!code.isEmpty() && DEFAULT_LANGUAGES.contains(code) && !result.contains(code)) {
+					if (!code.isEmpty() && supportedLanguages.contains(code) && !result.contains(code)) {
 						result.add(code);
 					}
 				}
 			}
-			return result.isEmpty() ? DEFAULT_LANGUAGES : result;
+			return result.isEmpty() ? new ArrayList<>(supportedLanguages) : result;
 		}
 
 		/**

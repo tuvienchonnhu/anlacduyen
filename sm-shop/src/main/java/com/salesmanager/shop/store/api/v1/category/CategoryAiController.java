@@ -55,8 +55,12 @@ public class CategoryAiController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CategoryAiController.class);
 
-	/** Cac ngon ngu he thong ho tro san cho du lieu danh muc. */
-	private static final List<String> DEFAULT_LANGUAGES = List.of("vi", "en", "fr", "zh");
+	/**
+	 * Chi dung khi store khong tra ve ngon ngu nao (truong hop bat thuong).
+	 * Binh thuong danh sach ngon ngu luon lay dong tu cau hinh cua cua hang
+	 * (MerchantStore.getLanguages()) - KHONG thiet lap cung.
+	 */
+	private static final List<String> FALLBACK_LANGUAGES = List.of("vi");
 
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -118,7 +122,12 @@ public class CategoryAiController {
 			throw new RestApiException(msg("category.ai.need.name", locale));
 		}
 
-		List<String> languages = parseLanguages(body.get("supported_languages"), body.get("languages"));
+		// Ngon ngu ho tro lay dong tu cau hinh cua cua hang (khong thiet lap cung)
+		List<String> storeLanguages = storeLanguages(store);
+		List<String> languages = parseLanguages(body.get("supported_languages"), body.get("languages"), storeLanguages);
+		if (languages.isEmpty()) {
+			throw new RestApiException(msg("category.ai.no.languages", locale));
+		}
 
 		String prompt = buildSystemPrompt(categoryName, languages);
 
@@ -142,6 +151,149 @@ public class CategoryAiController {
 			LOGGER.error("Error calling AI API or parsing category response", e);
 			throw new RestApiException(msg("category.ai.error", locale) + e.getMessage());
 		}
+	}
+
+	/**
+	 * POST /api/v1/category/ai/translate
+	 *
+	 * Body (JSON):
+	 * { "sourceLanguage": "vi",
+	 *   "categoryName": "Laptop & Máy tính bảng",
+	 *   "seUrl": "laptop-may-tinh-bang",
+	 *   "shortDescription": "...",
+	 *   "description": "<p>...</p>",
+	 *   "metaTitle": "...",
+	 *   "metaKeywords": "...",
+	 *   "metaDescription": "...",
+	 *   "languages": ["vi","en","fr","zh"] }
+	 *
+	 * Dich toan bo thong tin danh muc dang nhap o tab ngon ngu nguon (mac dinh
+	 * tieng Viet) sang cac ngon ngu con lai cua cua hang. Danh sach ngon ngu dich
+	 * lay dong tu cau hinh cua cua hang (MerchantStore.getLanguages()).
+	 *
+	 * Returns CategoryAiDTO JSON voi "languages" chi chua cac ngon ngu dich.
+	 */
+	@PostMapping("/translate")
+	public CategoryAiDTO translateCategory(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+
+		Locale locale = resolveLocale(request);
+
+		MerchantStore store = storeFacade.getByCode(request);
+		if (store == null) {
+			throw new RestApiException("Merchant store not found");
+		}
+
+		AiChatModel chatModel = null;
+		try {
+			chatModel = aiChatModelFactory.getChatModel(store);
+		} catch (AiException e) {
+			LOGGER.warn("AI provider is not configured: {}", e.getMessage());
+			throw new RestApiException(e.getMessage());
+		}
+
+		// Ngon ngu nguon: mac dinh tieng Viet
+		String sourceLanguage = StringUtils.defaultIfBlank(asString(body.get("sourceLanguage")), "vi")
+				.trim().toLowerCase(Locale.ROOT);
+
+		// Tap hop cac truong can dich tu tab nguon
+		CategoryAiDTO.CategoryAiLanguage source = new CategoryAiDTO.CategoryAiLanguage();
+		source.setName(StringUtils.trimToEmpty(asString(firstNonBlank(body.get("categoryName"), body.get("category_name"),
+				body.get("name")))));
+		source.setSeUrl(StringUtils.trimToEmpty(asString(body.get("seUrl"))));
+		source.setShortDescription(StringUtils.trimToEmpty(asString(firstNonBlank(body.get("shortDescription"),
+				body.get("short_description")))));
+		source.setDescription(StringUtils.trimToEmpty(asString(body.get("description"))));
+		source.setMetaTitle(StringUtils.trimToEmpty(asString(firstNonBlank(body.get("metaTitle"),
+				body.get("meta_title")))));
+		source.setMetaKeywords(StringUtils.trimToEmpty(asString(firstNonBlank(body.get("metaKeywords"),
+				body.get("meta_keywords")))));
+		source.setMetaDescription(StringUtils.trimToEmpty(asString(firstNonBlank(body.get("metaDescription"),
+				body.get("meta_description")))));
+
+		if (StringUtils.isBlank(source.getName())
+				&& StringUtils.isBlank(source.getShortDescription())
+				&& StringUtils.isBlank(source.getDescription())
+				&& StringUtils.isBlank(source.getMetaTitle())
+				&& StringUtils.isBlank(source.getMetaDescription())) {
+			throw new RestApiException(msg("category.ai.need.source", locale));
+		}
+
+		// Danh sach ngon ngu dich: lay tu cau hinh cua cua hang, loai bo ngon ngu nguon
+		List<String> storeLanguages = storeLanguages(store);
+		List<String> languages = parseLanguages(body.get("languages"), body.get("supported_languages"), storeLanguages);
+		languages.remove(sourceLanguage);
+		if (languages.isEmpty()) {
+			throw new RestApiException(msg("category.ai.no.languages", locale));
+		}
+
+		String prompt = buildTranslatePrompt(sourceLanguage, source, languages);
+
+		try {
+			String generatedText = callModel(chatModel, AiChatRequest.text(prompt), locale);
+			if (StringUtils.isBlank(generatedText)) {
+				throw new RestApiException(msg("category.ai.no.data", locale));
+			}
+			CategoryAiDTO dto = OBJECT_MAPPER.readValue(stripCodeFence(generatedText), CategoryAiDTO.class);
+
+			// seUrl luon phai la slug sach
+			sanitizeSlugs(dto);
+
+			return dto;
+		} catch (RestApiException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.error("Error calling AI API or parsing category translation response", e);
+			throw new RestApiException(msg("category.ai.error", locale) + e.getMessage());
+		}
+	}
+
+	/**
+	 * Prompt dich toan bo thong tin danh muc tu ngon ngu nguon sang cac ngon ngu
+	 * dich. Giu nguyen dinh dang HTML cua mo ta chi tiet.
+	 */
+	private String buildTranslatePrompt(String sourceLanguage, CategoryAiDTO.CategoryAiLanguage source,
+			List<String> languages) {
+		String langCsv = String.join(", ", languages);
+		StringBuilder sb = new StringBuilder();
+		sb.append("Bạn là chuyên gia dịch thuật thương mại điện tử và SEO Content.");
+		sb.append("Dịch toàn bộ thông tin danh mục sản phẩm sau từ ngôn ngữ \"").append(sourceLanguage)
+				.append("\" sang các ngôn ngữ: [").append(langCsv).append("].\n\n");
+		sb.append("NỘI DUNG NGUỒN:\n");
+		sb.append("- name: ").append(source.getName()).append("\n");
+		sb.append("- shortDescription: ").append(source.getShortDescription()).append("\n");
+		sb.append("- description (HTML): ").append(source.getDescription()).append("\n");
+		sb.append("- metaTitle: ").append(source.getMetaTitle()).append("\n");
+		sb.append("- metaKeywords: ").append(source.getMetaKeywords()).append("\n");
+		sb.append("- metaDescription: ").append(source.getMetaDescription()).append("\n\n");
+		sb.append("Trả về kết quả ĐÚNG định dạng JSON với cấu trúc sau:\n");
+		sb.append("{\n");
+		sb.append("  \"languages\": {\n");
+		for (int i = 0; i < languages.size(); i++) {
+			String lang = languages.get(i);
+			sb.append("    \"").append(lang).append("\": {\n");
+			sb.append("      \"name\": \"Tên danh mục đã dịch\",\n");
+			sb.append("      \"seUrl\": \"duong-dan-than-thien-seo\",\n");
+			sb.append("      \"shortDescription\": \"Mô tả ngắn đã dịch\",\n");
+			sb.append("      \"description\": \"Đoạn HTML đã dịch với thẻ <p> và <strong>\",\n");
+			sb.append("      \"metaTitle\": \"Tiêu đề SEO đã dịch 50-60 ký tự\",\n");
+			sb.append("      \"metaKeywords\": \"từ khóa 1, từ khóa 2, từ khóa 3, từ khóa 4\",\n");
+			sb.append("      \"metaDescription\": \"Mô tả meta đã dịch 130-160 ký tự\"\n");
+			sb.append("    }");
+			if (i < languages.size() - 1) {
+				sb.append(",");
+			}
+			sb.append("\n");
+		}
+		sb.append("  }\n");
+		sb.append("}\n\n");
+		sb.append("Lưu ý bắt buộc:\n");
+		sb.append("- Chỉ trả về JSON thuần, KHÔNG thêm bất kỳ chữ nào khác, KHÔNG bọc trong markdown code fence.\n");
+		sb.append("- Chỉ dùng đúng các mã ngôn ngữ sau cho khóa trong \"languages\": ").append(langCsv).append(".\n");
+		sb.append("- Dịch sát nghĩa, tự nhiên, phù hợp văn phong bán hàng của ngôn ngữ đích.\n");
+		sb.append("- seUrl chỉ gồm chữ thường, số và dấu '-', không dấu, không ký tự đặc biệt (với tiếng Trung dùng Pinyin không dấu).\n");
+		sb.append("- description phải giữ nguyên cấu trúc thẻ HTML (<p>, <strong>) như bản gốc, chỉ dịch phần văn bản bên trong.\n");
+		sb.append("- Không dịch tên thương hiệu riêng hoặc mã danh mục nếu có trong nội dung.\n");
+		return sb.toString();
 	}
 
 	/**
@@ -204,42 +356,72 @@ public class CategoryAiController {
 	}
 
 	/**
+	 * Lay danh sach ma ngon ngu ma cua hang dang ho tro, doc dong tu
+	 * MerchantStore.getLanguages() - tuc la lay tu cau hinh that su cua cua hang
+	 * thay vi thiet lap cung trong code.
+	 *
+	 * Neu vi ly do nao do store khong tra ve ngon ngu nao, moi dung
+	 * FALLBACK_LANGUAGES de tranh loi he thong.
+	 */
+	private List<String> storeLanguages(MerchantStore store) {
+		List<String> codes = new ArrayList<>();
+		try {
+			if (store != null && store.getLanguages() != null) {
+				for (Language language : store.getLanguages()) {
+					if (language != null && StringUtils.isNotBlank(language.getCode())) {
+						String code = language.getCode().trim().toLowerCase(Locale.ROOT);
+						if (!codes.contains(code)) {
+							codes.add(code);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Cannot read store supported languages", e);
+		}
+		return codes.isEmpty() ? FALLBACK_LANGUAGES : codes;
+	}
+
+	/**
 	 * Nhan supported_languages tu Frontend: chap nhan ca List (JSON array)
 	 * lan chuoi phan cach bang dau phay ("vi,en,fr,zh").
+	 *
+	 * Chi giu cac ngon ngu ma cua hang dang ho tro (supportedLanguages). Neu
+	 * client khong gui gi thi dung luon danh sach ngon ngu cua cua hang.
 	 */
-	private List<String> parseLanguages(Object raw, Object fallbackRaw) {
+	private List<String> parseLanguages(Object raw, Object fallbackRaw, List<String> supportedLanguages) {
 		List<String> result = new ArrayList<>();
-		addLanguages(result, raw);
+		addLanguages(result, raw, supportedLanguages);
 		if (result.isEmpty()) {
-			addLanguages(result, fallbackRaw);
+			addLanguages(result, fallbackRaw, supportedLanguages);
 		}
-		return result.isEmpty() ? DEFAULT_LANGUAGES : result;
+		return result.isEmpty() ? new ArrayList<>(supportedLanguages) : result;
 	}
 
 	@SuppressWarnings("unchecked")
-	private void addLanguages(List<String> result, Object raw) {
+	private void addLanguages(List<String> result, Object raw, List<String> supportedLanguages) {
 		if (raw == null) {
 			return;
 		}
 		if (raw instanceof Iterable) {
 			for (Object item : (Iterable<Object>) raw) {
-				addLanguage(result, item == null ? null : String.valueOf(item));
+				addLanguage(result, item == null ? null : String.valueOf(item), supportedLanguages);
 			}
 			return;
 		}
 		if (raw instanceof String) {
 			for (String part : ((String) raw).split(",")) {
-				addLanguage(result, part);
+				addLanguage(result, part, supportedLanguages);
 			}
 		}
 	}
 
-	private void addLanguage(List<String> result, String raw) {
+	private void addLanguage(List<String> result, String raw, List<String> supportedLanguages) {
 		if (StringUtils.isBlank(raw)) {
 			return;
 		}
 		String code = raw.trim().toLowerCase(Locale.ROOT);
-		if (DEFAULT_LANGUAGES.contains(code) && !result.contains(code)) {
+		if (supportedLanguages.contains(code) && !result.contains(code)) {
 			result.add(code);
 		}
 	}
@@ -372,5 +554,9 @@ public class CategoryAiController {
 			}
 		}
 		return null;
+	}
+
+	private String asString(Object value) {
+		return value == null ? null : String.valueOf(value);
 	}
 }

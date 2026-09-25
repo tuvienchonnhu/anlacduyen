@@ -24,6 +24,11 @@
 <s:message code="category.ai.parse.error" text="Error processing the AI response." var="aiMsgParseError" htmlEscape="false"/>
 <s:message code="category.ai.server.error" text="Server error" var="aiMsgServerError" htmlEscape="false"/>
 <s:message code="category.ai.no.connection" text="Cannot connect to the server." var="aiMsgNoConnection" htmlEscape="false"/>
+<s:message code="category.ai.no.source.language" text="No source language tab found to translate." var="aiMsgNoSourceLang" htmlEscape="false"/>
+<s:message code="category.ai.need.source" text="Please enter the category name or description in the source language tab before translating." var="aiMsgNeedSource" htmlEscape="false"/>
+<s:message code="category.ai.translating" text="AI is translating category data, please wait 10-30 seconds..." var="aiMsgTranslating" htmlEscape="false"/>
+<s:message code="category.ai.translate.success" text="Category data has been translated into all languages!" var="aiMsgTranslateSuccess" htmlEscape="false"/>
+<s:message code="category.ai.no.languages" text="No target language found for translation." var="aiMsgNoLanguages" htmlEscape="false"/>
 var CATEGORY_AI_I18N = {
 	needName : "${aiMsgNeedName}",
 	processing : "${aiMsgProcessing}",
@@ -31,7 +36,12 @@ var CATEGORY_AI_I18N = {
 	missingFields : "${aiMsgMissingFields}",
 	parseError : "${aiMsgParseError}",
 	serverError : "${aiMsgServerError}",
-	noConnection : "${aiMsgNoConnection}"
+	noConnection : "${aiMsgNoConnection}",
+	noSourceLanguage : "${aiMsgNoSourceLang}",
+	needSourceText : "${aiMsgNeedSource}",
+	translating : "${aiMsgTranslating}",
+	translateSuccess : "${aiMsgTranslateSuccess}",
+	noTargetLanguages : "${aiMsgNoLanguages}"
 };
 </script>
 
@@ -111,29 +121,31 @@ var CATEGORY_AI_I18N = {
 
 			function setValue(id, value) {
 				var el = document.getElementById(id);
-				if(el && value) {
-					el.value = value;
+				if(el) {
+					// Ghi de mỗi lần điền giá trị (kể cả rỗng) để nút Dịch cập nhật mọi ô
+					el.value = (value === undefined || value === null) ? '' : value;
 				}
 			}
 
 			// Dong bo textarea goc truoc (day la du lieu that se submit len server)
 			function setEditorValue(name, html) {
+				var value = (html === undefined || html === null) ? '' : html;
 				var textarea = document.getElementsByName(name)[0];
 				if(textarea) {
-					textarea.value = html;
+					textarea.value = value;
 				}
 				if(window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances[name]) {
 					var editor = CKEDITOR.instances[name];
 					try {
-						editor.setData(html);
+						editor.setData(value);
 						editor.updateElement();
 					} catch (ignored) {
-						editor.on('instanceReady', function(){ editor.setData(html); editor.updateElement(); });
+						editor.on('instanceReady', function(){ editor.setData(value); editor.updateElement(); });
 					}
 				} else {
 					// CKEditor chua khoi tao xong - dien lai khi san sang
 					window.__aiCategoryPending = window.__aiCategoryPending || {};
-					window.__aiCategoryPending[name] = html;
+					window.__aiCategoryPending[name] = value;
 				}
 			}
 
@@ -169,13 +181,16 @@ var CATEGORY_AI_I18N = {
 
 					var l = languages[lang] || {};
 
-					if(l.name) { setValue('name' + idx, l.name); filled++; }
-					if(l.seUrl) setValue('seUrl' + idx, l.seUrl);
-					if(l.shortDescription) setValue('categoryHighlight' + idx, l.shortDescription);
-					if(l.description) setEditorValue('descriptions[' + idx + '].description', l.description);
-					if(l.metaTitle) setValue('descriptions[' + idx + '].metatagTitle', l.metaTitle);
-					if(l.metaKeywords) setValue('descriptions[' + idx + '].metatagKeywords', l.metaKeywords);
-					if(l.metaDescription) setValue('descriptions[' + idx + '].metatagDescription', l.metaDescription);
+					// GHI DE: dien moi truong AI tra ve vao o tuong ung, ke ca khi o da co
+					// du lieu nguoi dung nhap truoc do. Chi kiem tra truong co duoc tra ve
+					// hay khong (khac undefined/null), khong bo qua truong rong.
+					if(l.name !== undefined && l.name !== null) { setValue('name' + idx, l.name); filled++; }
+					if(l.seUrl !== undefined && l.seUrl !== null) setValue('seUrl' + idx, l.seUrl);
+					if(l.shortDescription !== undefined && l.shortDescription !== null) setValue('categoryHighlight' + idx, l.shortDescription);
+					if(l.description !== undefined && l.description !== null) setEditorValue('descriptions[' + idx + '].description', l.description);
+					if(l.metaTitle !== undefined && l.metaTitle !== null) setValue('descriptions[' + idx + '].metatagTitle', l.metaTitle);
+					if(l.metaKeywords !== undefined && l.metaKeywords !== null) setValue('descriptions[' + idx + '].metatagKeywords', l.metaKeywords);
+					if(l.metaDescription !== undefined && l.metaDescription !== null) setValue('descriptions[' + idx + '].metatagDescription', l.metaDescription);
 				}
 				return filled;
 			}
@@ -249,6 +264,109 @@ var CATEGORY_AI_I18N = {
 					supported_languages: supported
 				}));
 			});
+
+			// ===== DICH THONG TIN DANH MUC TU TIENG VIET SANG CAC NGON NGU KHAC =====
+			var translateBtn = document.getElementById('aiTranslateBtn');
+			var translateStatus = document.getElementById('aiTranslateStatus');
+			if(translateBtn) {
+
+				function setTranslateStatus(msg, color) {
+					if(translateStatus) {
+						translateStatus.innerHTML = msg || '';
+						translateStatus.style.color = color || '#d9534f';
+					}
+				}
+
+				// Lay gia tri input/textarea theo id (tra ve '' neu khong co)
+				function valById(id) {
+					var el = document.getElementById(id);
+					return (el && el.value) ? el.value : '';
+				}
+
+				// Lay noi dung HTML hien tai cua CKEditor (neu da khoi tao), nguoc lai lay textarea
+				function editorContent(name) {
+					if(window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances[name]) {
+						try { return CKEDITOR.instances[name].getData() || ''; } catch (ignored) {}
+					}
+					var textarea = document.getElementsByName(name)[0];
+					return (textarea && textarea.value) ? textarea.value : '';
+				}
+
+				translateBtn.addEventListener('click', function(){
+					// Ngon ngu nguon: uu tien tieng Viet (vi), neu khong co thi lay tab dau tien
+					var sourceLang = (langIndex['vi'] !== undefined) ? 'vi' : (Object.keys(langIndex)[0] || '');
+					var srcIdx = langIndex[sourceLang];
+					if(srcIdx === undefined) {
+						setTranslateStatus(CATEGORY_AI_I18N.noSourceLanguage);
+						return;
+					}
+
+					// Danh sach ngon ngu dich: tat ca tab ngon ngu cua cua hang, tru ngon ngu nguon
+					var targetLangs = [];
+					for(var lang in langIndex) {
+						if(langIndex.hasOwnProperty(lang) && lang !== sourceLang) targetLangs.push(lang);
+					}
+					if(targetLangs.length === 0) {
+						setTranslateStatus(CATEGORY_AI_I18N.noTargetLanguages);
+						return;
+					}
+
+					// Thu thap thong tin danh muc tu tab nguon
+					var payload = {
+						sourceLanguage: sourceLang,
+						languages: Object.keys(langIndex).join(','),
+						categoryName: valById('name' + srcIdx),
+						seUrl: valById('seUrl' + srcIdx),
+						shortDescription: valById('categoryHighlight' + srcIdx),
+						description: editorContent('descriptions[' + srcIdx + '].description'),
+						metaTitle: valById('descriptions[' + srcIdx + '].metatagTitle'),
+						metaKeywords: valById('descriptions[' + srcIdx + '].metatagKeywords'),
+						metaDescription: valById('descriptions[' + srcIdx + '].metatagDescription')
+					};
+
+					if(!payload.categoryName && !payload.shortDescription && !payload.description
+							&& !payload.metaTitle && !payload.metaKeywords && !payload.metaDescription) {
+						setTranslateStatus(CATEGORY_AI_I18N.needSourceText);
+						return;
+					}
+
+					setTranslateStatus(CATEGORY_AI_I18N.translating, '#333333');
+					translateBtn.disabled = true;
+
+					var xhr = new XMLHttpRequest();
+					xhr.open('POST', '<c:url value="/api/v1/category/ai/translate"/>', true);
+					xhr.setRequestHeader('Content-Type', 'application/json');
+					xhr.onload = function() {
+						translateBtn.disabled = false;
+						if(xhr.status === 200) {
+							try {
+								var data = JSON.parse(xhr.responseText);
+								var filled = fillLanguages(data.languages);
+								if(filled === 0) {
+									setTranslateStatus(CATEGORY_AI_I18N.missingFields);
+									return;
+								}
+								setTranslateStatus(CATEGORY_AI_I18N.translateSuccess, '#468847');
+								setTimeout(function(){ setTranslateStatus(''); }, 10000);
+							} catch (e) {
+								setTranslateStatus(CATEGORY_AI_I18N.parseError);
+							}
+						} else {
+							var msg = CATEGORY_AI_I18N.serverError + ' (' + xhr.status + ')';
+							try {
+								var err = JSON.parse(xhr.responseText);
+								if(err && err.message) msg = err.message;
+							} catch (ignored) {}
+							setTranslateStatus(msg);
+						}
+					};
+					xhr.onerror = function() {
+						translateBtn.disabled = false;
+						setTranslateStatus(CATEGORY_AI_I18N.noConnection);
+					};
+					xhr.send(JSON.stringify(payload));
+				});
+			}
 		}
 
 		// Doi DOM san sang (nut nam trong <form> ben duoi khoi script nay)
@@ -328,6 +446,20 @@ var CATEGORY_AI_I18N = {
                               <span id="aiSuggestStatus" style="margin-left:10px;color:#d9534f;font-weight:bold;"></span>
                               <p class="help-inline" style="margin-top:5px;">
 							  	<s:message code="button.label.AI_Suggest_Category_Description" text="Nhập Tên danh mục ở ô bên dưới, sau đó bấm nút này - AI sẽ tự động điền mã danh mục, tên, URL, mô tả và SEO cho tất cả ngôn ngữ. Bạn vẫn xem lại và chỉnh sửa trước khi lưu."/>
+                              </p>
+                        </div>
+                 </div>
+                 </c:if>
+                 <c:if test="${counter.first}">
+                 <div class="control-group" id="aiTranslateGroup">
+                        <label><s:message code="button.label.translate_category_information_with_AI" text="Translate category information with AI"/></label>
+                        <div class="controls">
+                              <button type="button" id="aiTranslateBtn" class="btn btn-info" style="margin-bottom:5px;">
+                                    <i class="icon-globe"></i> <s:message code="button.label.translate_category_information_with_AI" text="Translate category information with AI"/>
+                              </button>
+                              <span id="aiTranslateStatus" style="margin-left:10px;color:#d9534f;font-weight:bold;"></span>
+                              <p class="help-inline" style="margin-top:5px;">
+  <s:message code="button.label.AI_Translate_Category_Description" text="Nhập thông tin danh mục ở tab tiếng Việt, sau đó bấm nút này - AI sẽ dịch tên, URL, mô tả và SEO sang các ngôn ngữ còn lại của cửa hàng."/>
                               </p>
                         </div>
                  </div>
