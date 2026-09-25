@@ -252,6 +252,7 @@ public class CustomProductGroupsController {
 		
 		model.addAttribute("group", groupCode);
 		model.addAttribute("categories", readableCategories);
+		model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
 		return ControllerConstants.Tiles.Product.customGroupsDetails;
 		
 	}

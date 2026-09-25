@@ -831,10 +831,12 @@ public class ProductController {
 		
 		model.addAttribute("product", product);
 		model.addAttribute("categories", readableCategories);
+		// Ten danh muc da duoc chon dung ngon ngu hien thi (dung cho dropdown)
+		model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
 		return "catalogue-product-categories";
-		
+
 	}
-	
+
 	/**
 	 * List all categories associated to a Product
 	 * @param request
@@ -848,16 +850,16 @@ public class ProductController {
 
 		String sProductId = request.getParameter("productId");
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-		
-		
+
+
 		AjaxResponse resp = new AjaxResponse();
-		
+
 		final HttpHeaders httpHeaders= new HttpHeaders();
 	    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
-		
+
 		Long productId;
 		Product product = null;
-		
+
 		try {
 			productId = Long.parseLong(sProductId);
 		} catch (Exception e) {
@@ -867,37 +869,37 @@ public class ProductController {
 			return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 		}
 
-		
+
 		try {
 
 			product = productService.getById(productId);
 
-			
+
 			if(product==null) {
 				resp.setStatus(AjaxPageableResponse.RESPONSE_STATUS_FAIURE);
 				resp.setErrorString("Product id is not valid");
 				String returnString = resp.toJSONString();
 				return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 			}
-			
+
 			if(product.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
 				resp.setStatus(AjaxPageableResponse.RESPONSE_STATUS_FAIURE);
 				resp.setErrorString("Product id is not valid");
 				String returnString = resp.toJSONString();
 				return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 			}
-			
-			
+
+
 			Language language = (Language)request.getAttribute("LANGUAGE");
 
-			
+
 			Set<Category> categories = product.getCategories();
-			
+
 
 			for(Category category : categories) {
 				Map entry = new HashMap();
 				entry.put("categoryId", category.getId());
-				
+
 				Set<CategoryDescription> descriptions = category.getDescriptions();
 				String categoryName = category.getDescriptions().iterator().next().getName();
 				for(CategoryDescription description : descriptions){
@@ -910,125 +912,126 @@ public class ProductController {
 			}
 
 			resp.setStatus(AjaxPageableResponse.RESPONSE_STATUS_SUCCESS);
-		
+
 		} catch (Exception e) {
 			LOGGER.error("Error while paging products", e);
 			resp.setStatus(AjaxPageableResponse.RESPONSE_STATUS_FAIURE);
 			resp.setErrorMessage(e);
 		}
-		
+
 		String returnString = resp.toJSONString();
 		return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 
 
 	}
-	
-	
+
+
 	@PreAuthorize("hasRole('PRODUCTS')")
 	@RequestMapping(value="/admin/product-categories/remove.html", method=RequestMethod.POST)
 	public @ResponseBody ResponseEntity<String> deleteProductFromCategory(HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		String sCategoryid = request.getParameter("categoryId");
 		String sProductId = request.getParameter("productId");
-		
+
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-		
+
 		AjaxResponse resp = new AjaxResponse();
-		
+
 		final HttpHeaders httpHeaders= new HttpHeaders();
 	    httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
-		
+
 		try {
-			
+
 			Long categoryId = Long.parseLong(sCategoryid);
 			Long productId = Long.parseLong(sProductId);
-			
+
 			Category category = categoryService.getById(categoryId, store.getId());
 			Product product = productService.getById(productId);
-			
+
 			if(category==null || category.getMerchantStore().getId()!=store.getId()) {
 
 				resp.setStatusMessage(messages.getMessage("message.unauthorized", locale));
-				resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);			
+				resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 				String returnString = resp.toJSONString();
 				return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
-			} 
-			
+			}
+
 			if(product==null || product.getMerchantStore().getId()!=store.getId()) {
 
 				resp.setStatusMessage(messages.getMessage("message.unauthorized", locale));
-				resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);			
+				resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 				String returnString = resp.toJSONString();
 				return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
-			} 
-			
+			}
+
 			product.getCategories().remove(category);
-			productService.update(product);	
-			
+			productService.update(product);
+
 			resp.setStatus(AjaxResponse.RESPONSE_OPERATION_COMPLETED);
 
-		
-		
+
+
 		} catch (Exception e) {
 			LOGGER.error("Error while deleting category", e);
 			resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 			resp.setErrorMessage(e);
 		}
-		
+
 		String returnString = resp.toJSONString();
 
 		return new ResponseEntity<String>(returnString,httpHeaders,HttpStatus.OK);
 	}
-	
+
 
 	@PreAuthorize("hasRole('PRODUCTS')")
 	@RequestMapping(value="/admin/products/addProductToCategories.html", method=RequestMethod.POST)
 	public String addProductToCategory(@RequestParam("productId") long productId, @RequestParam("id") long categoryId, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
+
 		setMenu(model,request);
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
 		Language language = (Language)request.getAttribute("LANGUAGE");
-		
-		
+
+
 		//get the product and validate it belongs to the current merchant
 		Product product = productService.getById(productId);
-		
+
 		if(product==null) {
 			return "redirect:/admin/products/products.html";
 		}
-		
+
 		if(product.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
 			return "redirect:/admin/products/products.html";
 		}
-		
+
 
 		//get parent categories
 		List<Category> categories = categoryService.listByStore(store,language);
-		
+
 		Category category = categoryService.getById(categoryId, store.getId(), language.getId());
-		
+
 		if(category==null) {
 			return "redirect:/admin/products/products.html";
 		}
-		
+
 		if(category.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
 			return "redirect:/admin/products/products.html";
 		}
-		
+
 		product.getCategories().add(category);
-		
+
 		productService.update(product);
-		
+
 		List<com.salesmanager.shop.admin.model.catalog.Category> readableCategories = CategoryUtils.readableCategoryListConverter(categories, language);
-		
+
 		model.addAttribute("product", product);
 		model.addAttribute("categories", readableCategories);
-		
+		model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
+
 		return "catalogue-product-categories";
-		
+
 	}
 
-	private void setMenu(Model model, HttpServletRequest request) throws Exception {
+	private void setMenu(final Model model, HttpServletRequest request) throws Exception {
 		
 		//display menu
 		Map<String,String> activeMenus = new HashMap<String,String>();

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.salesmanager.core.business.services.catalog.category.CategoryService;
+import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.reference.country.CountryService;
 import com.salesmanager.core.business.services.reference.language.LanguageService;
 import com.salesmanager.core.business.utils.ajax.AjaxResponse;
@@ -50,6 +51,9 @@ public class CategoryController {
 
     @Inject
     CountryService countryService;
+
+    @Inject
+    ProductService productService;
 
     @Inject
     LabelUtils messages;
@@ -90,10 +94,13 @@ public class CategoryController {
         List<com.salesmanager.shop.admin.model.catalog.Category> readableCategories = CategoryUtils.readableCategoryListConverter(categories, language);
 
         for(Language l : languages) {
+            // Lay mo ta theo dung ngon ngu (khong phu thuoc thu tu cua Set)
             CategoryDescription description = null;
             for(CategoryDescription desc : category.get().getDescriptions()) {
-                if(desc.getLanguage().getCode().equals(l.getCode())) {
+                if(desc.getLanguage()!=null && desc.getLanguage().getCode()!=null
+                        && l.getCode()!=null && desc.getLanguage().getCode().equals(l.getCode())) {
                     description = desc;
+                    break;
                 }
             }
             if(description==null) {
@@ -107,7 +114,9 @@ public class CategoryController {
         adminCategory.setCategory(category.get());
 
         model.addAttribute("category", adminCategory);
-        model.addAttribute("categories", readableCategories);
+        // Danh muc cha co the chon: loai chinh no va cac danh muc con cua no
+        model.addAttribute("categories", CategoryUtils.readableCategoryListConverter(
+                CategoryUtils.parentCandidates(categories, category.get()), language));
 
         return "catalogue-categories-category";
     }
@@ -147,12 +156,18 @@ public class CategoryController {
         }
         //save to DB
         category.getCategory().setMerchantStore(store);
+
+        //get parent categories (da loai chinh no va cac danh muc con cua no)
+        List<Category> categories = categoryService.listByStore(store,language);
+        model.addAttribute("categories", CategoryUtils.readableCategoryListConverter(
+                CategoryUtils.parentCandidates(categories, category.getCategory()), language));
+
         //}
         if (result.hasErrors()) {
             return "catalogue-categories-category";
         }
         //check parent
-        if(category.getCategory().getParent()!=null) {
+        if(category.getCategory().getParent()!=null && category.getCategory().getParent().getId()!=null) {
             if(category.getCategory().getParent().getId()==-1) {//this is a root category
                 category.getCategory().setParent(null);
                 category.getCategory().setLineage("/" + category.getCategory().getId() + "/");
@@ -162,17 +177,17 @@ public class CategoryController {
         category.getCategory().getAuditSection().setModifiedBy(request.getRemoteUser());
         categoryService.saveOrUpdate(category.getCategory());
         //ajust lineage and depth
-        if(category.getCategory().getParent()!=null && category.getCategory().getParent().getId()!=-1) {
+        if(category.getCategory().getParent()!=null && category.getCategory().getParent().getId()!=null
+                && category.getCategory().getParent().getId()!=-1) {
             Category parent = new Category();
             parent.setId(category.getCategory().getParent().getId());
             parent.setMerchantStore(store);
             categoryService.addChild(parent, category.getCategory());
         }
         //get parent categories
-        List<Category> categories = categoryService.listByStore(store,language);
-        List<com.salesmanager.shop.admin.model.catalog.Category> readableCategories = CategoryUtils.readableCategoryListConverter(categories, language);
+        model.addAttribute("categories", CategoryUtils.readableCategoryListConverter(
+                CategoryUtils.parentCandidates(categories, category.getCategory()), language));
 
-        model.addAttribute("categories", readableCategories);
         model.addAttribute("success","success");
         return "catalogue-categories-category";
     }
@@ -201,20 +216,42 @@ public class CategoryController {
             if(!StringUtils.isBlank(categoryName)) {
                 categories = categoryService.getByName(store, categoryName, language);
             } else if(!StringUtils.isBlank(categoryCode)) {
-                categoryService.listByCodes(store, new ArrayList<>(Collections.singletonList(categoryCode)), language);
+                // Truoc day ket qua tra ve khong duoc gan vao bien categories nen
+                // khi loc theo code se luon bi NullPointerException ben duoi.
+                categories = categoryService.listByCodes(store, new ArrayList<>(Collections.singletonList(categoryCode)), language);
             } else {
                 categories = categoryService.listByStore(store, language);
             }
-            for(Category category : categories) {
-                @SuppressWarnings("rawtypes")
-                Map entry = new HashMap();
-                entry.put("categoryId", category.getId());
-                CategoryDescription description = category.getDescriptions().iterator().next();
+            if(categories != null) {
+                for(Category category : categories) {
+                    @SuppressWarnings("rawtypes")
+                    Map entry = new HashMap();
+                    entry.put("categoryId", category.getId());
 
-                entry.put("name", description.getName());
-                entry.put("code", category.getCode());
-                entry.put("visible", category.isVisible());
-                resp.addDataEntry(entry);
+                    // Chon mo ta dung voi ngon ngu Admin dang hien thi (language)
+                    // thay vi lay bua phan tu dau tien trong Set
+                    // (gay tinh trang ten danh muc hien thi lan lon nhieu ngon ngu).
+                    // Neu khong co ban dich dung ngon ngu nay thi moi fallback
+                    // ve mo ta dau tien, va neu khong con mo ta nao thi dung code.
+                    CategoryDescription description = null;
+                    if(category.getDescriptions()!=null && !category.getDescriptions().isEmpty()) {
+                        for(CategoryDescription desc : category.getDescriptions()) {
+                            if(desc.getLanguage()!=null && language!=null
+                                    && desc.getLanguage().getCode().equals(language.getCode())) {
+                                description = desc;
+                                break;
+                            }
+                        }
+                        if(description==null) {
+                            description = category.getDescriptions().iterator().next();
+                        }
+                    }
+
+                    entry.put("name", description!=null ? description.getName() : category.getCode());
+                    entry.put("code", category.getCode());
+                    entry.put("visible", category.isVisible());
+                    resp.addDataEntry(entry);
+                }
             }
             resp.setStatus(AjaxResponse.RESPONSE_STATUS_SUCCESS);
         } catch (Exception e) {
@@ -240,6 +277,7 @@ public class CategoryController {
         List<com.salesmanager.shop.admin.model.catalog.Category> readableCategories = CategoryUtils.readableCategoryListConverter(categories, language);
 
         model.addAttribute("categories", readableCategories);
+        model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
 
         return "catalogue-categories-hierarchy";
     }
@@ -252,12 +290,16 @@ public class CategoryController {
         AjaxResponse resp = new AjaxResponse();
         try {
             Long id = Long.parseLong(sid);
-            Optional<Category> category = Optional.ofNullable(categoryService.getById(id, store.getId()));
-            if(category.isPresent() || category.get().getMerchantStore().getId().intValue() !=store.getId().intValue() ) {
+            Category category = categoryService.getById(id, store.getId());
+            if(category==null || category.getMerchantStore().getId().intValue()!=store.getId().intValue()) {
                 resp.setStatusMessage(messages.getMessage("message.unauthorized", locale));
                 resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
+            } else if(isCategoryReferenced(category)) {
+                // Khong xoa khi con danh muc con hoac con san pham gan vao danh muc nay
+                resp.setStatusMessage(messages.getMessage("message.category.notempty", locale));
+                resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
             } else {
-                categoryService.delete(category.get());
+                categoryService.delete(category);
                 resp.setStatus(AjaxResponse.RESPONSE_OPERATION_COMPLETED);
             }
         } catch (Exception e) {
@@ -285,19 +327,17 @@ public class CategoryController {
             Long childId = Long.parseLong(childid);
             Optional<Category> child = Optional.ofNullable(categoryService.getById(childId, store.getId()));
             Optional<Category> parent = Optional.ofNullable(categoryService.getById(parentId, store.getId()));
-            if(child.isPresent()&& child.get().getParent().getId().equals(parentId)) {
+            if(isValid(store, child, parent)) {
+                return getResponseAjax(locale, resp, httpHeaders);
+            }
+            if(parent.get().getId().equals(child.get().getParent()!=null ? child.get().getParent().getId() : null)) {
+                // Danh muc da nam duoi danh muc cha nay roi
                 resp.setStatus(AjaxResponse.RESPONSE_OPERATION_COMPLETED);
-                //String returnString = resp.toJSONString();
+            } else {
+                parent.get().getAuditSection().setModifiedBy(request.getRemoteUser());
+                categoryService.addChild(parent.get(), child.get());
+                resp.setStatus(AjaxResponse.RESPONSE_OPERATION_COMPLETED);
             }
-            if(parentId!=1) {
-                if(isValid(store, child, parent)) {
-                    return getResponseAjax(locale, resp, httpHeaders);
-                }
-            }
-            parent.get().getAuditSection().setModifiedBy(request.getRemoteUser());
-            categoryService.addChild(parent.get(), child.get());
-            resp.setStatus(AjaxResponse.RESPONSE_OPERATION_COMPLETED);
-
         } catch (Exception e) {
             LOGGER.error("Error while moving category", e);
             resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
@@ -330,15 +370,17 @@ public class CategoryController {
             return getResponseAjax(resp, httpHeaders, AjaxResponse.CODE_ALREADY_EXIST);
         }
         try {
-            Optional<Category> category =Optional.ofNullable(categoryService.getByCode(store, code));
+            Optional<Category> category = Optional.ofNullable(categoryService.getByCode(store, code));
             if(category.isPresent() && StringUtils.isBlank(id)) {
-                return getResponseAjax(resp, httpHeaders, AjaxResponse.CODE_ALREADY_EXIST);
+                return getResponseAjax(resp, httpHeaders, AjaxResponse.RESPONSE_STATUS_FAIURE);
             }
             if(category.isPresent() && !StringUtils.isBlank(id)) {
                 try {
                     long lid = Long.parseLong(id);
                     if(category.get().getCode().equals(code) && category.get().getId() ==lid) {
-                        return getResponseAjax(resp, httpHeaders, AjaxResponse.CODE_ALREADY_EXIST);
+                        resp.setStatus(AjaxResponse.RESPONSE_OPERATION_COMPLETED);
+                        String returnString = resp.toJSONString();
+                        return new ResponseEntity<>(returnString, httpHeaders, HttpStatus.OK);
                     }
                 } catch (Exception e) {
                     return getResponseAjax(resp, httpHeaders, AjaxResponse.CODE_ALREADY_EXIST);
@@ -358,6 +400,15 @@ public class CategoryController {
         resp.setStatus(codeAlreadyExist);
         String returnString = resp.toJSONString();
         return new ResponseEntity<>(returnString, httpHeaders, HttpStatus.OK);
+    }
+
+    /**
+     * Mot danh muc chi co the bi xoa khi khong con danh muc con va khong con
+     * san pham nao tham chieu toi no.
+     */
+    private boolean isCategoryReferenced(Category category) throws Exception {
+        return !categoryService.listByStoreAndParent(category.getMerchantStore(), category).isEmpty()
+                || !productService.getProducts(Collections.singletonList(category.getId())).isEmpty();
     }
 
     private void setMenu(Model model, HttpServletRequest request) {

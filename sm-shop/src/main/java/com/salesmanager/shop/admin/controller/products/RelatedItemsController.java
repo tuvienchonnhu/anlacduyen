@@ -80,6 +80,7 @@ public class RelatedItemsController {
         
 		
 		model.addAttribute("categories", readableCategories);
+		model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
 		model.addAttribute("product", product);
 		return ControllerConstants.Tiles.Product.relatedItems;
 		

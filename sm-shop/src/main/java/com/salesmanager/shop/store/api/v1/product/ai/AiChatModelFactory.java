@@ -57,7 +57,7 @@ public class AiChatModelFactory {
 	@Value("${cerebras.apikey:}")
 	private String cerebrasApiKeyFromProperties;
 
-	@Value("${cerebras.model:llama3.1-8b}")
+	@Value("${cerebras.model:gpt-oss-120b}")
 	private String cerebrasModelFromProperties;
 
 	@Value("${ai.provider:" + Constants.AI_PROVIDER_GEMINI + "}")

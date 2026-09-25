@@ -65,6 +65,7 @@ public class FeaturedItemsController {
 		List<com.salesmanager.shop.admin.model.catalog.Category> readableCategories = CategoryUtils.readableCategoryListConverter(categories, language);
 		
 		model.addAttribute("categories", readableCategories);
+		model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
 		return "admin-catalogue-featured";
 		
 	}

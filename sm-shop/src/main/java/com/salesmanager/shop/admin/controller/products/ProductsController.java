@@ -59,10 +59,11 @@ public class ProductsController {
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
 		
 		List<Category> categories = categoryService.listByStore(store, language);
-		
-		List<com.salesmanager.shop.admin.model.catalog.Category> readableCategories = CategoryUtils.readableCategoryListConverter(categories, language);
-		
+				List<com.salesmanager.shop.admin.model.catalog.Category> readableCategories = CategoryUtils.readableCategoryListConverter(categories, language);
+
 		model.addAttribute("categories", readableCategories);
+		// Du lieu cho cay danh muc (ten da duoc chon dung ngon ngu hien thi)
+		model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
 		
 		return "admin-products";
 		
@@ -90,18 +91,30 @@ public class ProductsController {
 		
 			int startRow = Integer.parseInt(request.getParameter("_startRow"));
 			int endRow = Integer.parseInt(request.getParameter("_endRow"));
-			
+						// SmartClient gui _endRow la CHI SO (0-based) cua dong cuoi cua trang,
+			// khong phai so luong ban ghi. Truoc day code dung truc tiep endRow
+			// lam so luong nen trang luon tra ve thua (endRow - startRow + 1)
+			// ban ghi, dong cuoi cua trang bi lap lai o trang ke tiep.
+			int count = endRow - startRow + 1;
+			if(count <= 0) {
+				count = 10;
+			}
+
 			Language language = (Language)request.getAttribute("LANGUAGE");
 			MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-			
+
 			ProductCriteria criteria = new ProductCriteria();
-			
+			// SmartClient "dataFetchMode:paged" phan trang theo so dong bat dau
+			// (startRow) va so dong can lay (count), khong phai theo so trang.
+			// Danh dau de repository phan trang theo che do nay (legacy) - vua
+			// dung ngu nghia du lieu tra ve vua tranh keo het ket qua ve bo nho.
 			criteria.setStartIndex(startRow);
-			criteria.setMaxCount(endRow);
-			
-			
+			criteria.setMaxCount(count);
+			criteria.setPageSize(count);
+
+
 			if(!StringUtils.isBlank(categoryId) && !categoryId.equals("-1")) {
-				
+
 				//get other filters
 				Long lcategoryId = 0L;
 				try {
@@ -111,49 +124,49 @@ public class ProductsController {
 					resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 					String returnString = resp.toJSONString();
 					return new ResponseEntity<String>(returnString,HttpStatus.BAD_REQUEST);
-				} 
-				
-				
+				}
+
+
 
 				if(lcategoryId>0) {
-				
+
 					Category category = categoryService.getById(lcategoryId, store.getId());
-	
+
 					if(category==null || category.getMerchantStore().getId()!=store.getId()) {
 						resp.setStatus(AjaxResponse.RESPONSE_STATUS_FAIURE);
 						String returnString = resp.toJSONString();
 						return new ResponseEntity<String>(returnString,HttpStatus.BAD_REQUEST);
 					}
-					
+
 					//get all sub categories
 					StringBuilder lineage = new StringBuilder();
 					lineage.append(category.getLineage()).append(category.getId()).append("/");
-					
+
 					List<Category> categories = categoryService.getListByLineage(store, lineage.toString());
-					
+
 					List<Long> categoryIds = new ArrayList<Long>();
-					
+
 					for(Category cat : categories) {
 						categoryIds.add(cat.getId());
 					}
 					categoryIds.add(category.getId());
 					criteria.setCategoryIds(categoryIds);
-				
+
 				}
-				
 
 
-				
+
+
 			}
-			
+
 			if(!StringUtils.isBlank(sku)) {
 				criteria.setCode(sku);
 			}
-			
+
 			if(!StringUtils.isBlank(name)) {
 				criteria.setProductName(name);
 			}
-			
+
 			if(!StringUtils.isBlank(available)) {
 				if(available.equals("true")) {
 					criteria.setAvailable(new Boolean(true));
@@ -161,9 +174,11 @@ public class ProductsController {
 					criteria.setAvailable(new Boolean(false));
 				}
 			}
-			
+
 			ProductList productList = productService.listByStore(store, language, criteria);
-			resp.setEndRow(Math.toIntExact(productList.getTotalCount()));
+			// totalCount = tong so san pham (client can de tinh so trang)
+			// endRow = chi so dong cuoi cung cua trang hien tai (bat dau tu 0)
+			resp.setEndRow(Math.max(0, (int) productList.getTotalCount() - 1));
 			resp.setStartRow(startRow);
 			List<Product> plist = productList.getProducts();
 			

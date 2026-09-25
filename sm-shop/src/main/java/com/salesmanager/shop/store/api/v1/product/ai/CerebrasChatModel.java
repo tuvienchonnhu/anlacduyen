@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
  * Cerebras cung cap API tuong thich OpenAI (OpenAI-compatible), nen endpoint va
  * dinh dang payload/message giong het OpenAI, chi khac base URL
  * (https://api.cerebras.ai/v1/chat/completions) va danh sach model
- * (vi du: llama3.1-8b, llama-3.3-70b).
+ * (vi du: gpt-oss-120b, qwen-3.8-27b - cac model Llama cu da bi go bo).
  *
  * Ho tro ca van ban va anh (vision) qua message content dang mang (array of
  * parts) voi "image_url" chua data URL (voi cac model vision cua Cerebras).
@@ -38,7 +38,7 @@ public class CerebrasChatModel implements AiChatModel {
 
 	public CerebrasChatModel(String apiKey, String model, RestTemplate restTemplate) {
 		this.apiKey = apiKey;
-		this.model = StringUtils.defaultIfBlank(model, "llama3.1-8b");
+		this.model = StringUtils.defaultIfBlank(model, "gpt-oss-120b");
 		this.restTemplate = (restTemplate != null) ? restTemplate : new RestTemplate();
 	}
 
@@ -117,6 +117,11 @@ public class CerebrasChatModel implements AiChatModel {
 				}
 				String apiMessage = e.getResponseBodyAsString();
 				LOGGER.error("Cerebras API HTTP error {} : {}", e.getStatusCode(), apiMessage);
+				if (status == 404) {
+					throw new AiException("Model Cerebras '" + model
+							+ "' khong ton tai hoac khong co quyen truy cap. Vao Admin > Configuration > AI Configuration de doi model ("
+							+ "vi du: gpt-oss-120b hoac qwen-3.8-27b). Chi tiet: " + apiMessage);
+				}
 				throw new AiException("Cerebras API tra ve " + e.getStatusCode() + ": " + apiMessage);
 			}
 		}

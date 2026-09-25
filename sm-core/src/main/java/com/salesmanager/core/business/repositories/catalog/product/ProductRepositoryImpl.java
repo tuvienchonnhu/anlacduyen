@@ -912,9 +912,257 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 					.append("%").toString());
 		}
 
-	    @SuppressWarnings("rawtypes")
-	    GenericEntityList entityList = new GenericEntityList();
-	    entityList.setTotalCount(count.intValue());
+		/**
+		 * Phan trang an toan (tranh warning HHH000104).
+		 *
+		 * Query "select distinct p from Product p join fetch <cac collection>
+		 * ... order by p.sortOrder" tra ve nhieu dong vat ly cho mot san pham
+		 * (do join fetch cac collection). Neu Hibernate/DB ap LIMIT/OFFSET truc
+		 * tiep tren query nay thi gioi han se roi vao cac dong vat ly chu khong
+		 * phai so luong san pham -> ket qua phan trang bi sai. Vi vay neu co
+		 * setFirstResult/setMaxResults tren query co collection fetch, Hibernate
+		 * phai keo toan bo ket qua ve roi phan trang trong bo nho va ghi canh bao:
+		 * "HHH000104: firstResult/maxResults specified with collection fetch;
+		 * applying in memory!". Cach xu ly dung theo khuyen nghi cua Hibernate la
+		 * tach thanh 2 query:
+		 * 1) Query thu nhat: chi lay KHOA (p.id) cua trang can lay, KHONG join
+		 *    fetch collection -> phan trang duoc thuc hien trong database.
+		 * 2) Query thu hai: lay day du entity + cac collection theo danh sach id
+		 *    vua lay -> khong con setFirstResult/setMaxResults nen khong con
+		 *    warning va khong phai doc thua du lieu.
+		 */
+		boolean pagingRequested = criteria.isLegacyPagination()
+				? criteria.getMaxCount() > 0
+				: true;
+
+		if (pagingRequested) {
+
+			int firstResult;
+			int maxResults;
+			if (criteria.isLegacyPagination()) {
+				firstResult = criteria.getStartIndex();
+				maxResults = criteria.getMaxCount();
+			} else {
+				firstResult = ((criteria.getStartPage() == 0 ? 0 : criteria.getStartPage())) * criteria.getPageSize();
+				maxResults = criteria.getPageSize();
+			}
+
+			// Query 1: danh sach id cua trang hien tai (khong join fetch collection).
+			// Can select them p.sortOrder de order by dung trong SQL khi dung
+			// distinct (mot so DB yeu cau dieu nay).
+			StringBuilder idQueryString = new StringBuilder();
+			idQueryString.append("select distinct p.id, p.sortOrder from Product as p ");
+			idQueryString.append("join p.merchantStore merch ");
+			idQueryString.append("join p.availabilities pa ");
+			idQueryString.append("left join pa.prices pap ");
+			idQueryString.append("join p.descriptions pd ");
+			idQueryString.append("left join p.categories categs ");
+			idQueryString.append("left join p.manufacturer manuf ");
+			idQueryString.append("left join p.owner owner ");
+
+			if (!CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+				idQueryString.append(" inner join p.attributes pattr");
+				idQueryString.append(" inner join pattr.productOption po");
+				idQueryString.append(" inner join po.descriptions pod");
+				idQueryString.append(" inner join pattr.productOptionValue pov ");
+				idQueryString.append(" inner join pov.descriptions povd");
+			} else if (CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+				idQueryString.append(" inner join p.attributes pattr");
+				idQueryString.append(" inner join pattr.productOptionValue pov ");
+			}
+
+			// cung dieu kien WHERE nhu query lay du lieu ben duoi
+			idQueryString.append(" where merch.id=:mId");
+			if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+				idQueryString.append(" and pd.language.code=:lang");
+			}
+			if (!CollectionUtils.isEmpty(criteria.getProductIds())) {
+				idQueryString.append(" and p.id in (:pId)");
+			}
+			if (!CollectionUtils.isEmpty(criteria.getCategoryIds())) {
+				idQueryString.append(" and categs.id in (:cid)");
+			}
+			if (criteria.getManufacturerId() != null) {
+				idQueryString.append(" and manuf.id = :manufid");
+			}
+			if (criteria.getAvailable() != null) {
+				if (criteria.getAvailable()) {
+					idQueryString.append(" and p.available=true and p.dateAvailable<=:dt");
+				} else {
+					idQueryString.append(" and p.available=false and p.dateAvailable>:dt");
+				}
+			}
+			if (!StringUtils.isBlank(criteria.getProductName())) {
+				idQueryString.append(" and lower(pd.name) like :nm");
+			}
+			if (!StringUtils.isBlank(criteria.getCode())) {
+				idQueryString.append(" and lower(p.sku) like :sku");
+			}
+			if (!StringUtils.isBlank(criteria.getStatus())) {
+				idQueryString.append(" and p.rentalStatus = :status");
+			}
+			if (criteria.getOwnerId() != null) {
+				idQueryString.append(" and owner.id = :ownerid");
+			}
+			if (!CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+				int cnt = 0;
+				for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
+					idQueryString.append(" and po.code =:").append(attributeCriteria.getAttributeCode());
+					idQueryString.append(" and povd.description like :").append("val").append(cnt)
+							.append(attributeCriteria.getAttributeCode());
+					cnt++;
+				}
+				if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+					idQueryString.append(" and povd.language.code=:lang");
+				}
+			}
+			if (CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+				idQueryString.append(" and pov.id in (:povid)");
+			}
+			idQueryString.append(" order by p.sortOrder asc");
+
+			Query idQuery = this.em.createQuery(idQueryString.toString());
+
+			if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+				idQuery.setParameter("lang", language.getCode());
+			}
+			idQuery.setParameter("mId", store.getId());
+
+			if (!CollectionUtils.isEmpty(criteria.getCategoryIds())) {
+				idQuery.setParameter("cid", criteria.getCategoryIds());
+			}
+			if (CollectionUtils.isNotEmpty(criteria.getOptionValueIds())) {
+				idQuery.setParameter("povid", criteria.getOptionValueIds());
+			}
+			if (!CollectionUtils.isEmpty(criteria.getProductIds())) {
+				idQuery.setParameter("pId", criteria.getProductIds());
+			}
+			if (criteria.getAvailable() != null) {
+				idQuery.setParameter("dt", new Date());
+			}
+			if (criteria.getManufacturerId() != null) {
+				idQuery.setParameter("manufid", criteria.getManufacturerId());
+			}
+			if (!StringUtils.isBlank(criteria.getCode())) {
+				idQuery.setParameter("sku",
+						new StringBuilder().append("%").append(criteria.getCode().toLowerCase()).append("%").toString());
+			}
+			if (!CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+				int cnt = 0;
+				for (AttributeCriteria attributeCriteria : criteria.getAttributeCriteria()) {
+					idQuery.setParameter(attributeCriteria.getAttributeCode(), attributeCriteria.getAttributeCode());
+					idQuery.setParameter("val" + cnt + attributeCriteria.getAttributeCode(),
+							"%" + attributeCriteria.getAttributeValue() + "%");
+					cnt++;
+				}
+			}
+			if (!StringUtils.isBlank(criteria.getStatus())) {
+				idQuery.setParameter("status", criteria.getStatus());
+			}
+			if (criteria.getOwnerId() != null) {
+				idQuery.setParameter("ownerid", criteria.getOwnerId());
+			}
+			if (!StringUtils.isBlank(criteria.getProductName())) {
+				idQuery.setParameter("nm", new StringBuilder().append("%")
+						.append(criteria.getProductName().toLowerCase()).append("%").toString());
+			}
+
+			// Pagination duoc ap dung trong database (khong con collection fetch)
+			idQuery.setFirstResult(firstResult);
+			idQuery.setMaxResults(Math.min(maxResults, count.intValue()));
+
+			List<?> idRows = idQuery.getResultList();
+
+			List<Long> pageProductIds = new ArrayList<Long>();
+			for (Object row : idRows) {
+				if (row instanceof Object[]) {
+					pageProductIds.add((Long) ((Object[]) row)[0]);
+				} else {
+					pageProductIds.add((Long) row);
+				}
+			}
+
+			List<Product> pageProducts = new ArrayList<Product>();
+
+			if (!pageProductIds.isEmpty()) {
+
+				/*
+				 * Query 2: lay day du entity + collection theo danh sach id cua trang.
+				 *
+				 * LUU Y: phai dung MOT StringBuilder MOI cho phan select/from cua
+				 * query nay. Bien "qs" o tren da chua san "where merch.id=:mId ...
+				 * order by p.sortOrder asc" (dung cho query lay du lieu truoc khi
+				 * phan trang). Neu append tiep vao "qs" thi HQL se bi lap WHERE va
+				 * ORDER BY -> loi: org.hibernate.hql.internal.ast.QuerySyntaxException:
+				 * unexpected token: where.
+				 */
+				StringBuilder pageBuilder = new StringBuilder();
+				pageBuilder.append("select distinct p from Product as p ");
+				pageBuilder.append("join fetch p.merchantStore merch ");
+				pageBuilder.append("join fetch p.availabilities pa ");
+				pageBuilder.append("left join fetch pa.prices pap ");
+
+				pageBuilder.append("join fetch p.descriptions pd ");
+				pageBuilder.append("left join fetch p.categories categs ");
+				pageBuilder.append("left join fetch categs.descriptions cd ");
+
+				// images
+				pageBuilder.append("left join fetch p.images images ");
+
+				// other lefts
+				pageBuilder.append("left join fetch p.manufacturer manuf ");
+				pageBuilder.append("left join fetch manuf.descriptions manufd ");
+				pageBuilder.append("left join fetch p.type type ");
+				pageBuilder.append("left join fetch p.taxClass tx ");
+
+				// RENTAL
+				pageBuilder.append("left join fetch p.owner owner ");
+
+				// attributes / option values
+				if (!CollectionUtils.isEmpty(criteria.getAttributeCriteria())) {
+					pageBuilder.append(" left join fetch p.attributes pattr");
+					pageBuilder.append(" left join fetch pattr.productOption po");
+					pageBuilder.append(" left join fetch po.descriptions pod");
+					pageBuilder.append(" left join fetch pattr.productOptionValue pov");
+					pageBuilder.append(" left join fetch pov.descriptions povd");
+				} else {
+					pageBuilder.append(" left join fetch p.attributes pattr");
+					pageBuilder.append(" left join fetch pattr.productOption po");
+					pageBuilder.append(" left join fetch po.descriptions pod");
+					pageBuilder.append(" left join fetch pattr.productOptionValue pov");
+					pageBuilder.append(" left join fetch pov.descriptions povd");
+				}
+
+				pageBuilder.append(" left join fetch p.relationships pr");
+
+				pageBuilder.append(" where merch.id=:mId");
+				if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+					pageBuilder.append(" and pd.language.code=:lang");
+				}
+				pageBuilder.append(" and p.id in (:pageIds)");
+				pageBuilder.append(" order by p.sortOrder asc");
+
+				Query pageQuery = this.em.createQuery(pageBuilder.toString());
+
+				if (criteria.getLanguage() != null && !criteria.getLanguage().equals("_all")) {
+					pageQuery.setParameter("lang", language.getCode());
+				}
+				pageQuery.setParameter("mId", store.getId());
+				pageQuery.setParameter("pageIds", pageProductIds);
+
+				@SuppressWarnings("unchecked")
+				List<Product> pageResult = pageQuery.getResultList();
+				pageProducts = pageResult;
+			}
+
+			productList.setProducts(pageProducts);
+
+			return productList;
+		}
+
+		// Khong yeu cau phan trang -> tra ve toan bo ket qua sau khi da set tham so
+		GenericEntityList entityList = new GenericEntityList();
+		entityList.setTotalCount(count.intValue());
 
 		q = RepositoryHelper.paginateQuery(q, count, entityList, criteria);
 
