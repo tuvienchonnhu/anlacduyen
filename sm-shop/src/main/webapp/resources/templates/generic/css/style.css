@@ -427,16 +427,16 @@ body {}
 	color: #ffffff;
 	font-family: "Times New Roman", Times,serif;
 	display: block;
-	font-size: 14px;
-	font-weight: 900;
-	line-height: 25px;
-	padding: 22px 18px;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.35;
+	padding: 14px 13px;
 	position: relative;
 	text-transform: uppercase;
 	transition:all.3s;
 }
 .mainmenu ul li:hover > a,.mainmenu ul li.active > a{
-	color:#C2A773; 
+	color:#C2A773;
 }
 .mainmenu ul li ul {
 	background: #ffffff none repeat scroll 0 0;
@@ -461,10 +461,11 @@ body {}
 }
 .mainmenu ul li > ul li{
 	display:block;
-} 
+}
 .mainmenu ul li > ul li > a {
 	color: #666666;
-	padding:  6px 0;
+	padding:  5px 0;
+	font-size: 12px;
 	text-transform: capitalize;
 	font-weight: 500;
 }

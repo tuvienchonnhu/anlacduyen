@@ -7,8 +7,8 @@
   padding: 0 20px;
 }
 .mainmenu ul li a {
-  font-size: 13px;
-  padding: 22px 17px;
+  font-size: 11px;
+  padding: 14px 12px;
 }
 .mainmenu ul li .megamenu {
   left: -50px;
@@ -36,14 +36,14 @@ a.shopnow {
   margin-top: 25px;
 }
 /*==================================
-	Home page 2   
+	Home page 2
 ====================================*/
 .mainmenu-area.home-page-2 .megamenu.megamenu2.living-room-megamenu, .mainmenu-area.home-page-2 .megamenu.diningroom-megamenu {
   left: -200px;
 }
 /*==================================
-	Home page 3   
-====================================*/	
+	Home page 3
+====================================*/
 .header-top-area.header-top-3 .header-top-right ul li a {
   margin-left: 10px;
 }
@@ -71,8 +71,8 @@ a.shopnow {
   font-size: 14px;
 }
 /*==================================
-	Home page 4   
-====================================*/	
+	Home page 4
+====================================*/
 .header-bottom-right.header-bottom-right-4:hover .shop-cart-hover {
   left: -70px;
 }
@@ -101,7 +101,7 @@ a.shopnow {
   width: 44%;
 }
 /*==================================
-	Bedroom-Page   
+	Bedroom-Page
 ====================================*/
 .sort-by {
   margin-left: 26px;
@@ -110,7 +110,7 @@ a.shopnow {
   padding: 9px 12px;
 }
 /*==================================
-	Shop-Page   
+	Shop-Page
 ====================================*/
 ul.sinple-tab-menu li a {
   width: 65px !important;
@@ -120,14 +120,14 @@ ul.sinple-tab-menu li a {
 /* Tablet desktop :768px. */
 @media (min-width: 768px) and (max-width: 991px) {
 /*==================================
-	Home page 1   
-====================================*/	
+	Home page 1
+====================================*/
 .header-top-right ul li a {
   margin-left: 15px;
-}	
+}
 .mainmenu ul li a {
-  font-size: 12px;
-  padding: 22px 9px;
+  font-size: 11px;
+  padding: 14px 8px;
 }
 .mainmenu-area .megamenu.living-megamenu {
   left: -143px;
