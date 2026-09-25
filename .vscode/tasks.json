@@ -1,0 +1,64 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "mvn: build sm-shop",
+      "type": "shell",
+      "command": "${workspaceFolder}/sm-shop/mvnw.cmd",
+      "args": [
+        "-q",
+        "compile"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/sm-shop"
+      },
+      "windows": {
+        "command": "${workspaceFolder}\\sm-shop\\mvnw.cmd"
+      },
+      "linux": {
+        "command": "${workspaceFolder}/sm-shop/mvnw"
+      },
+      "osx": {
+        "command": "${workspaceFolder}/sm-shop/mvnw"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "clear": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Shopizer: Run Without Debugging",
+      "type": "shell",
+      "command": "${workspaceFolder}/sm-shop/mvnw.cmd",
+      "args": [
+        "spring-boot:run"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/sm-shop"
+      },
+      "windows": {
+        "command": "${workspaceFolder}\\sm-shop\\mvnw.cmd"
+      },
+      "linux": {
+        "command": "${workspaceFolder}/sm-shop/mvnw"
+      },
+      "osx": {
+        "command": "${workspaceFolder}/sm-shop/mvnw"
+      },
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "group": "none"
+    }
+  ]
+}

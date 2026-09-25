@@ -52,14 +52,44 @@ section.products-grid .product {
 }
 
 section.products-grid .product .thumbnail {
-    height: 300px;
+    height: 200px;
     background-repeat: no-repeat;
     background-position: 50% 50%;
     background-size: cover;
+    /* Anh luon nam gon trong khung: khong tran xuong che chu va nut */
+    overflow: hidden;
+    text-align: center;
 }
 
+/* Resize anh: dat kich thuoc co dinh de anh lon khong tran len chu va nut */
 section.products-grid .product .thumbnail img {
-	margin-top:20px;
+    max-width: 100%;
+    width: auto;
+    height: 180px;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+/* Phan chu/gia/nut luon nam trong khung .product (440px) */
+section.products-grid .product .product-content {
+    overflow: hidden;
+}
+
+/* Nut Add to cart cua featured: khong dung float (gay tran ra ngoai khung) */
+section.products-grid .product .store-btn {
+    margin-top: 8px;
+    clear: both;
+    overflow: hidden;
+}
+section.products-grid .product .store-btn-addtocart {
+    display: block;
+    line-height: normal;
+}
+section.products-grid .product .store-btn .addToCart {
+    float: none;
+    display: inline-block;
+    line-height: 32px;
+    padding: 0 16px;
 }
 
 .category-products {
@@ -314,8 +344,8 @@ fieldset[disabled] .twitter-typeahead .tt-input {
   -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
   background-clip: padding-box;
-  *border-right-width: 2px;
-  *border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
 }
 .tt-dropdown-menu .tt-suggestion {
   display: block;
@@ -1289,7 +1319,7 @@ fieldset[disabled] .twitter-typeahead .tt-input {
     font-weight: normal;
     line-height: 1.42857143;
     color: #878c94; 
-    font-size:15px
+    font-size:15px;
     white-space: nowrap;
 }
 .topBar .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {

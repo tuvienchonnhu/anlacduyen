@@ -42,10 +42,10 @@ response.setDateHeader ("Expires", -1);
     <script type="text/html" id="productBoxTemplate">
 			{{#products}}
                         <div itemscope itemtype="http://schema.org/Enumeration" class="col-md-COLUMN-SIZE col-sm-6 col-xs-12 product" item-order="{{sortOrder}}" item-name="{{description.name}}" item-price="{{price}}" data-id="{{id}}">
-								<div class="thumbnail product-img" style="border:none !important;">
+								<div class="thumbnail product-img" style="border:none !important; height:200px; overflow:hidden; text-align:center;">
                                     {{#image}}
-									<a href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html/ref=<c:out value="${requestScope.ref}"/>">
-										<img src="<c:url value=""/>{{image.imageUrl}}" alt="" />
+									<a href="<c:url value="/shop/product/" />{{description.friendlyUrl}}.html/ref=<c:out value="${requestScope.ref}"/>" style="display:block; height:100%; overflow:hidden;">
+										<img src="<c:url value=""/>{{image.imageUrl}}" alt="" style="max-width:100%; max-height:100%; width:auto; height:auto; display:block; margin:0 auto; object-fit:contain;" />
 									</a>
 									{{/image}}
 								</div>
