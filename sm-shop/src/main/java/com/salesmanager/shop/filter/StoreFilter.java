@@ -816,8 +816,7 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 			configs.put(Constants.FACEBOOK_APP_ID, coreConfiguration.getProperty(Constants.FACEBOOK_APP_ID));
 
 			// get MerchantConfig
-			MerchantConfig merchantConfig = merchantConfigurationService.getMerchantConfig(store);
-			if (merchantConfig != null) {
+			MerchantConfig merchantConfig = merchantConfigurationService.getMerchantConfig(store);			if (merchantConfig != null) {
 				if (configs == null) {
 					configs = new HashMap<String, Object>();
 				}

@@ -225,6 +225,68 @@ public class ConfigurationController {
 	return config;
 	}
 
+	/**
+	 * Hien thi trang cau hinh dang nhap (Admin > Configuration > Login
+	 * Configuration). Cac key o day (Google Client ID / Client Secret) duoc
+	 * GoogleOAuthService doc de cho phep khach hang dang nhap bang tai khoan
+	 * Google.
+	 */
+	@PreAuthorize("hasRole('AUTH')")
+	@RequestMapping(value="/admin/configuration/login.html", method=RequestMethod.GET)
+	public String displayLoginConfiguration(Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+	setLoginConfigurationMenu(model, request);
+	MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
+	List<MerchantConfiguration> configs = new ArrayList<MerchantConfiguration>();
+	configs.add(aiConfig(Constants.KEY_GOOGLE_CLIENT_ID, store));
+	configs.add(aiConfig(Constants.KEY_GOOGLE_CLIENT_SECRET, store));
+
+	ConfigListWrapper configWrapper = new ConfigListWrapper();
+	configWrapper.setMerchantConfigs(configs);
+	model.addAttribute("configuration",configWrapper);
+	model.addAttribute("loginCallbackUrl", buildGoogleCallbackUrl(request));
+
+	return com.salesmanager.shop.admin.controller.ControllerConstants.Tiles.Configuration.login;
+	}
+
+	/**
+	 * Luu cau hinh dang nhap. Cac key duoc luu voi type CONFIG de
+	 * GoogleOAuthService doc dung.
+	 */
+	@PreAuthorize("hasRole('AUTH')")
+	@RequestMapping(value="/admin/configuration/saveLoginConfiguration.html", method=RequestMethod.POST)
+	public String saveLoginConfigurations(@ModelAttribute("configuration") ConfigListWrapper configWrapper, BindingResult result, Model model, HttpServletRequest request, Locale locale) throws Exception {
+
+	setLoginConfigurationMenu(model, request);
+	List<MerchantConfiguration> configs = configWrapper.getMerchantConfigs();
+	MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
+	for(MerchantConfiguration mConfigs : configs)
+	{
+	mConfigs.setMerchantStore(store);
+	if(!StringUtils.isBlank(mConfigs.getValue())) {
+	mConfigs.setMerchantConfigurationType(MerchantConfigurationType.CONFIG);
+	merchantConfigurationService.saveOrUpdate(mConfigs);
+	} else {//remove if submited blank and exists
+	MerchantConfiguration config = merchantConfigurationService.getMerchantConfiguration(mConfigs.getKey(), store);
+	if(config!=null) {
+	merchantConfigurationService.delete(config);
+	}
+	}
+	}
+	model.addAttribute("success","success");
+	model.addAttribute("configuration",configWrapper);
+	model.addAttribute("loginCallbackUrl", buildGoogleCallbackUrl(request));
+	return com.salesmanager.shop.admin.controller.ControllerConstants.Tiles.Configuration.login;
+	}
+
+	/**
+	 * URL callback phai khai bao trong Google Console (Authorized redirect URI).
+	 */
+	private String buildGoogleCallbackUrl(HttpServletRequest request) {
+	return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+	+ request.getContextPath() + "/shop/customer/google/callback.html";
+	}
+
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/configuration/email.html", method=RequestMethod.GET)
 	public String displayEmailSettings(Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -284,15 +346,15 @@ public class ConfigurationController {
 		Map<String,String> activeMenus = new HashMap<String,String>();
 		activeMenus.put("configuration", "configuration");
 		activeMenus.put("accounts-conf", "accounts-conf");
-		
+
 		@SuppressWarnings("unchecked")
 		Map<String, Menu> menus = (Map<String, Menu>)request.getAttribute("MENUMAP");
-		
+
 		Menu currentMenu = (Menu)menus.get("configuration");
 		model.addAttribute("currentMenu",currentMenu);
 		model.addAttribute("activeMenus",activeMenus);
 	}
-	
+
 		private void setEmailConfigurationMenu(Model model, HttpServletRequest request) throws Exception {
 		Map<String,String> activeMenus = new HashMap<String,String>();
 		activeMenus.put("configuration", "configuration");
@@ -310,6 +372,19 @@ public class ConfigurationController {
 		Map<String,String> activeMenus = new HashMap<String,String>();
 		activeMenus.put("configuration", "configuration");
 		activeMenus.put("ai-conf", "ai-conf");
+
+		@SuppressWarnings("unchecked")
+		Map<String, Menu> menus = (Map<String, Menu>)request.getAttribute("MENUMAP");
+
+		Menu currentMenu = (Menu)menus.get("configuration");
+		model.addAttribute("currentMenu",currentMenu);
+		model.addAttribute("activeMenus",activeMenus);
+		}
+
+		private void setLoginConfigurationMenu(Model model, HttpServletRequest request) throws Exception {
+		Map<String,String> activeMenus = new HashMap<String,String>();
+		activeMenus.put("configuration", "configuration");
+		activeMenus.put("login-conf", "login-conf");
 
 		@SuppressWarnings("unchecked")
 		Map<String, Menu> menus = (Map<String, Menu>)request.getAttribute("MENUMAP");

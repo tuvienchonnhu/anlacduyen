@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -102,6 +103,35 @@ public class CustomerRegistrationController extends AbstractController {
 	private CaptchaRequestUtils captchaRequestUtils;
 
 	@Inject
+	private GoogleOAuthService googleOAuthService;
+
+	/**
+	 * Dua cau hinh Google (Client ID + ma ngon ngu) vao model de fragment
+	 * googleSignIn.jsp hien thi nut dang nhap bang GIS SDK.
+	 */
+	public void setGoogleLoginAttributes(Model model, MerchantStore store) {
+		model.addAttribute("googleLoginEnabled", googleOAuthService.isConfigured(store));
+		model.addAttribute("googleClientId", googleOAuthService.getClientId(store));
+		model.addAttribute("googleLocale", resolveGoogleLocale());
+	}
+
+	/**
+	 * Lay ma ngon ngu 2 ky tu cua request hien tai de GIS SDK hien thi nut dung
+	 * ngon ngu. Mac dinh la "en" neu chua xac dinh duoc.
+	 */
+	private String resolveGoogleLocale() {
+		try {
+			Locale locale = LocaleContextHolder.getLocale();
+			if (locale != null && StringUtils.isNotBlank(locale.getLanguage())) {
+				return locale.getLanguage();
+			}
+		} catch (Exception e) {
+			LOGGER.debug("Cannot resolve locale for Google sign-in button", e);
+		}
+		return "en";
+	}
+
+	@Inject
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
 
@@ -122,6 +152,7 @@ public class CustomerRegistrationController extends AbstractController {
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 
 		model.addAttribute( "recapatcha_public_key", siteKeyKey);
+		this.setGoogleLoginAttributes(model, store);
 
 		SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
 		AnonymousCustomer anonymousCustomer = (AnonymousCustomer)request.getAttribute(Constants.ANONYMOUS_CUSTOMER);
@@ -177,10 +208,11 @@ public class CustomerRegistrationController extends AbstractController {
 
         String userName = null;
         String password = null;
-        
+
         model.addAttribute( "recapatcha_public_key", siteKeyKey);
-        
-        if(!StringUtils.isBlank(request.getParameter("g-recaptcha-response"))) {
+        this.setGoogleLoginAttributes(model, merchantStore);
+
+              if(StringUtils.isNotBlank(request.getParameter("g-recaptcha-response"))) {
         	boolean validateCaptcha = captchaRequestUtils.checkCaptcha(request.getParameter("g-recaptcha-response"));
         	
             if ( !validateCaptcha )

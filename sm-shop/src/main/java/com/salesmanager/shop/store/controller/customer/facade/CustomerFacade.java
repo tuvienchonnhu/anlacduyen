@@ -64,6 +64,14 @@ public interface CustomerFacade
      * @throws Exception
      */
     ReadableCustomer getByUserName(String userName, MerchantStore merchantStore, Language language);
+
+    /**
+     * Xac thuc khach hang da duoc xac minh boi ben thu ba (vi du Google OAuth).
+     * Khong can mat khau, chi gan quyen cua khach hang vao Spring Security
+     * context.
+     */
+    public void authenticateWithoutPassword(final Customer customer) throws Exception;
+
     /**
      * <p>Method responsible for merging cart during authentication, 
      *     Method will perform following operations

@@ -301,10 +301,13 @@
 	"code":"ai-conf","url":"/admin/configuration/ai.html","role":"AUTH","order":1
 	}},
 	{"menu":{
-	"code":"email-conf","url":"/admin/configuration/email.html","role":"AUTH","order":2
+	"code":"login-conf","url":"/admin/configuration/login.html","role":"AUTH","order":2
 	}},
 	{"menu":{
-	"code":"system-configurations","url":"/admin/configuration/system.html","role":"AUTH","order":3
+	"code":"email-conf","url":"/admin/configuration/email.html","role":"AUTH","order":3
+	}},
+	{"menu":{
+	"code":"system-configurations","url":"/admin/configuration/system.html","role":"AUTH","order":4
 	}}
 ]
 }}

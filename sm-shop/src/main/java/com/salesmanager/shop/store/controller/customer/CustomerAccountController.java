@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -119,16 +120,45 @@ public class CustomerAccountController extends AbstractController {
     private CustomerFacade customerFacade;
     
     @Inject
+    private GoogleOAuthService googleOAuthService;
+
+    /**
+     * Dua cau hinh Google (Client ID + ma ngon ngu) vao model de fragment
+     * googleSignIn.jsp hien thi nut dang nhap bang GIS SDK.
+     */
+    public void setGoogleLoginAttributes(Model model, MerchantStore store) {
+        model.addAttribute("googleLoginEnabled", googleOAuthService.isConfigured(store));
+        model.addAttribute("googleClientId", googleOAuthService.getClientId(store));
+        model.addAttribute("googleLocale", resolveGoogleLocale());
+    }
+
+    /**
+     * Lay ma ngon ngu 2 ky tu cua request hien tai de GIS SDK hien thi nut dung
+     * ngon ngu. Mac dinh la "en" neu chua xac dinh duoc.
+     */
+    private String resolveGoogleLocale() {
+        try {
+            Locale locale = LocaleContextHolder.getLocale();
+            if (locale != null && StringUtils.isNotBlank(locale.getLanguage())) {
+                return locale.getLanguage();
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Cannot resolve locale for Google sign-in button", e);
+        }
+        return "en";
+    }
+
+    @Inject
     private OrderService orderService;
-    
+
     @Inject
     private OrderFacade orderFacade;
-    
+
 	@Inject
 	private LabelUtils messages;
 
 
-	
+
 	/**
 	 * Dedicated customer logon page
 	 * @param model
@@ -139,11 +169,11 @@ public class CustomerAccountController extends AbstractController {
 	 */
 	@RequestMapping(value="/customLogon.html", method=RequestMethod.GET)
 	public String displayLogon(Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
+
 
 	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
 
-
+		this.setGoogleLoginAttributes(model, store);
 		//dispatch to dedicated customer logon
 		
 		/** template **/

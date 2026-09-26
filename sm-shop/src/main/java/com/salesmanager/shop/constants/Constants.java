@@ -136,6 +136,14 @@ public class Constants {
 	public final static String AI_PROVIDER_GROQ = "groq";
 	public final static String AI_PROVIDER_CEREBRAS = "cerebras";
 
+	/*
+	 * Login configuration (Admin > Configuration > Login Configuration)
+	 * Cac key nay duoc luu trong bang MerchantConfiguration va duoc
+	 * GoogleOAuthService doc de dang nhap bang tai khoan Google.
+	 */
+	public final static String KEY_GOOGLE_CLIENT_ID = "GOOGLE_CLIENT_ID";
+	public final static String KEY_GOOGLE_CLIENT_SECRET = "GOOGLE_CLIENT_SECRET";
+
 	public final static String KEY_SESSION_ADDRESS = "readableDelivery";
 
 	public final static String CATEGORY_LINEAGE_DELIMITER = "/";

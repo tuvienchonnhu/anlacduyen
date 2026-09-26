@@ -39,6 +39,10 @@ response.setDateHeader ("Expires", -1);
 									<button type="submit" id="genericLogin-button" class="btn btn-default login-btn"><s:message code="button.label.signin" text="button.label.signin"/></button>
 								</form>
 					
+								<c:if test="${googleLoginEnabled}">
+									<jsp:include page="googleSignIn.jsp" />
+								</c:if>
+
 							</div>
 
 <%-- 							<a href="#" class="back"><s:message code="button.label.forgotpassword" text="Forgot Password ?" /></a>

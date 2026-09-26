@@ -261,6 +261,10 @@
   	<put-attribute name="body" value="/pages/admin/configuration/ai.jsp" /> 
   	</definition>
   	
+  	<definition name="config-login" template="/layout/admin/layout.jsp">
+  	<put-attribute name="body" value="/pages/admin/configuration/login.jsp" />
+  	</definition>
+
   	 <definition name="config-system" template="/layout/admin/layout.jsp"> 
   		<put-attribute name="body" value="/pages/admin/configuration/system.jsp" /> 
   	</definition>

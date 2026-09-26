@@ -211,6 +211,10 @@ function checkEmailExists() {
 									</div>
 									<button type="submit" class="btn btn-default login-btn"><s:message code="label.register.createaccount" text="Create an account"/></button>
 								</form:form>						
+
+								<c:if test="${googleLoginEnabled}">
+									<jsp:include page="googleSignIn.jsp" />
+								</c:if>
 							</div>
 						</div>
 						<div class="col-lg-6 col-md-6 col-sm-4 hidden-xs">

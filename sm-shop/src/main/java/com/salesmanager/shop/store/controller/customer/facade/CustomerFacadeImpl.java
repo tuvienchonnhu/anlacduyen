@@ -479,6 +479,43 @@ public class CustomerFacadeImpl implements CustomerFacade {
 
   }
 
+  /**
+   * Dang nhap khach hang da duoc xac minh boi ben thu ba (Google). Khong the
+   * goi customerAuthenticationManager vi tai khoan Google khong co mat khau,
+   * nen chi tao Authentication truc tiep tu thong tin khach hang.
+   */
+  @Override
+  public void authenticateWithoutPassword(Customer customer) throws Exception {
+
+    Validate.notNull(customer, "Customer cannot be null");
+
+    Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+    authorities.add(new SimpleGrantedAuthority(
+        ROLE_PREFIX + Constants.PERMISSION_CUSTOMER_AUTHENTICATED));
+
+    List<Integer> groupsId = new ArrayList<Integer>();
+    List<Group> groups = customer.getGroups();
+    if (groups != null) {
+      for (Group group : groups) {
+        groupsId.add(group.getId());
+      }
+      if (!groupsId.isEmpty()) {
+        List<Permission> permissions = permissionService.getPermissions(groupsId);
+        for (Permission permission : permissions) {
+          authorities.add(new SimpleGrantedAuthority(permission.getPermissionName()));
+        }
+      }
+    }
+
+    String principal = StringUtils.isNotBlank(customer.getNick()) ? customer.getNick()
+        : customer.getEmailAddress();
+
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(principal, null, authorities);
+
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+  }
+
 
   @Override
   public Address getAddress(Long userId, final MerchantStore merchantStore,

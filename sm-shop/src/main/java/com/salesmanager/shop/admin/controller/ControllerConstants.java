@@ -93,6 +93,7 @@ public interface ControllerConstants
         final String cache="admin-cache";
         final String system="config-system";
         final String ai="config-ai";
+        final String login="config-login";
         }
         
         interface Tax{

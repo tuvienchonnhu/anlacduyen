@@ -111,6 +111,7 @@ response.setDateHeader ("Expires", -1);
 									<button type="submit" style="width:100%" class="btn btn-large" id="login-button"><s:message code="button.label.login" text="Login" /></button>
 									
 								</form>
+								<jsp:include page="/pages/shop/templates/bootstrap/pages/googleSignIn.jsp" />
 								<a onClick="javascript:location.href='<c:url value="/shop/customer/registration.html" />';" href="" role="button" class="" data-toggle="modal"><s:message code="label.register.notyetregistered" text="Not yet registered ?" /></a>
 							</div>
 					  </li>

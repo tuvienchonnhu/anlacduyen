@@ -203,6 +203,7 @@ $(document).ready(function() {
 					<button id="login-button" type="submit" class="btn btn-group btn-dark btn-sm"><s:message code="button.label.login" text="Login" /></button>
 					<span></span>
 					<br/>
+					<jsp:include page="/pages/shop/templates/exoticamobilia/pages/googleSignIn.jsp" />
 					<a id="registerLink" onClick="javascript:location.href='<c:url value="/shop/customer/registration.html" />';" href="" role="button" class="" data-toggle="modal"><s:message code="label.register.notyetregistered" text="Not yet registered ?" /></a>
 					<br/>
 				</form>

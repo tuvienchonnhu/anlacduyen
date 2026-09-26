@@ -128,6 +128,8 @@ public class MultipleEntryPointsSecurityConfig {
 					.antMatchers("/shop/customer/checkEmail*").permitAll()
 					.antMatchers("/shop/customer/logout*").permitAll()
 					.antMatchers("/shop/customer/customLogon*").permitAll()
+					// Dang nhap bang Google (OAuth 2.0): trang bat dau va trang callback
+					.antMatchers("/shop/customer/google/**").permitAll()
 					.antMatchers("/shop/customer/denied*").permitAll()
 					.antMatchers("/shop/customer/**").hasRole("AUTH_CUSTOMER")
 					.anyRequest().authenticated()

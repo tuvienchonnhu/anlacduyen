@@ -345,6 +345,9 @@ response.setDateHeader ("Expires", -1);
 			$("#ai-conf-link").click(function() {
 			 		window.location='<c:url value="/admin/configuration/ai.html" />';
 			});
+			$("#login-conf-link").click(function() {
+			 		window.location='<c:url value="/admin/configuration/login.html" />';
+			});
 			$("#system-configurations-link").click(function() {
   				window.location='<c:url value="/admin/configuration/system.html" />';
 			});
