@@ -985,7 +985,7 @@ public class ProductController {
 
 	@PreAuthorize("hasRole('PRODUCTS')")
 	@RequestMapping(value="/admin/products/addProductToCategories.html", method=RequestMethod.POST)
-	public String addProductToCategory(@RequestParam("productId") long productId, @RequestParam("id") long categoryId, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public String addProductToCategory(@RequestParam("productId") long productId, @RequestParam(value="categoryId", required=false) Long categoryIdParam, @RequestParam(value="id", required=false) Long legacyCategoryId, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		setMenu(model,request);
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
@@ -1006,6 +1006,19 @@ public class ProductController {
 
 		//get parent categories
 		List<Category> categories = categoryService.listByStore(store,language);
+
+		// JSP cu gui len tham so "id" (bi trung voi product.id), JSP moi gui "categoryId".
+		// Uu tien categoryId, van chap nhan "id" de khong pha vo lien ket cu.
+		Long categoryId = (categoryIdParam!=null) ? categoryIdParam : legacyCategoryId;
+
+		// Khong co danh muc nao duoc chon -> hien lai trang voi thong bao loi
+		if(categoryId==null) {
+			model.addAttribute("product", product);
+			model.addAttribute("categories", CategoryUtils.readableCategoryListConverter(categories, language));
+			model.addAttribute("categoryLabels", CategoryUtils.categoryLabels(categories, language));
+			model.addAttribute("errorMessage", messages.getMessage("message.product.category.required", request.getLocale()));
+			return "catalogue-product-categories";
+		}
 
 		Category category = categoryService.getById(categoryId, store.getId(), language.getId());
 

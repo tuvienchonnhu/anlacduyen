@@ -30,6 +30,9 @@
 			<div id="store.success" class="alert alert-success"	style="<c:choose><c:when test="${success!=null}">display:block;</c:when><c:otherwise>display:none;</c:otherwise></c:choose>">
 					<s:message code="message.success" text="Request successfull" />
 			</div>
+			<c:if test="${not empty errorMessage}">
+				<div class="alert alert-error"><c:out value="${errorMessage}"/></div>
+			</c:if>
 			<br/>
 			<strong><c:out value="${product.sku}"/></strong>
 			<br/><br/>
@@ -37,10 +40,18 @@
 			<div class="control-group">
 				<label><s:message code="label.productedit.categoryname" text="Category"/></label>
 			  	<div class="controls">
-	                        		<form:select path="id">
-					  					<form:options items="${categoryLabels}" itemValue="id" itemLabel="name"/>
-				       				</form:select>
-	                                <span class="help-inline"><form:errors path="id" cssClass="error" /></span>
+								<!-- Khong bind vao product.id: neu bind vao "id" thi Spring se ghi de
+								     product.id bang gia tri category, lam request param "id"
+								     (chinh la categoryId) bi sai -> them danh muc that bai.
+								     Dung doi tuong roi de form chi gui len tham so categoryId. -->
+								<select name="categoryId" id="categoryId" class="form-control">
+									<c:forEach items="${categoryLabels}" var="categoryLabel">
+										<option value="<c:out value='${categoryLabel.id}'/>"><c:out value="${categoryLabel.name}"/></option>
+									</c:forEach>
+								</select>
+								<c:if test="${categoryLabels==null || empty categoryLabels}">
+									<span class="help-inline"><s:message code="label.product.category.nocategories" text="No category available"/></span>
+								</c:if>
 				</div>
 			</div>
 			
