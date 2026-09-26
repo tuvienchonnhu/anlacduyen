@@ -18,6 +18,23 @@
     var config = global.shopizerGoogleSignIn || {};
     var card = document.getElementById('google-signin-card');
 
+    /**
+     * Khung dang nhap nam trong dropdown (display:none) nen Google Identity
+     * Services khong the do duoc chieu rong that. Mac dinh lay 320px, rieng
+     * trong #signinPane thi bang chieu rong khung tru di padding 2 ben.
+     */
+    function resolveButtonWidth() {
+        var pane = document.getElementById('signinPane');
+        if (pane) {
+            var width = pane.clientWidth;
+            if (width > 0) {
+                return Math.max(200, Math.min(320, width - 36));
+            }
+            return 300;
+        }
+        return 320;
+    }
+
     function log(message, error) {
         if (error && global.console && global.console.error) {
             global.console.error('[Google sign-in] ' + message, error);
@@ -104,6 +121,11 @@
      */
     global.shopizerInitGoogleSignIn = function () {
         if (!card) {
+            // Truong hop nut Google nam trong dropdown duoc render bang JSP sau khi
+            // thay noi dung khung dang nhap -> tim lai phan tu.
+            card = document.getElementById('google-signin-card');
+        }
+        if (!card) {
             return;
         }
 
@@ -119,6 +141,16 @@
             return;
         }
 
+        var container = card.querySelector('.google-signin-button');
+        if (!container) {
+            return;
+        }
+
+        //
+        // GIS SDK chi cho phep initialize() mot lan voi cung client_id, nhung
+        // renderButton() co the goi lai. Khi nguoi dung doi ngon ngu, trang duoc
+        // nap lai nen khoi tao moi la an toan.
+        //
         global.google.accounts.id.initialize({
             client_id: config.clientId,
             callback: global.onGoogleSignIn,
@@ -126,10 +158,8 @@
             cancel_on_tap_outside: true
         });
 
-        var container = card.querySelector('.google-signin-button');
-        if (!container) {
-            return;
-        }
+        // xoa nut cu (neu co) truoc khi render lai de tranh chong 2 iframe
+        container.innerHTML = '';
 
         global.google.accounts.id.renderButton(container, {
             type: 'standard',
@@ -138,15 +168,30 @@
             text: 'signin_with',
             shape: 'rectangular',
             logo_alignment: 'left',
-            width: 320,
+            width: resolveButtonWidth(),
             locale: config.locale || 'en'
         });
     };
+
+    /**
+     * Khi dropdown duoc mo, khung dang nhap moi co chieu rong thuc -> render lai
+     * nut Google cho vua khung.
+     */
+    function bindDropdownRefresh() {
+        if (!global.jQuery) {
+            return;
+        }
+        global.jQuery(document).on('shown.bs.dropdown', function () {
+            global.shopizerInitGoogleSignIn();
+        });
+    }
 
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         global.setTimeout(global.shopizerInitGoogleSignIn, 0);
     } else if (document.addEventListener) {
         document.addEventListener('DOMContentLoaded', global.shopizerInitGoogleSignIn);
     }
+
+    bindDropdownRefresh();
 
 }(window));

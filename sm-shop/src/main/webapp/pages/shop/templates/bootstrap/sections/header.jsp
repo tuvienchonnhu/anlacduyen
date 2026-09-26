@@ -91,24 +91,24 @@ response.setDateHeader ("Expires", -1);
 					    <a href="#" id="signinDrop" role="button" class="dropdown-toggle noboxshadow" data-toggle="dropdown"><s:message code="button.label.signin" text="Signin" /><b class="caret"></b></a>
 					
 					
-							<div id="signinPane" class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+							<div id="signinPane" class="dropdown-menu" style="padding: 18px; padding-bottom: 14px;">
 								<div id="loginError" class="alert alert-error" style="display:none;"></div>
 								<!-- form id must be login, form fields must be userName, password and storeCode -->
 								<form id="login" method="post" accept-charset="UTF-8">
 									<div class="control-group">
-	                        				<label><s:message code="label.username" text="Username" /></label>
+	                        				<label><s:message code="label.generic.username" text="Username" /></label>
 					                        <div class="controls">
-												<input id="signin_userName" style="margin-bottom: 15px;" type="text" name="userName" size="30" />
-											</div>
+											<input id="signin_userName" type="text" name="userName" size="30" />
+										</div>
 									</div>
 									<div class="control-group">
-	                        				<label><s:message code="label.password" text="Password" /></label>
+	                        				<label><s:message code="label.generic.password" text="Password" /></label>
 					                        <div class="controls">
-												<input id="signin_password" style="margin-bottom: 15px;" type="password" name="password" size="30" />
-											</div>
+											<input id="signin_password" type="password" name="password" size="30" />
+										</div>
 									</div>
 									<input id="signin_storeCode" name="storeCode" type="hidden" value="<c:out value="${requestScope.MERCHANT_STORE.code}"/>"/>					 
-									<button type="submit" style="width:100%" class="btn btn-large" id="login-button"><s:message code="button.label.login" text="Login" /></button>
+									<button type="submit" class="btn btn-large" id="login-button"><s:message code="button.label.login" text="Login" /></button>
 									
 								</form>
 								<jsp:include page="/pages/shop/templates/bootstrap/pages/googleSignIn.jsp" />

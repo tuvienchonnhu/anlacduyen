@@ -52,6 +52,10 @@
     	<link href="<c:url value="/resources/css/sm.css" />" rel="stylesheet">
     	<link href="<c:url value="/resources/css/showLoading.css" />" rel="stylesheet">
     	
+    	<!-- khung dang nhap + nut dang nhap bang Google (dung chung moi template) -->
+    	<link href="<c:url value="/resources/css/assets/bootstrap-social.css" />" rel="stylesheet">
+    	<link href="<c:url value="/resources/css/sm-login.css" />" rel="stylesheet">
+
     	<c:if test="${requestScope.CONTENT['heroSlider']!=null}">
 		    <link rel="stylesheet" href="/resources/css/flexslider.css" type="text/css" media="screen" />
     		<link rel="stylesheet" href="/resources/templates/december/css/header.css">

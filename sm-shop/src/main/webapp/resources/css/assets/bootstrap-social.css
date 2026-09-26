@@ -145,25 +145,30 @@
 .btn-yahoo:active,.btn-yahoo.active,.open>.dropdown-toggle.btn-yahoo{background-image:none}
 .btn-yahoo.disabled:hover,.btn-yahoo[disabled]:hover,fieldset[disabled] .btn-yahoo:hover,.btn-yahoo.disabled:focus,.btn-yahoo[disabled]:focus,fieldset[disabled] .btn-yahoo:focus,.btn-yahoo.disabled.focus,.btn-yahoo[disabled].focus,fieldset[disabled] .btn-yahoo.focus{background-color:#720e9e;border-color:rgba(0,0,0,0.2)}
 .btn-yahoo .badge{color:#720e9e;background-color:#fff}
-/* Nut dang nhap bang Google (Google Identity Services) tren trang login / register */
-.google-signin-wrapper{margin-top:20px;}
-.google-signin-divider{display:block;margin-bottom:12px;color:#888;text-align:center;font-size:13px;text-transform:uppercase;}
-.google-signin-card{display:flex;flex-direction:column;align-items:center;}
-.google-signin-card .google-signin-button{width:100%;max-width:320px;min-height:44px;}
-.google-signin-card .google-signin-button iframe{margin:0 auto;}
+/*
+ * Nut dang nhap bang Google (Google Identity Services).
+ *
+ * CSS chi tiet nam trong /resources/css/sm-login.css - file nay duoc nhung
+ * trong shopLinks.jsp cua TAT CA cac template. Cac khai bao duoi day chi giu
+ * lai cho cac trang logon/register cu (template generic / december) nhung
+ * KHONG duoc dat width co dinh cho #signinPane nua de tranh ghi de khung
+ * dang nhap rong 340px. Xem sm-login.css.
+ */
+.google-signin-wrapper{margin-top:18px;padding-top:16px;border-top:1px solid rgba(0,0,0,.12);}
+.google-signin-divider{display:block;margin-bottom:12px;color:#888;text-align:center;font-size:12px;text-transform:uppercase;}
+.google-signin-card{display:block;width:100%;text-align:center;}
+.google-signin-card .google-signin-button{display:block;width:100%;max-width:320px;min-height:44px;margin:0 auto;overflow:hidden;}
+.google-signin-card .google-signin-button iframe{margin:0 auto;max-width:100%;}
 .google-signin-hint{margin:10px 0 0;color:#888;font-size:12px;text-align:center;}
-.google-signin-status{margin:8px 0 0;color:#666;font-size:13px;text-align:center;}
-.google-signin-error{margin:8px 0 0;color:#a94442;font-size:13px;text-align:center;}
+.google-signin-status{margin:8px 0 0;color:#666;font-size:12px;text-align:center;}
+.google-signin-error{margin:8px 0 0;color:#a94442;font-size:12px;text-align:center;}
 .google-signin-card.is-busy .google-signin-button{opacity:.6;pointer-events:none;}
 
 /*
- * Trong dropdown signinPane o header, chieu rong bi gioi han va GIS SDK tra ve
- * iframe co kich thuoc co dinh, nen thu nho va can lai cho vua khung.
+ * Trong dropdown #signinPane: nut Google dung chung chieu rong khung.
+ * KHONG dat width co dinh cho .google-signin-button o day (xem sm-login.css).
  */
-#signinPane .google-signin-wrapper{margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,0,0,.1);}
-#signinPane .google-signin-card{min-width:200px;}
-#signinPane .google-signin-card .google-signin-button{width:200px!important;min-height:40px;overflow:hidden;}
-#signinPane .google-signin-card .google-signin-button iframe{max-width:100%;}
-#signinPane .google-signin-hint{font-size:11px;line-height:1.35;margin-top:8px;}
+#signinPane .google-signin-wrapper{margin-top:14px;padding-top:14px;}
+#signinPane .google-signin-hint{font-size:11px;line-height:1.4;margin-top:8px;}
 #signinPane .google-signin-status,
-#signinPane .google-signin-error{font-size:11px;line-height:1.35;}
+#signinPane .google-signin-error{font-size:11px;line-height:1.4;}

@@ -181,35 +181,15 @@ $(document).ready(function() {
 		</ul>
 </script>
 
-<!-- Customer account menu not logged in customer -->
-<script type="text/html" id="customerNotLoggedInAccountTemplate">
-		<button type="button" class="btn dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user no-desktop"></i><span class="uppercase"> <s:message code="button.label.signin" text="Signin"/></span></button>
-		<!-- Absolutely need to have the following id signinPane -->
-        <ul id="signinPane" class="dropdown-menu dropdown-menu-right dropdown-animation">
-			<li>
-				<div id="loginError" class="alert alert-error bg-danger" style="display:none;"></div>
-				<form class="login-form" id="login" method="post" accept-charset="UTF-8">
-					<div class="form-group has-feedback">
-							<label class="control-label"><s:message code="label.generic.username" text="User name" /></label>
-							<input class="form-control" id="signin_userName" type="text" name="userName" />
-							<i class="fa fa-user form-control-feedback"></i>
-					</div>
-					<div class="form-group has-feedback">
-							<label class="control-label"><s:message code="label.generic.password" text="Password" /></label>
-							<input class="form-control" id="signin_password" type="password" name="password" />
-							<i class="fa fa-lock form-control-feedback"></i>
-					</div>
-					<input id="signin_storeCode" name="storeCode" type="hidden" value="<c:out value="${requestScope.MERCHANT_STORE.code}"/>"/>
-					<button id="login-button" type="submit" class="btn btn-group btn-dark btn-sm"><s:message code="button.label.login" text="Login" /></button>
-					<span></span>
-					<br/>
-					<jsp:include page="/pages/shop/templates/exoticamobilia/pages/googleSignIn.jsp" />
-					<a id="registerLink" onClick="javascript:location.href='<c:url value="/shop/customer/registration.html" />';" href="" role="button" class="" data-toggle="modal"><s:message code="label.register.notyetregistered" text="Not yet registered ?" /></a>
-					<br/>
-				</form>
-			</li>
-		</ul>
-</script>
+<!--
+	Customer account menu not logged in customer
+
+	GHI CHU: Khung dang nhap KHONG dat trong the script type="text/html" nua.
+	Ly do: the include cua JSP ben trong the script chi duoc render nhu van ban,
+	khong tao ra HTML that -> nut dang nhap Google khong hien thi. Ngoai ra no con
+	tao ra mot #signinPane trung id voi khung dang nhap that o header, lam hong dropdown.
+	Khung dang nhap duoc render truc tiep bang JSP trong div#customerAccount.
+-->
 
 		<!-- header-top start (Add "dark" class to .header-top in order to enable dark header-top e.g <div class="header-top dark">) -->
 	    <!-- ================ -->
@@ -296,7 +276,38 @@ $(document).ready(function() {
                                         </c:if>                                       
                                         <!-- Customer account menu populated by JS -->
                                         <c:if test="${requestScope.CONFIGS['displayCustomerSection'] == true}">
-                                        <div class="btn-group dropdown" id="customerAccount"></div>
+                                        <!--
+                                            Khung dang nhap render truc tiep bang JSP (khong qua Hogan template)
+                                            de the include cua JSP doi voi fragment googleSignIn.jsp nam dung
+                                            ngoai the script type="text/html".
+                                            LUU Y: CHI duoc co MOT the id="customerAccount" trong trang, neu khong
+                                            shop-account.js se ghi de nham the va lam mat khung dang nhap.
+                                        -->
+                                        <div class="btn-group dropdown" id="customerAccount">
+                                        <button type="button" class="btn dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user no-desktop"></i><span class="uppercase"> <s:message code="button.label.signin" text="Signin"/></span></button>
+                                        <ul id="signinPane" class="dropdown-menu dropdown-menu-right dropdown-animation">
+                                            <li>
+                                                <div id="loginError" class="alert alert-error bg-danger" style="display:none;"></div>
+                                                <form class="login-form" id="login" method="post" accept-charset="UTF-8">
+                                                    <div class="form-group has-feedback">
+                                                        <label class="control-label"><s:message code="label.generic.username" text="User name" /></label>
+                                                        <input class="form-control" id="signin_userName" type="text" name="userName" />
+                                                        <i class="fa fa-user form-control-feedback"></i>
+                                                    </div>
+                                                    <div class="form-group has-feedback">
+                                                        <label class="control-label"><s:message code="label.generic.password" text="Password" /></label>
+                                                        <input class="form-control" id="signin_password" type="password" name="password" />
+                                                        <i class="fa fa-lock form-control-feedback"></i>
+                                                    </div>
+                                                    <input id="signin_storeCode" name="storeCode" type="hidden" value="<c:out value="${requestScope.MERCHANT_STORE.code}"/>"/>
+                                                    <button id="login-button" type="submit" class="btn btn-group btn-dark"><s:message code="button.label.login" text="Login" /></button>
+                                                </form>
+                                                <!-- Nut dang nhap bang Google: JSP fragment nam TRONG #signinPane -->
+                                                <jsp:include page="/pages/shop/templates/exoticamobilia/pages/googleSignIn.jsp" />
+                                                <a id="registerLink" onClick="javascript:location.href='<c:url value="/shop/customer/registration.html" />';" href="" role="button" data-toggle="modal"><s:message code="label.register.notyetregistered" text="Not yet registered ?" /></a>
+                                            </li>
+                                        </ul>
+                                        </div>
                                         </c:if>
                                         
                                         <!-- Shopping cart menu populated by JS -->

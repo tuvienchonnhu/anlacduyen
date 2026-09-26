@@ -178,7 +178,7 @@ public class ShopApplicationConfiguration implements WebMvcConfigurer {
   @Bean
   public SessionLocaleResolver localeResolver() {
     SessionLocaleResolver slr = new SessionLocaleResolver();
-   // Vietnam is the default locale (language code "vn")
+   // Vietnam is the default locale (language code "vi", country code "VN")
     slr.setDefaultLocale(new Locale("vi", "VN"));
     //slr.setDefaultLocale(Locale.getDefault());
     return slr;

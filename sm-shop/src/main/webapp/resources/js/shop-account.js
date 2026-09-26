@@ -1,20 +1,39 @@
 
  
 
+	/**
+	 * Kiem tra khung dang nhap da duoc render san bang JSP chua.
+	 * Dau hieu: ton tai #login (form dang nhap) hoac #signinPane trong trang.
+	 *
+	 * Khai bao truoc $(function(){}) de chac chan co san khi document ready.
+	 */
+	function hasServerRenderedLogin() {
+		return document.getElementById('login') != null || document.getElementById('signinPane') != null;
+	}
+
 	$(function(){
 		//log('Check for customer account');
 		if(supportsCustomerLogin()) {
-			if($('#customerNotLoggedInAccountTemplate')) {
-				var customerNotLoggedInTemplate = Hogan.compile(document.getElementById("customerNotLoggedInAccountTemplate").innerHTML);
-				var customerNotLoggedInRendered = customerNotLoggedInTemplate.render('');
-				$('#customerAccount').html('');
-				$('#customerAccount').append(customerNotLoggedInRendered);
+			//
+			// Mot so template (bootstrap, exoticamobilia) render khung dang nhap bang JSP ngay tren
+			// trang de co the nhung fragment googleSignIn.jsp (chua nut dang nhap Google).
+			// Trong truong hop do TUYET DOI khong duoc ghi de #customerAccount,
+			// neu khong khung dang nhap se bi xoa mat.
+			//
+			if(!hasServerRenderedLogin()) {
+				var template = document.getElementById("customerNotLoggedInAccountTemplate");
+				if(template) {
+					var customerNotLoggedInTemplate = Hogan.compile(template.innerHTML);
+					var customerNotLoggedInRendered = customerNotLoggedInTemplate.render('');
+					$('#customerAccount').html('');
+					$('#customerAccount').append(customerNotLoggedInRendered);
+				}
 			}
 			initUserAccount();
 		}
 
 	});
-	
+
 	function initUserAccount() {
 		var userName = getUserName();
 		//log('userName ' + userName);
@@ -22,31 +41,30 @@
 			displayUserAccount(userName);
 		}
 	}
-	
+
 
 
 
 function displayUserAccount(userName){
 	url = getContextPath() + '/shop/customer/accountSummary.json?userName='+userName;
-	$.ajax({  
-		 type: 'GET',  
-		 url: url,  
-		 error: function(xhr) { 
+	$.ajax({
+		 type: 'GET',
+		 url: url,
+		 error: function(xhr) {
 			if(xhr.status==401) {//not authenticated
 				removeUserName();
 			}
-			 
+
 		 },
 		 success: function(customer) {
 			 log('From account summary');
 			 if(customer!=null) {
 				 //display user
-				 //alert("Supports customer loggin " + supportsCustomerLogin());
-				 if($('#customerLoggedInAccountTemplate')) {
-					    $('#customerAccount').html('');
-						var customerLoggedInTemplate = Hogan.compile(document.getElementById("customerLoggedInAccountTemplate").innerHTML);
-						var customerLoggedInRendered = customerLoggedInTemplate.render(customer);
-						$('#customerAccount').append(customerLoggedInRendered);
+				 if($('#customerLoggedInAccountTemplate').length > 0) {
+					var customerLoggedInTemplate = Hogan.compile(document.getElementById("customerLoggedInAccountTemplate").innerHTML);
+					var customerLoggedInRendered = customerLoggedInTemplate.render(customer);
+					$('#customerAccount').html('');
+					$('#customerAccount').append(customerLoggedInRendered);
 				 }
 			 }
 		} 

@@ -98,9 +98,23 @@ public class LanguageUtils {
 
 
       Locale localeFromContext = LocaleContextHolder.getLocale();// should be browser locale
-      if (!language.getCode().equals(localeFromContext.getLanguage())) {
+      //
+      // So sanh theo NGON NGU (khong phan biet hoa/thuong) va co xu ly ma cu.
+      //
+      // Trong DB, tieng Viet duoc luu voi ma cu "vn", trong khi java.util.Locale
+      // dung ma ISO-639 "vi" (Locale("vi","VN").getLanguage() tra ve "vi").
+      // Neu so sanh truc tiep "vn".equals("vi") thi LUON sai -> moi request deu goi
+      // toLanguage("vi"), tra cuu getLanguagesMap() theo key "vi" khong thay
+      // (map duoc danh key theo ma DB "vn") nen roi vao fallback DEFAULT_LANGUAGE
+      // ("en"). Ket qua: ngon ngu phien bi doi am tham sang "en" moi lan tai trang,
+      // lam StoreFilter nap sai noi dung va khung dang nhap bien mat.
+      //
+      if (!isSameLanguage(language.getCode(), localeFromContext.getLanguage())) {
         // get locale context
-        language = languageService.toLanguage(localeFromContext);
+        Language fromContext = languageService.toLanguage(localeFromContext);
+        if (fromContext != null) {
+          language = fromContext;
+        }
       }
 
     }
@@ -119,6 +133,29 @@ public class LanguageUtils {
     request.getSession().setAttribute(Constants.LANGUAGE, language);
 
     return language;
+  }
+
+  /**
+   * So sanh hai ma ngon ngu co cung chi mot ngon ngu khong.
+   *
+   * Xu ly truong hop dac biet cua tieng Viet: DB dung ma cu "vn" con
+   * java.util.Locale dung ma ISO-639 "vi". Neu khong quy ve cung mot dang thi
+   * phep so sanh luon sai va ngon ngu phien bi reset ve mac dinh moi request.
+   */
+  private boolean isSameLanguage(String languageCode, String localeCode) {
+    if (StringUtils.isBlank(languageCode) || StringUtils.isBlank(localeCode)) {
+      return false;
+    }
+    return normalizeLanguageCode(languageCode).equalsIgnoreCase(normalizeLanguageCode(localeCode));
+  }
+
+  /** Quy cac ma ngon ngu tieng Viet (vn / vie) ve cung mot dang "vi". */
+  private String normalizeLanguageCode(String code) {
+    String normalized = code.trim();
+    if ("vn".equalsIgnoreCase(normalized) || "vie".equalsIgnoreCase(normalized)) {
+      return "vi";
+    }
+    return normalized;
   }
 
   /**

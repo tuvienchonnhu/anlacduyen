@@ -42,6 +42,10 @@
 		<link href="<c:url value="/resources/templates/generic/css/template.css" />" rel="stylesheet" type="text/css">
 		<link href="<c:url value="/resources/templates/generic/css/responsive.css" />" rel="stylesheet" type="text/css">
 
+		<!-- khung dang nhap + nut dang nhap bang Google (dung chung moi template) -->
+		<link href="<c:url value="/resources/css/assets/bootstrap-social.css" />" rel="stylesheet">
+		<link href="<c:url value="/resources/css/sm-login.css" />" rel="stylesheet">
+
 		<script src="<c:url value="/resources/templates/generic/js/vendor/modernizr-2.8.3.min.js" />"></script>
 		<script src="<c:url value="/resources/templates/generic/js/vendor/jquery-1.12.0.min.js" />"></script>
     

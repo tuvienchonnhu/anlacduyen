@@ -1,0 +1,350 @@
+/*
+ * Khung dang nhap (logon box) + nut "Dang nhap bang Google" dung chung cho
+ * moi template (bootstrap, exoticamobilia, generic, december).
+ *
+ * Ly do tach rieng file nay:
+ *   - bootstrap-social.css chi duoc nhung o trang logon/register cua template
+ *     generic + december, nen nut Google trong dropdown o header cua template
+ *     bootstrap / exoticamobilia khong co CSS -> khong hien thi.
+ *   - Khung dropdown cu qua hep (200px) trong khi Google Identity Services
+ *     luon render iframe rong 320px -> bi cat mat nut.
+ *
+ * File nay duoc nhung trong shopLinks.jsp cua TAT CA cac template nen nut
+ * Google luon hien thi dung, ke ca khi nguoi dung doi ngon ngu.
+ */
+
+/* ---------------------------------------------------------------------------
+ * 1. Nut Google (Google Identity Services)
+ * ------------------------------------------------------------------------ */
+.google-signin-wrapper {
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid rgba(0, 0, 0, .12);
+	clear: both;
+}
+
+.google-signin-divider {
+	display: block;
+	margin-bottom: 12px;
+	color: #888;
+	text-align: center;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: .06em;
+}
+
+.google-signin-card {
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+
+.google-signin-card .google-signin-button {
+	display: block;
+	width: 100%;
+	max-width: 320px;
+	min-height: 44px;
+	margin: 0 auto;
+	overflow: hidden;
+}
+
+.google-signin-card .google-signin-button iframe {
+	margin: 0 auto;
+	max-width: 100%;
+}
+
+.google-signin-hint {
+	margin: 10px 0 0;
+	color: #888;
+	font-size: 12px;
+	line-height: 1.4;
+	text-align: center;
+}
+
+.google-signin-status {
+	margin: 8px 0 0;
+	color: #666;
+	font-size: 12px;
+	line-height: 1.4;
+	text-align: center;
+}
+
+.google-signin-error {
+	margin: 8px 0 0;
+	color: #a94442;
+	font-size: 12px;
+	line-height: 1.4;
+	text-align: center;
+}
+
+.google-signin-card.is-busy .google-signin-button {
+	opacity: .6;
+	pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * 2. Khung dang nhap trong dropdown o header (id signinPane)
+ *
+ * Chieu rong 340px = 320px cua nut Google + padding 2 ben, nen nut Google
+ * hien thi day du chu khong bi cat.
+ * ------------------------------------------------------------------------ */
+#signinPane {
+	width: 340px !important;
+	min-width: 340px !important;
+	max-width: 340px !important;
+	padding: 18px !important;
+	padding-bottom: 14px !important;
+	box-sizing: border-box;
+	white-space: normal;
+}
+
+#signinPane .login-form {
+	margin: 0;
+	width: 100%;
+}
+
+/* input dung chung chieu rong voi nut Google */
+#signinPane input[type="text"],
+#signinPane input[type="password"],
+#signinPane input[type="email"],
+#signinPane .form-control {
+	display: block;
+	width: 100% !important;
+	height: 44px;
+	line-height: 44px;
+	padding: 0 12px;
+	box-sizing: border-box;
+	font-size: 14px;
+	margin-bottom: 12px;
+}
+
+#signinPane select.form-control {
+	height: 44px;
+	line-height: normal;
+	padding: 0 12px;
+}
+
+#signinPane label,
+#signinPane .control-label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #444;
+}
+
+/* nut Login / Signin dung chung chieu rong + chieu cao voi nut Google */
+#signinPane #login-button,
+#signinPane .login-btn,
+#signinPane button[type="submit"] {
+	display: block;
+	width: 100% !important;
+	height: 44px;
+	line-height: 44px;
+	padding: 0 12px;
+	box-sizing: border-box;
+	font-size: 14px;
+	text-align: center;
+	margin: 4px 0 0;
+}
+
+#signinPane .form-group {
+	margin-bottom: 12px;
+}
+
+/* bo icon feedback chong len input khi input da full width */
+#signinPane .form-control-feedback {
+	right: 6px;
+	line-height: 44px;
+}
+
+/* nut Google trong dropdown: bang dung chieu rong khung */
+#signinPane .google-signin-wrapper {
+	margin-top: 14px;
+	padding-top: 14px;
+}
+
+#signinPane .google-signin-card .google-signin-button {
+	width: 100% !important;
+	max-width: 100% !important;
+	min-height: 44px;
+}
+
+#signinPane .google-signin-hint {
+	font-size: 11px;
+	line-height: 1.4;
+	margin-top: 8px;
+}
+
+#signinPane .google-signin-status,
+#signinPane .google-signin-error {
+	font-size: 11px;
+	line-height: 1.4;
+}
+
+#signinPane .google-signin-divider {
+	margin-bottom: 10px;
+	font-size: 11px;
+}
+
+/* link "Chua co tai khoan?" */
+#signinPane #registerLink,
+#signinPane a[data-toggle="modal"] {
+	display: block;
+	margin-top: 10px;
+	text-align: center;
+	font-size: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+ * 3. Man hinh nho: khung dang nhap khong duoc tran ra ngoai viewport
+ * ------------------------------------------------------------------------ */
+@media (max-width: 420px) {
+	#signinPane {
+		width: calc(100vw - 24px) !important;
+		min-width: 0 !important;
+		max-width: calc(100vw - 24px) !important;
+	}
+
+	#signinPane .google-signin-card .google-signin-button {
+		max-width: 100% !important;
+	}
+}/* ---------------------------------------------------------------------------
+ * 4. Ghi de cac rule cua tung template
+ *
+ * theme.css cua bootstrap dat #mainmenu { text-transform:uppercase;
+ * font-size:10px } va #mainmenu .dropdown-menu > li > a { font-size:10px }.
+ * Cac rule nay lam chu trong khung dang nhap bi nho va bi viet HOA, khong
+ * khop voi nut Google. Ghi de lai cho dung.
+ * ------------------------------------------------------------------------ */
+#mainmenu #signinPane,
+#signinPane {
+	text-transform: none;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+#mainmenu #signinPane input,
+#mainmenu #signinPane button,
+#mainmenu #signinPane label,
+#signinPane input,
+#signinPane button,
+#signinPane label,
+#signinPane p,
+#signinPane span {
+	text-transform: none;
+}
+
+#mainmenu #signinPane label,
+#signinPane label {
+	font-size: 13px;
+}
+
+#mainmenu #signinPane input,
+#signinPane input {
+	font-size: 14px;
+}
+
+#mainmenu #signinPane #login-button,
+#signinPane #login-button {
+	font-size: 14px;
+	letter-spacing: normal;
+}
+
+#mainmenu #signinPane .google-signin-hint,
+#mainmenu #signinPane .google-signin-status,
+#mainmenu #signinPane .google-signin-error,
+#mainmenu #signinPane .google-signin-divider,
+#signinPane .google-signin-hint,
+#signinPane .google-signin-status,
+#signinPane .google-signin-error,
+#signinPane .google-signin-divider {
+	font-size: 11px;
+	text-transform: none;
+}
+
+/* exoticamobilia: .dropdown-menu dung padding rieng, ep lai cho dong nhat */
+.dropdown-menu#signinPane,
+ul#signinPane.dropdown-menu {
+	padding: 18px !important;
+	padding-bottom: 14px !important;
+	width: 340px !important;
+	min-width: 340px !important;
+	max-width: 340px !important;
+}
+
+/* exoticamobilia: item trong dropdown khong duoc gioi han chieu rong */
+#signinPane > li {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+}
+
+#signinPane .form-group.has-feedback {
+	position: relative;
+}
+
+#signinPane .form-group.has-feedback .form-control {
+	padding-right: 34px;
+}
+
+@media (max-width: 420px) {
+	.dropdown-menu#signinPane,
+	ul#signinPane.dropdown-menu {
+		width: calc(100vw - 24px) !important;
+		min-width: 0 !important;
+		max-width: calc(100vw - 24px) !important;
+	}
+}/* ---------------------------------------------------------------------------
+ * 5. Neo khung dang nhap vao dung nut "Dang nhap" (bootstrap 2 / bootstrap 3)
+ *
+ * Trong template bootstrap, #signinPane nam trong <li class="dropdown"> cua mot
+ * <ul class="pull-right">. Khi so luong muc o header doi (vi du khi doi ngon ngu,
+ * hoac khi co/khong co mini cart), chieu rong cua <ul> thay doi lam dropdown bi
+ * day ra ngoai viewport -> nguoi dung thay nhu muc dang nhap "bien mat".
+ *
+ * Cach xu ly: neo dropdown vao <li> cha va luon canh phai trong viewport.
+ * ------------------------------------------------------------------------ */
+li#fat-menu > .dropdown-menu#signinPane,
+li.dropdown > #signinPane {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	left: auto;
+	margin-top: 2px;
+}
+
+/* truong hop cuoi cung: khong du cho ben phai thi canh le phai viewport */
+li#fat-menu,
+li.dropdown:has(> #signinPane) {
+	position: relative;
+}
+
+/* bootstrap 2: ul.pull-right khong tao containing block -> ep lai */
+#mainmenu > ul.pull-right,
+#mainmenu > ul.logon-box {
+	position: relative;
+}
+
+/* dam bao khung dang nhap khong bi meo boi .navbar / .nav cua template */
+#mainmenu #signinPane.dropdown-menu {
+	float: none;
+	top: auto;
+	left: auto;
+	margin: 0;
+	z-index: 500000;
+}
+
+/* ngon ngu + dang nhap: giu dung thu tu, khong cho keo gian lam tran dong */
+#mainmenu > ul.pull-right {
+	flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+	li#fat-menu > .dropdown-menu#signinPane,
+	li.dropdown > #signinPane {
+		right: auto;
+		left: 0;
+	}
+}
