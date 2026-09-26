@@ -81,6 +81,15 @@ public interface CustomerFacade
     
     public boolean checkIfUserExists(final String userName,final MerchantStore store) throws Exception;
     
+    /**
+     * Check if a customer email address is already used for the given store
+     * @param emailAddress customer email address
+     * @param store store for which customer want to register
+     * @return boolean flag indicating if the email address already exists
+     * @throws Exception
+     */
+    public boolean checkIfEmailExists(final String emailAddress, final MerchantStore store) throws Exception;
+
     public PersistableCustomer  registerCustomer( final PersistableCustomer customer,final MerchantStore merchantStore, final Language language) throws Exception;
     
     public Address getAddress(final Long userId, final MerchantStore merchantStore,boolean isBillingAddress) throws Exception;

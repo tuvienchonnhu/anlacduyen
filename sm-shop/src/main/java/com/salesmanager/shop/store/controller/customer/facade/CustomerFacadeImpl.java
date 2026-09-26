@@ -335,6 +335,33 @@ public class CustomerFacadeImpl implements CustomerFacade {
   }
 
 
+  /**
+   * <p>
+   * Method to check if given email address is already used by a customer of the given store. Email
+   * address is used as the customer user name, a customer is not allowed to register twice with the
+   * same email address for a given store.
+   * </p>
+   */
+  @Override
+  public boolean checkIfEmailExists(final String emailAddress, final MerchantStore store)
+      throws Exception {
+    if (StringUtils.isNotBlank(emailAddress) && store != null) {
+      Customer customer = customerService.getByEmailAddress(emailAddress, store.getId());
+      if (customer != null) {
+        LOG.info("Customer with email {} already exists for store {} ", emailAddress,
+            store.getStorename());
+        return true;
+      }
+
+      LOG.info("No customer found with email {} for store {} ", emailAddress, store.getStorename());
+      return false;
+
+    }
+    LOG.info("Either email address is empty or we have not found any value for store");
+    return false;
+  }
+
+
   @Override
   public PersistableCustomer registerCustomer(final PersistableCustomer customer,
       final MerchantStore merchantStore, Language language) throws Exception {

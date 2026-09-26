@@ -41,6 +41,11 @@ $(document).ready(function() {
 		isFormValid();
 	});
 	
+	//Kiem tra email da ton tai trong he thong chua
+	$("#emailAddress").on("blur", function(){
+		checkEmailExists();
+	});
+
 	$("input[type='password']").on("change keyup paste", function(){
 		$("#userName").val($("#emailAddress").val());
 		isFormValid();
@@ -56,17 +61,29 @@ $(document).ready(function() {
 
 function isFormValid() {
 	
+	if($('#emailError').is(":visible")) {//email da ton tai
+		$('#submitRegistration').addClass('btn-disabled');
+		$('#submitRegistration').prop('disabled', true);
+		return false;
+	}
+
+	if($('#emailAddress').data('email-exists')) {//email da ton tai (ajax)
+		$('#submitRegistration').addClass('btn-disabled');
+		$('#submitRegistration').prop('disabled', true);
+		return false;
+	}
+
 	if($('.alert-error').is(":visible")) {
 		return true;
 	}
-	
+
 	if($('.alert-success').is(":visible")) {
 		return true;
 	}
-	
+
 	$('#registrationError').hide();//reset error message
 	var msg = isCustomerFormValid($('#registrationForm'));
-	
+
 	if(msg!=null) {//disable submit button
 		$('#submitRegistration').addClass('btn-disabled');
 		$('#submitRegistration').prop('disabled', true);
@@ -81,13 +98,47 @@ function isFormValid() {
 	}
 }
 
+//Khong cho phep dang ky voi email da ton tai trong database
+function checkEmailExists() {
 
- 
- 
- </script>
+	var email = $('#emailAddress').val();
+
+	$('#emailError').hide();
+	$('#emailAddress').data('email-exists', false);
+
+	if(email == null || email.length == 0) {
+		isFormValid();
+		return;
+	}
+
+	$.ajax({
+		type: 'GET',
+		url: '<c:url value="/shop/customer/checkEmail.html" />',
+		data: { email: email },
+		dataType: 'json',
+		success: function(data) {
+			if(data != null && data.exists) {
+				$('#emailError').html(data.message);
+				$('#emailError').show();
+				$('#emailAddress').data('email-exists', true);
+			} else {
+				$('#emailError').hide();
+				$('#emailAddress').data('email-exists', false);
+			}
+			isFormValid();
+		},
+		error: function() {
+			$('#emailError').hide();
+			$('#emailAddress').data('email-exists', false);
+			isFormValid();
+		}
+	});
+}
+	</script>
 
 <c:set var="register_url" value="${pageContext.request.contextPath}/shop/customer/register.html"/>
 <div id="registrationError"  class="alert alert-warning common-row" style="display:none;"></div>
+<div id="emailError" class="alert alert-danger common-row" style="display:none;"></div>
 
 
 		<!-- page-title-wrapper-end -->

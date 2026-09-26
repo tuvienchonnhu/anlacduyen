@@ -76,5 +76,11 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, Custo
 	@Query("select distinct c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.attributes ca left join fetch ca.customerOption cao left join fetch ca.customerOptionValue cav left join fetch cao.descriptions caod left join fetch cav.descriptions left join fetch c.groups  where cm.id = ?1")
 	List<Customer> findByStore(int storeId);
 	
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.groups where lower(c.emailAddress) = lower(?1) and cm.id = ?2")
+	Customer findByEmailAddress(String emailAddress, int storeId);
+
+	@Query("select c from Customer c join fetch c.merchantStore cm left join fetch c.defaultLanguage cl left join fetch c.groups where lower(c.emailAddress) = lower(?1) and cm.code = ?2")
+	Customer findByEmailAddress(String emailAddress, String storeCode);
+
 
 }

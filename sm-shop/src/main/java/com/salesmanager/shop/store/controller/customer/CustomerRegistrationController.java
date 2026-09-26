@@ -1,8 +1,10 @@
 package com.salesmanager.shop.store.controller.customer;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
@@ -23,6 +25,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.salesmanager.core.business.exception.ConversionException;
 import com.salesmanager.core.business.exception.ServiceException;
@@ -77,7 +80,7 @@ public class CustomerRegistrationController extends AbstractController {
 	@Inject
 	private CountryService countryService;
 
-	
+
 	@Inject
 	private ZoneService zoneService;
 
@@ -87,27 +90,27 @@ public class CustomerRegistrationController extends AbstractController {
 
 	@Inject
 	private LabelUtils messages;
-	
+
 	@Inject
 	private CustomerFacade customerFacade;
 
-	
+
 	@Inject
 	private EmailTemplatesUtils emailTemplatesUtils;
-	
+
 	@Inject
 	private CaptchaRequestUtils captchaRequestUtils;
-	
+
 	@Inject
 	@Qualifier("img")
 	private ImageFilePath imageUtils;
-	
+
     @Inject
     private ShoppingCartCalculationService shoppingCartCalculationService;
-    
+
     @Inject
     private PricingService pricingService;
-	
+
     @Value("${config.recaptcha.siteKey}")
     private String siteKeyKey;
 
@@ -119,13 +122,13 @@ public class CustomerRegistrationController extends AbstractController {
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.MERCHANT_STORE);
 
 		model.addAttribute( "recapatcha_public_key", siteKeyKey);
-		
+
 		SecuredShopPersistableCustomer customer = new SecuredShopPersistableCustomer();
 		AnonymousCustomer anonymousCustomer = (AnonymousCustomer)request.getAttribute(Constants.ANONYMOUS_CUSTOMER);
 		if(anonymousCustomer!=null) {
 			customer.setBilling(anonymousCustomer.getBilling());
 		}
-		
+
 		model.addAttribute("customer", customer);
 
 		/** template **/
@@ -135,6 +138,33 @@ public class CustomerRegistrationController extends AbstractController {
 
 
 	}
+
+    /**
+     * Ajax check used by the registration page to prevent registering with an email address
+     * already existing in the system for the current store.
+     */
+    @RequestMapping( value = "/checkEmail.html", method = RequestMethod.GET )
+    @ResponseBody
+    public Map<String, Object> checkEmail( final HttpServletRequest request, final Locale locale )
+        throws Exception
+    {
+        MerchantStore merchantStore = (MerchantStore) request.getAttribute( Constants.MERCHANT_STORE );
+
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put( "exists", false );
+
+        String emailAddress = request.getParameter( "email" );
+        if ( StringUtils.isBlank( emailAddress ) ) {
+            return result;
+        }
+
+        if ( customerFacade.checkIfEmailExists( emailAddress, merchantStore ) ) {
+            result.put( "exists", true );
+            result.put( "message", messages.getMessage( "registration.email.already.exists", locale ) );
+        }
+
+        return result;
+    }
 
     @RequestMapping( value = "/register.html", method = RequestMethod.POST )
     public String registerCustomer( @Valid
@@ -162,6 +192,16 @@ public class CustomerRegistrationController extends AbstractController {
         }
         
 
+        if ( StringUtils.isNotBlank( customer.getEmailAddress() ) )
+        {
+            if ( customerFacade.checkIfEmailExists( customer.getEmailAddress(), merchantStore ) )
+            {
+                LOGGER.debug( "Customer with email {} already exists for this store ", customer.getEmailAddress() );
+            	FieldError error = new FieldError("emailAddress","emailAddress",messages.getMessage("registration.email.already.exists", locale));
+            	bindingResult.addError(error);
+            }
+        }
+
         if ( StringUtils.isNotBlank( customer.getUserName() ) )
         {
             if ( customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
@@ -172,8 +212,8 @@ public class CustomerRegistrationController extends AbstractController {
             }
             userName = customer.getUserName();
         }
-        
-        
+
+
         if ( StringUtils.isNotBlank( customer.getPassword() ) &&  StringUtils.isNotBlank( customer.getCheckPassword() ))
         {
             if (! customer.getPassword().equals(customer.getCheckPassword()) )
@@ -193,6 +233,19 @@ public class CustomerRegistrationController extends AbstractController {
                 new StringBuilder().append( ControllerConstants.Tiles.Customer.register ).append( "." ).append( merchantStore.getStoreTemplate() );
             return template.toString();
 
+        }
+
+        //final safeguard against duplicate email address / username
+        if ( customerFacade.checkIfEmailExists( customer.getEmailAddress(), merchantStore )
+                        || customerFacade.checkIfUserExists( customer.getUserName(), merchantStore ) )
+        {
+            LOGGER.debug( "Customer with email {} or user name {} already exists for this store ",
+                         customer.getEmailAddress(), customer.getUserName() );
+        	FieldError error = new FieldError("emailAddress","emailAddress",messages.getMessage("registration.email.already.exists", locale));
+        	bindingResult.addError(error);
+            StringBuilder template =
+                new StringBuilder().append( ControllerConstants.Tiles.Customer.register ).append( "." ).append( merchantStore.getStoreTemplate() );
+            return template.toString();
         }
 
         @SuppressWarnings( "unused" )

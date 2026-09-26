@@ -125,6 +125,7 @@ public class MultipleEntryPointsSecurityConfig {
 					.antMatchers("/shop/**").permitAll()
 					.antMatchers("/shop/customer/logon*").permitAll()
 					.antMatchers("/shop/customer/registration*").permitAll()
+					.antMatchers("/shop/customer/checkEmail*").permitAll()
 					.antMatchers("/shop/customer/logout*").permitAll()
 					.antMatchers("/shop/customer/customLogon*").permitAll()
 					.antMatchers("/shop/customer/denied*").permitAll()

@@ -29,6 +29,22 @@ public interface CustomerService  extends SalesManagerEntityService<Long, Custom
 	Customer getByNick(String nick, String code);
 	
 	/**
+	 * Lookup a customer by its email address for a given store
+	 * @param emailAddress customer email address
+	 * @param storeId store id
+	 * @return Customer or null if not found
+	 */
+	Customer getByEmailAddress(String emailAddress, int storeId);
+
+	/**
+	 * Lookup a customer by its email address for a given store code
+	 * @param emailAddress customer email address
+	 * @param code store code
+	 * @return Customer or null if not found
+	 */
+	Customer getByEmailAddress(String emailAddress, String code);
+
+	/**
 	 * Password reset token
 	 * @param storeCode
 	 * @param token

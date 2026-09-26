@@ -117,6 +117,16 @@ public class CustomerServiceImpl extends SalesManagerEntityServiceImpl<Long, Cus
 	}
 
 	@Override
+	public Customer getByEmailAddress(String emailAddress, int storeId) {
+		return customerRepository.findByEmailAddress(emailAddress, storeId);
+	}
+
+	@Override
+	public Customer getByEmailAddress(String emailAddress, String code) {
+		return customerRepository.findByEmailAddress(emailAddress, code);
+	}
+
+	@Override
 	public Customer getByPasswordResetToken(String storeCode, String token) {
 		return customerRepository.findByResetPasswordToken(token, storeCode);
 	}
