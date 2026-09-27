@@ -1,7 +1,14 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 	<%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
-		<%@ page session="false" %>
 
+			<%--
+				KHONG duoc khai bao <%@ page session="false" %> trong file nay.
+				Fragment duoc nhung bang jsp:include vao header.jsp, ben trong khoi
+				<sec:authorize>. Directive page cua fragment se GHI DE trang cha, khien
+				container khong tao HttpSession -> Spring Security khong doc duoc
+				Authentication -> ca 3 nhanh sec:authorize deu truot -> toan bo khung
+				dang nhap bien mat khoi header.
+			--%>
 			<%-- Nut "Dang nhap bang Google" dung Google Identity Services (GIS) SDK. Chi hien thi khi cua hang da cau
 				hinh Google Client ID (googleLoginEnabled). Duoc nhung vao trang logon / register cua moi template. Bien
 				can co trong model: googleClientId : Google Client ID da cau hinh trong Admin googleLocale : ma ngon ngu

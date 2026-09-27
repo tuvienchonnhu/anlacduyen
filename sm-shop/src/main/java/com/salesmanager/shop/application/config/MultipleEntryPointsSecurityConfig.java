@@ -100,7 +100,18 @@ public class MultipleEntryPointsSecurityConfig {
 		@Override
 		public void configure(WebSecurity web) {
 			web.ignoring().antMatchers("/");
-			web.ignoring().antMatchers("/shop");
+			//
+			// KHONG duoc them "/shop" vao web.ignoring().
+			//
+			// web.ignoring() bo qua TOAN BO filter chain cua Spring Security, ke ca
+			// SecurityContextPersistenceFilter. Khi do SecurityContextHolder rong
+			// (Authentication = null) tren moi trang /shop, nen cac the
+			// <sec:authorize> trong header deu truot va toan bo khung dang nhap
+			// (cung nut dang nhap bang Google) bien mat khoi menu.
+			//
+			// /shop/** da duoc permitAll() trong configure(HttpSecurity) ben duoi,
+			// nen khach vang lai van truy cap duoc binh thuong.
+			//
 			web.ignoring().antMatchers("/admin");
 			web.ignoring().antMatchers("/error");
 			web.ignoring().antMatchers("/resources/**");

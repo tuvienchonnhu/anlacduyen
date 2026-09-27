@@ -347,4 +347,273 @@ li.dropdown:has(> #signinPane) {
 		right: auto;
 		left: 0;
 	}
+}/* ===========================================================================
+ * 6. Nut chup anh + modal tim san pham bang hinh anh
+ *
+ * Dung chung cho moi template (bootstrap, exoticamobilia, generic, december).
+ * File nay duoc nhung trong shopLinks.jsp cua TAT CA cac template.
+ * =========================================================================== */
+
+/* --- Nut tren header ----------------------------------------------------- */
+.product-camera-trigger {
+	cursor: pointer;
+}
+
+/* trong template co icon: chi hien icon cho gon */
+.product-camera-trigger .fa,
+.product-camera-trigger [class^="icon-"] {
+	margin-right: 4px;
+}
+
+/* --- Modal --------------------------------------------------------------- */
+.product-camera-modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2147483000;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	overflow-y: auto;
+	padding: 24px 12px;
+}
+
+.product-camera-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, .55);
+}
+
+.product-camera-dialog {
+	position: relative;
+	background: #fff;
+	border-radius: 6px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
+	width: 100%;
+	max-width: 560px;
+	margin: auto;
+	box-sizing: border-box;
+}
+
+.product-camera-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 18px;
+	border-bottom: 1px solid #eee;
+}
+
+.product-camera-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #333;
+}
+
+.product-camera-close {
+	background: none;
+	border: 0;
+	font-size: 26px;
+	line-height: 1;
+	color: #999;
+	cursor: pointer;
+	padding: 0 4px;
+}
+
+.product-camera-close:hover {
+	color: #333;
+}
+
+.product-camera-body {
+	padding: 18px;
+}
+
+/* --- Khung hinh / anh xem truoc ----------------------------------------- */
+.product-camera-stage {
+	position: relative;
+	width: 100%;
+	background: #111;
+	border-radius: 4px;
+	overflow: hidden;
+	min-height: 240px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.product-camera-stage.is-busy {
+	opacity: .55;
+	pointer-events: none;
+}
+
+.product-camera-video,
+.product-camera-preview {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: 380px;
+	object-fit: contain;
+	background: #111;
+}
+
+.product-camera-hint {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 8px 10px;
+	background: rgba(0, 0, 0, .6);
+	color: #fff;
+	font-size: 12px;
+	text-align: center;
+	line-height: 1.4;
+}
+
+/* --- Cac nut thao tac ---------------------------------------------------- */
+.product-camera-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 14px;
+}
+
+.product-camera-actions .btn {
+	flex: 1 1 auto;
+	min-width: 120px;
+	height: 44px;
+	line-height: 44px;
+	padding: 0 14px;
+	margin: 0;
+	text-align: center;
+	font-size: 14px;
+	box-sizing: border-box;
+}
+
+/* --- Thong bao ----------------------------------------------------------- */
+.product-camera-status {
+	margin-top: 12px;
+	color: #666;
+	font-size: 13px;
+	text-align: center;
+}
+
+.product-camera-error {
+	margin-top: 12px;
+	color: #a94442;
+	font-size: 13px;
+	text-align: center;
+}
+
+/* --- Ket qua tim duoc ---------------------------------------------------- */
+.product-camera-detected {
+	margin: 16px 0 10px;
+	font-size: 13px;
+	color: #555;
+	text-align: center;
+}
+
+.product-camera-empty {
+	margin: 16px 0 0;
+	font-size: 13px;
+	color: #888;
+	text-align: center;
+}
+
+.product-camera-result-list {
+	margin-top: 12px;
+	border-top: 1px solid #eee;
+	padding-top: 12px;
+	max-height: 340px;
+	overflow-y: auto;
+}
+
+.product-camera-result {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 0;
+	border-bottom: 1px solid #f2f2f2;
+}
+
+.product-camera-result:last-child {
+	border-bottom: 0;
+}
+
+.product-camera-result-image {
+	flex: 0 0 56px;
+	width: 56px;
+	height: 56px;
+	overflow: hidden;
+	border-radius: 4px;
+	background: #f6f6f6;
+}
+
+.product-camera-result-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.product-camera-result-info {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.product-camera-result-name {
+	margin: 0 0 3px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #333;
+	line-height: 1.3;
+	word-wrap: break-word;
+}
+
+.product-camera-result-price {
+	margin: 0;
+	font-size: 13px;
+	color: #c0392b;
+	font-weight: 600;
+}
+
+.product-camera-result .product-camera-add {
+	flex: 0 0 auto;
+	height: 36px;
+	line-height: 36px;
+	padding: 0 12px;
+	font-size: 12px;
+	margin: 0;
+	white-space: nowrap;
+}
+
+.product-camera-result .product-camera-add:disabled {
+	opacity: .65;
+	cursor: default;
+}
+
+/* khong cho trang cuon khi modal dang mo */
+body.product-camera-open {
+	overflow: hidden;
+}
+
+@media (max-width: 560px) {
+	.product-camera-dialog {
+		max-width: 100%;
+	}
+
+	.product-camera-actions .btn {
+		min-width: 0;
+		flex: 1 1 100%;
+	}
+
+	.product-camera-result-image {
+		flex-basis: 46px;
+		width: 46px;
+		height: 46px;
+	}
 }

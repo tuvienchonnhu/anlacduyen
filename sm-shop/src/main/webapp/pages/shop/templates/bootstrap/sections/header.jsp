@@ -120,8 +120,7 @@ response.setDateHeader ("Expires", -1);
 					</c:if>
 
 					<!-- Language selector -->
-					<c:if test="${fn:length(requestScope.MERCHANT_STORE.languages) > 1}">
-					<ul class="pull-right language-menu" style="list-style-type:none;padding-top:8px;margin:0 12px 0 0;">
+					<c:if test="${fn:length(requestScope.MERCHANT_STORE.languages) > 1}">					<ul class="pull-right language-menu" style="list-style-type:none;padding-top:8px;margin:0 12px 0 0;">
 					<li class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
 					<s:message code="label.generic.language" text="Language"/> <b class="caret"></b>
