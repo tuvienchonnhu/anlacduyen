@@ -6,7 +6,7 @@
 <%@ page session="false" %>
 
 	<!-- required common scripts -->
-	<script src="<c:url value="/resources/js/shop-functions.js" />"></script>
+	<!-- shop-functions.js duoc nap trong sections/jsLinks.jsp (sau jQuery) de tranh loi thu tu nap -->
     <jsp:include page="/resources/js/functions.jsp" />
     <script src="<c:url value="/resources/js/jquery-1.10.2.min.js" />"></script>
     <script src="<c:url value="/resources/js/json2.js" />"></script>

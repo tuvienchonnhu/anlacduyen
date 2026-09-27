@@ -359,6 +359,13 @@ li.dropdown:has(> #signinPane) {
 	cursor: pointer;
 }
 
+/* Vai template (exoticamobilia) chen nut vao vung header-top-right dang float,
+ * can mot wrapper de nut khong bi day xuong dong va khong pha layout. */
+.header-camera-wrapper {
+	display: inline-block;
+	vertical-align: middle;
+}
+
 /* trong template co icon: chi hien icon cho gon */
 .product-camera-trigger .fa,
 .product-camera-trigger [class^="icon-"] {
@@ -572,6 +579,17 @@ li.dropdown:has(> #signinPane) {
 	color: #333;
 	line-height: 1.3;
 	word-wrap: break-word;
+}
+
+/* ten san pham la link xem chi tiet */
+.product-camera-result-link {
+	color: #333;
+	text-decoration: none;
+}
+
+.product-camera-result-link:hover {
+	color: #c0392b;
+	text-decoration: underline;
 }
 
 .product-camera-result-price {

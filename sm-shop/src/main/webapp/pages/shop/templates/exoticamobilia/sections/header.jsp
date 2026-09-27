@@ -310,6 +310,11 @@ $(document).ready(function() {
                                         </div>
                                         </c:if>
                                         
+                                        <!-- Nut chup anh tim san pham (AJAX, fragment dung chung moi template) -->
+                                        <div class="header-camera-wrapper">
+                                        	<jsp:include page="/pages/shop/common/product/productCameraButton.jsp" />
+                                        </div>
+
                                         <!-- Shopping cart menu populated by JS -->
                                         <c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">
                                         <div id="miniCart" class="btn-group dropdown">

@@ -270,6 +270,10 @@ $(document).ready(function() {
         <c:if test="${requestScope.CONFIGS['displayCustomerSection'] == true}">
         	<li class="dropdown" id="customerAccount"></li>
         </c:if>
+        <!-- Nut chup anh tim san pham (AJAX, fragment dung chung moi template) -->
+        <li class="dropdown">
+        	<jsp:include page="/pages/shop/common/product/productCameraButton.jsp" />
+        </li>
         <c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">	
         	<li class="dropdown">
         		<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="false"> <i class="fa fa-shopping-basket mr-5"></i> <span class="hidden-xs">

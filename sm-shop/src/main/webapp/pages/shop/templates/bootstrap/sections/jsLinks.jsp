@@ -6,6 +6,14 @@
 <%@ page session="false" %>
 
 
+    <!-- required common scripts for shopizer -->
+    <!-- Hogan.js can render template -> used by shop-minicart.js and shop-account.js -->
+    <script src="<c:url value="/resources/js/hogan.js" />"></script>
+    <script src="<c:url value="/resources/js/shop-functions.js" />"></script>
+    <script src="<c:url value="/resources/js/shop-customer.js" />"></script>
+    <script src="<c:url value="/resources/js/shop-minicart.js" />"></script>
+    <script src="<c:url value="/resources/js/shop-account.js" />"></script>
+
     <script src="<c:url value="/resources/templates/bootstrap/js/bootstrap-button.js" />"></script>
     <script src="<c:url value="/resources/templates/bootstrap/js/bootstrap-modal.js" />"></script>
     <script src="<c:url value="/resources/templates/bootstrap/js/bootstrap-tab.js" />"></script>

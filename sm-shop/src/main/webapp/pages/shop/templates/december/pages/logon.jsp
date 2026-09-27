@@ -39,9 +39,9 @@ response.setDateHeader ("Expires", -1);
 									<button type="submit" id="genericLogin-button" class="btn btn-default login-btn"><s:message code="button.label.signin" text="button.label.signin"/></button>
 								</form>
 					
-								<c:if test="${googleLoginEnabled}">
-									<jsp:include page="googleSignIn.jsp" />
-								</c:if>
+								<!-- Nut dang nhap bang Google: fragment tu kiem tra cau hinh (model hoac CONFIGS) nen
+								     khong can boc trong c:if googleLoginEnabled - tranh truong hop header/doi ngon ngu khong co model -->
+								<jsp:include page="googleSignIn.jsp" />
 
 							</div>
 

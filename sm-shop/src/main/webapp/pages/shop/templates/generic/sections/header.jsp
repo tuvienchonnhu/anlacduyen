@@ -133,16 +133,26 @@ response.setDateHeader ("Expires", -1);
 							<div class="header-top-left" id="customerAccount" style="margin-left:20px;"></div>
 							</c:if>
 							<c:if test="${requestScope.CONFIGS['displayContactUs']==true}">
-							<button class="btn btn-default header-left-menu type="button" onClick="javascript:location.href='<c:url value="/shop/store/contactus.html"/>';" aria-haspopup="true" aria-expanded="true">
+							<button type="button" class="btn btn-default header-left-menu" onClick="javascript:location.href='<c:url value="/shop/store/contactus.html"/>';" aria-haspopup="true" aria-expanded="true">
 								<a href="<c:url value="/shop/store/contactus.html"/>"><s:message code="label.customer.contactus" text="Contact us"/></a>
 							</button>
 							</c:if>
+
 						</div>
 						<div class="col-lg-3 col-md-4 col-sm-4">
 							<div class="header-top-right">
 							<!-- Empty placeholder -->
+								<!-- Nut chup anh tim san pham (AJAX, fragment dung chung moi template) -->
+								<jsp:include page="/pages/shop/common/product/productCameraButton.jsp" />	
 							</div>
 						</div>
+						<!-- Shopping cart -->
+						<c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">						    													
+							<div class="shop-cart" id="miniCartSummary"></div>
+							<div class="shop-cart-hover fix">
+								<ul id="miniCartDetails"></ul>
+							</div>
+						</c:if>
 					</div>
 				</div>
 			</div>
@@ -196,6 +206,10 @@ response.setDateHeader ("Expires", -1);
 							-->
 						</div>
 						<div class="col-lg-4 col-md-4 col-sm-9 col-xs-12">
+						    <!-- Nut chup anh tim san pham (AJAX, fragment dung chung moi template) -->
+						    <div class="header-camera-wrapper pull-right">
+						    	<jsp:include page="/pages/shop/common/product/productCameraButton.jsp" />
+						    </div>
 						    <!-- search box -->
 		                    <c:if test="${requestScope.CONFIGS['displaySearchBox'] == true}">
 
@@ -204,13 +218,13 @@ response.setDateHeader ("Expires", -1);
 								<span class="input-group-btn">
 									<button class="btn btn-default" id="searchButton" type="button" onclick="submitSearch()"><s:message code="label.generic.search" text="Search"/></button>
 								</span>
-								<!-- important for submitting search -->
-								<form id="hiddenSearchForm" method="post" action="<c:url value="/shop/search/search.html"/>">
-									<input type="hidden" id="hiddenQuery" name="q">
-								</form>
 							</div>
+							<!-- important for submitting search -->
+							<form id="hiddenSearchForm" method="post" action="<c:url value="/shop/search/search.html"/>">
+								<input type="hidden" id="hiddenQuery" name="q">
+							</form>
 
-							<!-- ThÃªm Script xá»­ lÃ½ sá»± kiá»‡n Enter vÃ  Click -->
+							<!-- Thêm Script xử lý sự kiện Enter và Click -->
 							<script type="text/javascript">
 								function submitSearch() {
 									var query = $('#searchField').val();
@@ -222,9 +236,9 @@ response.setDateHeader ("Expires", -1);
 
 								$(document).ready(function() {
 									$('#searchField').on('keypress', function(e) {
-										// Kiá»ƒm tra náº¿u phÃ­m báº¥m lÃ  Enter (mÃ£ phÃ­m 13)
+										// Kiểm tra nếu phím bấm là Enter (mã phím 13)
 										if (e.which === 13 || e.keyCode === 13) {
-											e.preventDefault(); // NgÄƒn hÃ nh vi submit form máº·c Ä‘á»‹nh (náº¿u cÃ³)
+											e.preventDefault(); // Ngăn hành vi submit form mặc định (nếu có)
 											submitSearch();
 										}
 									});
@@ -234,10 +248,10 @@ response.setDateHeader ("Expires", -1);
 							</c:if>
 						    <!-- Shopping cart -->
 						    <c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">						    						
-								<div class="header-bottom-right">
+								<div class="header-bottom-right">								
 									<div class="shop-cart" id="miniCartSummary"></div>
 									<div class="shop-cart-hover fix">
-									<ul id="miniCartDetails"></ul>
+										<ul id="miniCartDetails"></ul>
 									</div>
 								</div>
 							</c:if>

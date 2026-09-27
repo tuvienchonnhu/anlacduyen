@@ -1,4 +1,4 @@
-m tin/**
+/**
  * Tim san pham bang cach chup anh (Product image search).
  *
  * Luong hoat dong:
@@ -370,6 +370,8 @@ m tin/**
             var name = product.name || '';
             var price = product.price || '';
             var productId = product.id;
+            // friendlyUrl nam trong description (xem ReadableProductPopulator.populateDescription)
+            var friendlyUrl = (product.description && product.description.friendlyUrl) || '';
 
             card.innerHTML =
                 '<div class="product-camera-result-image">' +
@@ -379,6 +381,18 @@ m tin/**
                 '  <p class="product-camera-result-name">' + escapeHtml(name) + '</p>' +
                 '  <p class="product-camera-result-price">' + escapeHtml(price) + '</p>' +
                 '</div>';
+
+            // Cho phep bam vao ten/anh de xem chi tiet san pham
+            if (friendlyUrl) {
+                var detailUrl = config.contextPath + '/shop/product/' + friendlyUrl + '.html';
+                var info = card.querySelector('.product-camera-result-info');
+                var link = document.createElement('a');
+                link.href = detailUrl;
+                link.className = 'product-camera-result-link';
+                link.textContent = name;
+                info.querySelector('.product-camera-result-name').innerHTML = '';
+                info.querySelector('.product-camera-result-name').appendChild(link);
+            }
 
             var button = document.createElement('button');
             button.type = 'button';

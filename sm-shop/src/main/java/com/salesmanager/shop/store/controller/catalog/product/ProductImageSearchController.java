@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
+import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.model.catalog.product.Product;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
@@ -69,6 +71,13 @@ public class ProductImageSearchController {
 	@Inject
 	private AiChatModelFactory aiChatModelFactory;
 
+	/**
+	 * Bat buoc phai co: ReadableProductPopulator.validate() nem loi neu pricingService null,
+	 * khien moi ket qua tim duoc deu bi bo di.
+	 */
+	@Inject
+	private PricingService pricingService;
+
 	@Inject
 	@org.springframework.beans.factory.annotation.Qualifier("img")
 	private ImageFilePath imageUtils;
@@ -82,13 +91,13 @@ public class ProductImageSearchController {
 	 */
 	@RequestMapping(value = "/imageSearch.html", method = RequestMethod.POST)
 	public @ResponseBody Map<String, Object> imageSearch(@RequestBody Map<String, String> body,
-			HttpServletRequest request, Locale locale) {
+			HttpServletRequest request, Locale locale, HttpServletResponse response) {
 
 		MerchantStore store = (MerchantStore) request.getAttribute(Constants.MERCHANT_STORE);
 		Language language = (Language) request.getAttribute(Constants.LANGUAGE);
 
 		if (store == null) {
-			throw new ServiceRuntimeException("Merchant store not found");
+			return error(response, "MerchantStore not found");
 		}
 		if (language == null) {
 			language = store.getDefaultLanguage();
@@ -96,14 +105,14 @@ public class ProductImageSearchController {
 
 		String imageBase64 = body.get("imageBase64");
 		if (StringUtils.isBlank(imageBase64)) {
-			throw new ServiceRuntimeException("Thiếu ảnh. Vui lòng chụp lại.");
+			return error(response, "Thiếu ảnh. Vui lòng chụp lại.");
 		}
 
 		String mimeType = "image/jpeg";
 		if (imageBase64.startsWith("data:")) {
 			int commaIndex = imageBase64.indexOf(',');
 			if (commaIndex < 0) {
-				throw new ServiceRuntimeException("Định dạng ảnh không hợp lệ");
+				return error(response, "Định dạng ảnh không hợp lệ.");
 			}
 			String meta = imageBase64.substring(0, commaIndex);
 			int semi = meta.indexOf(';');
@@ -116,20 +125,43 @@ public class ProductImageSearchController {
 		try {
 			Base64.getDecoder().decode(imageBase64);
 		} catch (IllegalArgumentException e) {
-			throw new ServiceRuntimeException("Ảnh không hợp lệ");
+			return error(response, "Ảnh không hợp lệ.");
 		}
 
 		// 1. AI phan tich anh -> tu khoa tim kiem
-		DetectedProduct detected = detectFromImage(store, language, mimeType, imageBase64);
+		DetectedProduct detected;
+		try {
+			detected = detectFromImage(store, language, mimeType, imageBase64);
+		} catch (ServiceRuntimeException e) {
+			// Tra JSON loi de giao dien hien thi thong bao than thien thay vi trang 500
+			LOGGER.warn("Product image search failed: {}", e.getMessage());
+			String message = StringUtils.defaultIfBlank(e.getMessage(),
+					"Không nhận diện được sản phẩm. Vui lòng thử lại.");
+			return error(response, message);
+		}
 
 		// 2. Tim trong catalogue cua cua hang
-		List<ReadableProduct> matches = findMatchingProducts(store, language, locale, detected);
+		try {
+			List<ReadableProduct> matches = findMatchingProducts(store, language, locale, detected);
 
-		Map<String, Object> response = new java.util.LinkedHashMap<>();
-		response.put("success", true);
-		response.put("detected", detected);
-		response.put("products", matches);
-		return response;
+			Map<String, Object> result = new java.util.LinkedHashMap<>();
+			result.put("success", true);
+			result.put("detected", detected);
+			result.put("products", matches);
+			return result;
+		} catch (Exception e) {
+			LOGGER.error("Cannot match products for image search", e);
+			return error(response, "Lỗi khi tìm sản phẩm trong cửa hàng.");
+		}
+	}
+
+	/** Tra ve JSON loi thong nhat de giao dien doc truong "message". */
+	private Map<String, Object> error(HttpServletResponse response, String message) {
+		response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+		Map<String, Object> result = new java.util.LinkedHashMap<>();
+		result.put("success", false);
+		result.put("message", message);
+		return result;
 	}
 
 	/** Thong tin AI nhan dien duoc tu anh. */
@@ -212,9 +244,14 @@ public class ProductImageSearchController {
 			LOGGER.warn("AI provider not configured for image search: {}", e.getMessage());
 			throw new ServiceRuntimeException(
 					"Chưa cấu hình AI. Vào Admin > Configuration > AI Configuration để bật tính năng chụp ảnh.");
+		} catch (ServiceRuntimeException e) {
+			// Da la thong bao than thien (vi du AI khong tra ve du lieu) -> giu nguyen
+			throw e;
 		} catch (Exception e) {
 			LOGGER.error("Cannot analyse product image", e);
-			throw new ServiceRuntimeException("Không thể phân tích ảnh: " + e.getMessage());
+			// Ghi lai nguyen nhan that trong log, con nguoi dung thay thong bao de hieu
+			throw new ServiceRuntimeException(
+					"Không phân tích được ảnh bằng AI. Vui lòng kiểm tra lại API key trong Admin > Configuration > AI Configuration.");
 		}
 	}
 
@@ -283,7 +320,7 @@ public class ProductImageSearchController {
 			}
 
 			ReadableProductPopulator populator = new ReadableProductPopulator();
-			populator.setPricingService(null);
+			populator.setPricingService(pricingService);
 			populator.setimageUtils(imageUtils);
 
 			// Cham diem tung san pham
@@ -339,7 +376,7 @@ public class ProductImageSearchController {
 
 		} catch (Exception e) {
 			LOGGER.error("Error while matching products for image search", e);
-			throw new ServiceRuntimeException("Lỗi khi tìm sản phẩm: " + e.getMessage());
+			throw new ServiceRuntimeException("Lỗi khi tìm sản phẩm trong cửa hàng.");
 		}
 
 		return results;

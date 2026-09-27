@@ -55,7 +55,7 @@
 
 				<%-- Nut tren header: logic mo modal nam trong product-camera.js --%>
 					<div class="btn-group dropdown">
-						<button type="button" class="btn product-camera-trigger" title="<c:out value=" ${pcButton}" />">
+						<button type="button" class="btn product-camera-trigger" title="<c:out value="${pcButton}" />">
 						<i class="fa fa-camera"></i>
 						<span class="no-responsive uppercase">
 							<c:out value="${pcButton}" />
@@ -90,6 +90,6 @@
 						};
 					</script>
 
-					<script src="<c:url value=" /resources/js/product-camera.js" />" type="text/javascript"></script>
+					<script src="<c:url value="/resources/js/product-camera.js" />" type="text/javascript"></script>
 
 			</c:if>
