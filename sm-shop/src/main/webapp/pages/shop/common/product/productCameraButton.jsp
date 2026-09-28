@@ -24,7 +24,8 @@
 			<c:set var="productCameraEnabled" value="${not empty requestScope.CONFIGS['GEMINI_API_KEY']
 		or not empty requestScope.CONFIGS['AI_OPENAI_API_KEY']
 		or not empty requestScope.CONFIGS['AI_GROQ_API_KEY']
-		or not empty requestScope.CONFIGS['AI_CEREBRAS_API_KEY']}" />
+		or not empty requestScope.CONFIGS['AI_CEREBRAS_API_KEY']
+		or not empty requestScope.CONFIGS['AI_GOOGLE_VISION_API_KEY']}" />
 
 			<%-- Khong hien nut o trang gio hang va trang dat hang (checkout): nguoi dung dang
 				hoan tat don hang, them mot loi vao giua se lam roi luong mua hang.
@@ -46,7 +47,7 @@
 				<s:message code="label.product.camera.searching" text="Đang nhận diện sản phẩm, vui lòng chờ..."
 					var="pcSearching" />
 				<s:message code="label.product.camera.detected" text="Đã nhận diện:" var="pcDetected" />
-				<s:message code="label.product.camera.quantity" text="Số lượng" var="pcQuantity" />
+				<s:message code="label.product.camera.quantity" text="Số lượng tìm được" var="pcQuantity" />
 				<s:message code="label.product.camera.noResults"
 					text="Không tìm thấy sản phẩm phù hợp trong cửa hàng. Vui lòng thử chụp rõ hơn."
 					var="pcNoResults" />

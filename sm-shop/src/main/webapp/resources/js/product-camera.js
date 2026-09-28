@@ -401,17 +401,25 @@
          * Tao mot dong ket qua cho MOT san pham.
          *
          * Backend tra ve moi ket qua dang:
-         *   { "product": {...ReadableProduct...}, "quantity": <so luong ton kho> }
-         * (tuong thich nguoc: neu chi co ReadableProduct thi quantity mac dinh = 1).
+         *   { "product": {...ReadableProduct...},
+         *     "quantity": <so luong TIM DUOC, luon = 1 cho moi san pham khop>,
+         *     "inStock":  <so luong ton kho that, chi dung lam muc toi da> }
          *
-         * Moi dong co o so luong (mac dinh bang so luong ton kho tim duoc) va nut
-         * "Them vao gio" -> them san pham vao gio DUNG so luong dang hien thi.
+         * So luong hien thi la SO LUONG TIM DUOC (khong phai ton kho trong database).
+         * O so luong mac dinh bang so luong tim duoc, cho phep nguoi dung tang len
+         * nhung khong vuot qua ton kho thuc (inStock).
          */
         function buildResultRow(row) {
             var product = (row && row.product) || row || {};
+            // So luong hien thi = so luong tim duoc
             var foundQty = parseInt(row && row.quantity, 10);
             if (isNaN(foundQty) || foundQty < 1) {
                 foundQty = 1;
+            }
+            // Ton kho that chi dung lam muc toi da khi them vao gio
+            var inStock = parseInt(row && row.inStock, 10);
+            if (isNaN(inStock) || inStock < foundQty) {
+                inStock = foundQty;
             }
 
             var rowEl = document.createElement('div');
@@ -438,7 +446,7 @@
                 '</div>' +
                 '<div class="product-camera-result-qty">' +
                 '  <label class="product-camera-qty-label">' + escapeHtml(t('quantity', 'Số lượng')) + '</label>' +
-                '  <input type="number" class="product-camera-qty-input" min="1" value="' + foundQty + '">' +
+                '  <input type="number" class="product-camera-qty-input" min="1" max="' + inStock + '" value="' + foundQty + '">' +
                 '</div>';
 
             var detailUrl = friendlyUrl
@@ -482,6 +490,13 @@
                 var quantity = parseInt(qtyInput && qtyInput.value, 10);
                 if (isNaN(quantity) || quantity < 1) {
                     quantity = 1;
+                }
+                // Khong cho them vuot qua ton kho thuc (inStock)
+                if (quantity > inStock) {
+                    quantity = inStock;
+                    if (qtyInput) {
+                        qtyInput.value = inStock;
+                    }
                 }
                 addProductToCart(productId, quantity, button);
             });
@@ -551,14 +566,14 @@
                     if (typeof displayMiniCart === 'function') {
                         displayMiniCart();
                     }
-                    if (typeof displayMiniCartSummary === 'function'
-                        && cart && cart.code) {
-                        displayMiniCartSummary(cart.code);
-                    }
+                    	if (typeof displayMiniCartSummary === 'function'
+                    		&& cart && cart.code) {
+                    		displayMiniCartSummary(cart.code);
+                    	}
 
-                    // Cho nguoi dung thay thong bao roi moi dong modal
-                    global.setTimeout(closeModal, 1200);
-                })
+                    	// Khung hinh CHI dong khi nguoi dung bam nut dong (hoac Esc/bam ra ngoai).
+                    	// Khong tu dong dong de nguoi dung xem lai ket qua va tiep tuc chon san pham.
+                    })
                 .catch(function (error) {
                     button.disabled = false;
                     button.textContent = originalText;

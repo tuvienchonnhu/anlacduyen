@@ -56,10 +56,15 @@
 																							text="Groq" />
 																											</form:option>
 																					<form:option value="cerebras">
-																												<s:message
-																													code="label.configuration.AI_PROVIDER.cerebras"
-																													text="Cerebras" />
-																											</form:option>
+																						<s:message
+																							code="label.configuration.AI_PROVIDER.cerebras"
+																							text="Cerebras" />
+																					</form:option>
+																					<form:option value="googlevision">
+																						<s:message
+																							code="label.configuration.AI_PROVIDER.googlevision"
+																							text="Google Cloud Vision" />
+																					</form:option>
 																</form:select>
 																<form:hidden
 																	path="merchantConfigs[${counter.index}].key" />

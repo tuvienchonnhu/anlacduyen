@@ -173,6 +173,7 @@ public class ConfigurationController {
 	configs.add(aiConfig(Constants.KEY_AI_GROQ_MODEL, store));
 	configs.add(aiConfig(Constants.KEY_AI_CEREBRAS_API_KEY, store));
 	configs.add(aiConfig(Constants.KEY_AI_CEREBRAS_MODEL, store));
+	configs.add(aiConfig(Constants.KEY_AI_GOOGLE_VISION_API_KEY, store));
 
 	ConfigListWrapper configWrapper = new ConfigListWrapper();
 	configWrapper.setMerchantConfigs(configs);

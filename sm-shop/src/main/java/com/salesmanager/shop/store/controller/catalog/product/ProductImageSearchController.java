@@ -336,9 +336,8 @@ public class ProductImageSearchController {
 	 *
 	 * Cach lam: quet san pham cua cua hang mot lan, cham diem theo so tu khoa xuat
 	 * hien trong ten/mo ta san pham, roi lay cac san pham diem cao nhat cua tung san
-	 * pham AI nhan dien (khong trung lap id). Moi ket qua kem theo SO LUONG ton kho
-	 * dang co trong cua hang (duoc goi la "so luong tim duoc") de giao dien hien thi
-	 * va them vao gio dung so luong do.
+	 * pham AI nhan dien (khong trung lap id). So luong tra ve cho giao dien la SO
+	 * LUONG TIM DUOC (moi ket qua khop la 1), khong phai so luong ton kho.
 	 *
 	 * Cach nay khong phu thuoc vao Elasticsearch nen hoat dong ca khi cua hang chua
 	 * bat search service.
@@ -443,8 +442,12 @@ public class ProductImageSearchController {
 
 				Map<String, Object> row = new java.util.LinkedHashMap<>();
 				row.put("product", readable);
-				// So luong ton kho dang co trong cua hang
-				row.put("quantity", resolveAvailableQuantity(best));
+				// So luong hien thi = so luong TIM DUOC (moi san pham khop la 1 ket qua),
+				// KHONG phai so luong ton kho trong database. Gia tri nay duoc dung lam
+				// gia tri mac dinh cho o so luong khi them vao gio.
+				row.put("quantity", 1);
+				// Ton kho that: chi dung lam muc toi da khi them vao gio (an voi nguoi dung)
+				row.put("inStock", resolveAvailableQuantity(best));
 				results.add(row);
 			}
 
@@ -457,8 +460,12 @@ public class ProductImageSearchController {
 	}
 
 	/**
-	 * Tong so luong ton kho cua san pham trong cua hang (so luong tim duoc).
-	 * Neu khong dinh duoc thi tra ve 1 de co the them vao gio.
+	 * Tong so luong ton kho THAT cua san pham trong cua hang.
+	 *
+	 * Luu y: gia tri nay KHONG duoc dung lam so luong hien thi tren giao dien
+	 * (so luong hien thi la so luong TIM DUOC, xem findMatchingProducts). No duoc
+	 * tra ve rieng trong truong "inStock" de giao dien biet muc toi da co the
+	 * them vao gio, tranh dat mua vuot qua so luong con lai.
 	 */
 	private int resolveAvailableQuantity(Product product) {
 		int total = 0;

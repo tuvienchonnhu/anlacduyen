@@ -60,6 +60,9 @@ public class AiChatModelFactory {
 	@Value("${cerebras.model:gpt-oss-120b}")
 	private String cerebrasModelFromProperties;
 
+	@Value("${googlevision.apikey:}")
+	private String googleVisionApiKeyFromProperties;
+
 	@Value("${ai.provider:" + Constants.AI_PROVIDER_GEMINI + "}")
 	private String defaultProvider;
 
@@ -99,6 +102,14 @@ public class AiChatModelFactory {
 					cerebrasModelFromProperties);
 			LOGGER.debug("Using Cerebras chat model : {}", model);
 			return new CerebrasChatModel(apiKey, model, null);
+	}
+
+	// Google Cloud Vision (nhan dien san pham tu anh, khong phai chat model)
+		if (Constants.AI_PROVIDER_GOOGLE_VISION.equals(provider)) {
+			String apiKey = StringUtils.defaultIfBlank(readConfig(Constants.KEY_AI_GOOGLE_VISION_API_KEY, store),
+					googleVisionApiKeyFromProperties);
+			LOGGER.debug("Using Google Cloud Vision model");
+			return new GoogleVisionChatModel(apiKey, null, null);
 	}
 
 	// Mac dinh Gemini
