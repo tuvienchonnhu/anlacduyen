@@ -79,33 +79,37 @@
 						</button>
 					</div>
 
-					<script type="text/javascript">
-						window.shopizerProductCamera = {
-							contextPath: '<c:url value="/"/>'.replace(/\/$/, ''),
-							messages: {
-								title: '<c:out value="${pcTitle}" escapeXml="false"/>',
-								hint: '<c:out value="${pcHint}" escapeXml="false"/>',
-								shoot: '<c:out value="${pcShoot}" escapeXml="false"/>',
-								upload: '<c:out value="${pcUpload}" escapeXml="false"/>',
-								retake: '<c:out value="${pcRetake}" escapeXml="false"/>',
-								search: '<c:out value="${pcSearch}" escapeXml="false"/>',
-								searching: '<c:out value="${pcSearching}" escapeXml="false"/>',
-								detected: '<c:out value="${pcDetected}" escapeXml="false"/>',
-						quantity: '<c:out value="${pcQuantity}" escapeXml="false"/>',
-								noResults: '<c:out value="${pcNoResults}" escapeXml="false"/>',
-								addToCart: '<c:out value="${pcAddToCart}" escapeXml="false"/>',
-								adding: '<c:out value="${pcAdding}" escapeXml="false"/>',
-								added: '<c:out value="${pcAdded}" escapeXml="false"/>',
-								addFailed: '<c:out value="${pcAddFailed}" escapeXml="false"/>',
-								searchFailed: '<c:out value="${pcSearchFailed}" escapeXml="false"/>',
-								noCamera: '<c:out value="${pcNoCamera}" escapeXml="false"/>',
-								cameraDenied: '<c:out value="${pcCameraDenied}" escapeXml="false"/>',
-								notReady: '<c:out value="${pcNotReady}" escapeXml="false"/>',
-								tooLarge: '<c:out value="${pcTooLarge}" escapeXml="false"/>',
-								cannotRead: '<c:out value="${pcCannotRead}" escapeXml="false"/>'
-							}
-						};
-					</script>
+					<%--
+						Cac nhan duoc truyen sang JS qua thuoc tinh data-* chu KHONG nhung
+						truc tiep vao doi tuong JavaScript.
+
+						Ly do: <c:out> escape theo HTML nen moi ky tu deu an toan. Neu nhung
+						truc tiep bang escapeXml="false", mot dau nhay don trong ban dich (vd
+						tieng Phap "d'ajouter", "n'est") se ket thuc chuoi JS som -> loi cu phap
+						-> window.shopizerProductCamera khong duoc tao -> nut chup anh hong.
+					--%>
+					<span id="product-camera-config" style="display:none;"
+						data-context-path="<c:url value="" />"
+						data-msg-title="<c:out value="${pcTitle}" />"
+						data-msg-hint="<c:out value="${pcHint}" />"
+						data-msg-shoot="<c:out value="${pcShoot}" />"
+						data-msg-upload="<c:out value="${pcUpload}" />"
+						data-msg-retake="<c:out value="${pcRetake}" />"
+						data-msg-search="<c:out value="${pcSearch}" />"
+						data-msg-searching="<c:out value="${pcSearching}" />"
+						data-msg-detected="<c:out value="${pcDetected}" />"
+						data-msg-quantity="<c:out value="${pcQuantity}" />"
+						data-msg-no-results="<c:out value="${pcNoResults}" />"
+						data-msg-add-to-cart="<c:out value="${pcAddToCart}" />"
+						data-msg-adding="<c:out value="${pcAdding}" />"
+						data-msg-added="<c:out value="${pcAdded}" />"
+						data-msg-add-failed="<c:out value="${pcAddFailed}" />"
+						data-msg-search-failed="<c:out value="${pcSearchFailed}" />"
+						data-msg-no-camera="<c:out value="${pcNoCamera}" />"
+						data-msg-camera-denied="<c:out value="${pcCameraDenied}" />"
+						data-msg-not-ready="<c:out value="${pcNotReady}" />"
+						data-msg-too-large="<c:out value="${pcTooLarge}" />"
+						data-msg-cannot-read="<c:out value="${pcCannotRead}" />"></span>
 
 					<script src="<c:url value="/resources/js/product-camera.js" />" type="text/javascript"></script>
 

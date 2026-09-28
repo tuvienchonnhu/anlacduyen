@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+	<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 	<%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 
 			<%-- Nut "Dang nhap bang Google" dung Google Identity Services (GIS) SDK.
@@ -21,7 +22,15 @@
 				Ca hai deu rong khi cua hang chua cau hinh -> fragment khong hien thi gi.
 
 				Moi nhan deu lay tu bundle qua s:message nen hien thi dung ngon ngu dang chon.
+
+				CANH BAO: cac nhan duoc nhung vao doi tuong JavaScript ben duoi PHAI duoc
+				escape an toan cho JS (dung googleJsQuote / googleJsBackslash ben duoi). Neu ghi
+				truc tiep bang escapeXml="false", mot dau nhay don trong ban dich se ket thuc
+				chuoi JS som -> loi cu phap -> window.shopizerGoogleSignIn khong duoc tao ->
+				nut Google khong hien thi. Day chinh la loi chi xay ra voi tieng Phap vi nhan
+				label.customer.google.error.notconfigured chua "n'est" (co dau nhay don).
 			--%>
+
 			<c:set var="googleSignInClientId"
 				value="${not empty googleClientId ? googleClientId : requestScope.CONFIGS['GOOGLE_CLIENT_ID']}" />
 
@@ -37,8 +46,27 @@
 						var="googleNotConfiguredLabel" />
 					<s:message code="label.customer.google.error.failed"
 						text="Unable to sign in with Google. Please try again later." var="googleFailedLabel" />
+					<s:message code="label.customer.signin.google" text="Sign in with Google" var="googleSigninLabel" />
 
-					<div class="google-signin-wrapper">
+					<%--
+						Cac nhan duoc truyen sang JS qua thuoc tinh data-* chu KHONG nhung
+						truc tiep vao doi tuong JavaScript.
+
+						Ly do: <c:out> escape theo HTML nen moi ky tu deu an toan. Neu nhung
+						truc tiep bang escapeXml="false", mot dau nhay don trong ban dich (vd
+						tieng Phap "n'est", "d'ajouter") se ket thuc chuoi JS som -> loi cu phap
+						-> window.shopizerGoogleSignIn khong duoc tao -> nut Google khong hien
+						thi. Day chinh la loi chi xay ra voi tieng Phap.
+					--%>
+					<div class="google-signin-wrapper" id="google-signin-config"
+						data-client-id="<c:out value="${googleSignInClientId}" />"
+						data-context-path="<c:url value="" />"
+						data-redirect="<c:url value="/shop/customer/dashboard.html" />"
+						data-locale="<c:out value="${not empty googleLocale ? googleLocale : pageContext.request.locale.language}" />"
+						data-msg-verifying="<c:out value="${googleVerifyingLabel}" />"
+						data-msg-not-configured="<c:out value="${googleNotConfiguredLabel}" />"
+						data-msg-failed="<c:out value="${googleFailedLabel}" />"
+						data-msg-signin="<c:out value="${googleSigninLabel}" />">
 						<span class="google-signin-divider">
 							<c:out value="${googleOrLabel}" />
 						</span>
@@ -52,20 +80,6 @@
 							<p class="google-signin-error" style="display:none;"></p>
 						</div>
 					</div>
-
-					<script type="text/javascript">
-						window.shopizerGoogleSignIn = {
-							clientId: '<c:out value="${googleSignInClientId}" escapeXml="false"/>',
-							contextPath: '<c:url value="/"/>'.replace(/\/$/, ''),
-							redirect: '<c:url value="/shop/customer/dashboard.html"/>',
-							locale: '<c:out value="${not empty googleLocale ? googleLocale : pageContext.request.locale.language}"/>',
-							messages: {
-								verifying: '<c:out value="${googleVerifyingLabel}" escapeXml="false"/>',
-								notConfigured: '<c:out value="${googleNotConfiguredLabel}" escapeXml="false"/>',
-								failed: '<c:out value="${googleFailedLabel}" escapeXml="false"/>'
-							}
-						};
-					</script>
 
 					<script src="<c:url value="/resources/js/google-signin.js" />" type="text/javascript"></script>
 					<script src="https://accounts.google.com/gsi/client" async defer></script>

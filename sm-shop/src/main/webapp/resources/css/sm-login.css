@@ -53,6 +53,37 @@
 	max-width: 100%;
 }
 
+/*
+ * Nut du phong khi Google Identity Services khong ve duoc nut (bi chan, mat
+ * mang...). Chu tren nut lay tu bundle theo ngon ngu dang chon nen luon dung
+ * ngon ngu, khong phu thuoc vao danh sach locale cua Google.
+ */
+.google-signin-fallback {
+	display: block;
+	width: 100%;
+	max-width: 320px;
+	margin: 0 auto;
+	padding: 10px 16px;
+	background: #fff;
+	border: 1px solid #dadce0;
+	border-radius: 4px;
+	color: #3c4043;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+	cursor: pointer;
+}
+
+.google-signin-fallback:hover {
+	background: #f8f9fa;
+	border-color: #c6c9cd;
+}
+
+.google-signin-fallback .fa {
+	margin-right: 8px;
+	color: #4285f4;
+}
+
 .google-signin-hint {
 	margin: 10px 0 0;
 	color: #888;
@@ -185,6 +216,36 @@
 #signinPane .google-signin-divider {
 	margin-bottom: 10px;
 	font-size: 11px;
+}
+
+/*
+ * Nut Google nam trong menu tai khoan o header cua template december.
+ * Menu nay rong 150px nen phai cho khung rong ra de nut Google hien du chu.
+ */
+.google-signin-in-account-menu {
+	padding: 10px 12px 12px;
+	border-top: 1px solid rgba(0, 0, 0, .1);
+}
+
+.google-signin-in-account-menu .google-signin-wrapper {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+}
+
+.google-signin-in-account-menu .google-signin-divider,
+.google-signin-in-account-menu .google-signin-hint,
+.google-signin-in-account-menu .google-signin-status,
+.google-signin-in-account-menu .google-signin-error {
+	font-size: 11px;
+	text-transform: none;
+	letter-spacing: normal;
+}
+
+.google-signin-in-account-menu .google-signin-card .google-signin-button,
+.google-signin-in-account-menu .google-signin-fallback {
+	width: 240px;
+	max-width: 100%;
 }
 
 /* link "Chua co tai khoan?" */

@@ -15,7 +15,33 @@
 (function (global) {
     'use strict';
 
-    var config = global.shopizerGoogleSignIn || {};
+    /**
+     * Cau hinh duoc JSP ghi vao cac thuoc tinh data-* cua #google-signin-config.
+     *
+     * Doc bang getAttribute nen moi ky tu trong ban dich (dau nhay don, dau
+     * ngoac kep...) deu nguyen ven - khong con rui ro lam vo cu phap JavaScript
+     * nhu khi nhung truc tiep vao mot doi tuong JS.
+     */
+    function readConfig() {
+        var el = document.getElementById('google-signin-config');
+        if (!el) {
+            return {};
+        }
+        return {
+            clientId: el.getAttribute('data-client-id') || '',
+            contextPath: el.getAttribute('data-context-path') || '',
+            redirect: el.getAttribute('data-redirect') || '',
+            locale: el.getAttribute('data-locale') || 'en',
+            messages: {
+                verifying: el.getAttribute('data-msg-verifying') || '',
+                notConfigured: el.getAttribute('data-msg-not-configured') || '',
+                failed: el.getAttribute('data-msg-failed') || '',
+                signin: el.getAttribute('data-msg-signin') || ''
+            }
+        };
+    }
+
+    var config = readConfig();
     var card = document.getElementById('google-signin-card');
 
     /**
@@ -106,6 +132,68 @@
             });
     }
 
+    /**
+     * Google Identity Services chi ho tro mot so ma ngon ngu nhat dinh ("vi"
+     * khong nam trong danh sach nay). Neu truyen mot ma khong duoc ho tro, SDK
+     * co the bo qua va khong ve nut. Vi vay:
+     *   - "vi" -> dua ve "en" (chu tieng Anh) thay vi de SDK that bai;
+     *   - cac ma khac: giu nguyen, SDK se tu fallback theo cai dat cua nguoi dung.
+     */
+    var GIS_UNSUPPORTED_LOCALES = { vi: 'en' };
+
+    function resolveGisLocale() {
+        var locale = (config.locale || 'en').toLowerCase();
+        return GIS_UNSUPPORTED_LOCALES[locale] || locale;
+    }
+
+    /**
+     * Nut du phong: khi GIS SDK khong ve duoc nut (bi chan, mat mang, cache loi),
+     * hien mot nut that su de nguoi dung khong bi ket. Chu tren nut lay tu bundle
+     * theo ngon ngu dang chon (config.messages.signin) nen luon dung ngon ngu.
+     */
+    function showFallbackButton() {
+        if (!card || card.querySelector('.google-signin-fallback')) {
+            return;
+        }
+        var container = card.querySelector('.google-signin-button');
+        if (!container) {
+            return;
+        }
+
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'google-signin-fallback';
+        button.innerHTML = '<i class="fa fa-google"></i> '
+            + ((config.messages && config.messages.signin) || 'Sign in with Google');
+
+        // Nut du phong khong the dang nhap (khong co credential tu Google), nhung
+        // dua nguoi dung sang trang dang nhap day du de khong bi ket.
+        button.addEventListener('click', function () {
+            var target = (config.contextPath || '') + '/shop/customer/customLogon.html';
+            global.location.href = target;
+        });
+
+        container.appendChild(button);
+    }
+
+    /**
+     * Kiem tra sau mot khoang thoi gian: neu GIS khong tao ra iframe nao trong
+     * khung thi coi nhu that bai va hien nut du phong.
+     */
+    function verifyButtonRendered() {
+        if (!card) {
+            return;
+        }
+        var container = card.querySelector('.google-signin-button');
+        if (!container) {
+            return;
+        }
+        if (!container.querySelector('iframe')) {
+            log('Google Identity Services did not render the button, showing fallback');
+            showFallbackButton();
+        }
+    }
+
     global.onGoogleSignIn = function (response) {
         if (!response || !response.credential) {
             log('no credential returned by Google Identity Services');
@@ -120,6 +208,8 @@
      * ngon ngu theo trang hien tai.
      */
     global.shopizerInitGoogleSignIn = function () {
+        config = readConfig();
+
         if (!card) {
             // Truong hop nut Google nam trong dropdown duoc render bang JSP sau khi
             // thay noi dung khung dang nhap -> tim lai phan tu.
@@ -169,8 +259,11 @@
             shape: 'rectangular',
             logo_alignment: 'left',
             width: resolveButtonWidth(),
-            locale: config.locale || 'en'
+            locale: resolveGisLocale()
         });
+
+        // GIS ve nut bat dong bo ben trong mot iframe -> kiem tra sau mot nhip.
+        global.setTimeout(verifyButtonRendered, 1500);
     };
 
     /**

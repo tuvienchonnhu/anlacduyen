@@ -16,7 +16,51 @@
     (function (global) {
         'use strict';
 
-        var config = global.shopizerProductCamera || {};
+        /**
+         * Cau hinh duoc JSP ghi vao cac thuoc tinh data-* cua #product-camera-config.
+         *
+         * Doc bang getAttribute nen moi ky tu trong ban dich (dau nhay don, dau
+         * ngoac kep...) deu nguyen ven - khong con rui ro lam vo cu phap JavaScript
+         * nhu khi nhung truc tiep vao mot doi tuong JS.
+         */
+        var MESSAGE_KEYS = [
+            ['title', 'data-msg-title'],
+            ['hint', 'data-msg-hint'],
+            ['shoot', 'data-msg-shoot'],
+            ['upload', 'data-msg-upload'],
+            ['retake', 'data-msg-retake'],
+            ['search', 'data-msg-search'],
+            ['searching', 'data-msg-searching'],
+            ['detected', 'data-msg-detected'],
+            ['quantity', 'data-msg-quantity'],
+            ['noResults', 'data-msg-no-results'],
+            ['addToCart', 'data-msg-add-to-cart'],
+            ['adding', 'data-msg-adding'],
+            ['added', 'data-msg-added'],
+            ['addFailed', 'data-msg-add-failed'],
+            ['searchFailed', 'data-msg-search-failed'],
+            ['noCamera', 'data-msg-no-camera'],
+            ['cameraDenied', 'data-msg-camera-denied'],
+            ['notReady', 'data-msg-not-ready'],
+            ['tooLarge', 'data-msg-too-large'],
+            ['cannotRead', 'data-msg-cannot-read']
+        ];
+
+        function readConfig() {
+            var el = document.getElementById('product-camera-config');
+            var cfg = { contextPath: '', messages: {} };
+            if (!el) {
+                return cfg;
+            }
+            cfg.contextPath = el.getAttribute('data-context-path') || '';
+            for (var i = 0; i < MESSAGE_KEYS.length; i++) {
+                var key = MESSAGE_KEYS[i][0];
+                cfg.messages[key] = el.getAttribute(MESSAGE_KEYS[i][1]) || '';
+            }
+            return cfg;
+        }
+
+        var config = readConfig();
 
         /** MediaStream dang mo (phai stop khi dong modal de tat den camera). */
         var stream = null;

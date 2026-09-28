@@ -275,7 +275,19 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 				request.setAttribute(Constants.ANONYMOUS_CUSTOMER, anonymousCustomer);
 			}
 
-			/** language & locale **/
+			/**
+			 * language & locale
+			 *
+			 * StoreFilter la servlet filter, chay TRUOC LocaleChangeInterceptor cua
+			 * Spring MVC. Vi vay tham so ?locale=xx tren URL phai duoc doc tai day,
+			 * neu khong getRequestLanguage() se luon tra ve ngon ngu dang luu trong
+			 * session (mac dinh la tieng Viet) va viec doi ngon ngu khong co tac dung.
+			 *
+			 * Chi doi khi ma ngon ngu nay thuc su ton tai trong MERCHANT_STORE dang
+			 * hoat dong, neu khong giu nguyen ngon ngu hien tai.
+			 */
+			this.applyRequestedLocale(request, response, store);
+
 			Language language = languageUtils.getRequestLanguage(request, response);
 			request.setAttribute(Constants.LANGUAGE, language);
 
@@ -287,7 +299,6 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 
 			/** Breadcrumbs **/
 			setBreadcrumb(request, locale);
-
 			/**
 			 * Get global objects Themes are built on a similar way displaying
 			 * Header, Body and Footer Header and Footer are displayed on each
@@ -835,6 +846,62 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 
 		return configs;
 
+	}
+
+	/**
+	 * Ap dung ngon ngu nguoi dung chon qua tham so ?locale=xx tren URL.
+	 *
+	 * StoreFilter chay truoc LocaleChangeInterceptor cua Spring MVC nen phai tu doc
+	 * tham so nay. Gia tri chi duoc chap nhan khi:
+	 *   - ma ngon ngu khong rong;
+	 *   - ngon ngu do nam trong danh sach ngon ngu cua MERCHANT_STORE (tranh ep mot
+	 *     ngon ngu khong duoc cau hinh);
+	 *   - xac dinh duoc Language tuong ung trong DB.
+	 *
+	 * Khi hop le, ngon ngu duoc ghi vao session (Constants.LANGUAGE) va loc vao
+	 * LocaleContextHolder de cac bundle cung nhu hinh dang (bundle) duoc nap dung.
+	 */
+	private void applyRequestedLocale(HttpServletRequest request, HttpServletResponse response, MerchantStore store) {
+
+		String requested = request.getParameter(Constants.LANG);
+		if (StringUtils.isBlank(requested)) {
+			// Mot so template/controller gui tham so ten "locale".
+			requested = request.getParameter("locale");
+		}
+		if (StringUtils.isBlank(requested)) {
+			return;
+		}
+
+		String code = requested.trim().toLowerCase();
+
+		// Chi chap nhan ngon ngu co trong danh sach ngon ngu cua store.
+		boolean storeSupports = false;
+		if (store != null && store.getLanguages() != null) {
+			for (Language l : store.getLanguages()) {
+				if (l != null && code.equalsIgnoreCase(l.getCode())) {
+					storeSupports = true;
+					break;
+				}
+			}
+		}
+		if (!storeSupports) {
+			return;
+		}
+
+		try {
+			Language language = languageService.getByCode(code);
+			if (language != null && StringUtils.isNotBlank(language.getCode())) {
+				request.getSession().setAttribute(Constants.LANGUAGE, language);
+
+				Locale locale = languageService.toLocale(language, store);
+				if (locale != null) {
+					LocaleContextHolder.setLocale(locale);
+					request.setAttribute(Constants.LOCALE, locale);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.debug("Cannot apply requested locale " + requested, e);
+		}
 	}
 
 	private void setBreadcrumb(HttpServletRequest request, Locale locale) {
