@@ -159,10 +159,6 @@ public class StoreBrandingController {
 			// Doc lai tu DB de chac chan gia tri da duoc luu
 			sessionstore = merchantStoreService.getByCode(sessionstore.getCode());
 			model.addAttribute("success","success");
-
-			// Bao storefront (StoreFilter) thay store trong session bang ban ghi moi
-			// -> theme moi co hieu luc ngay, khong can restart ung dung.
-			request.getSession().setAttribute(Constants.SESSION_STORE_TEMPLATE_OVERRIDE, sessionstore.getStoreTemplate());
 		}
 
 		request.getSession().setAttribute(Constants.ADMIN_STORE, sessionstore);

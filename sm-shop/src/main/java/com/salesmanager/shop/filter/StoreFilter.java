@@ -179,21 +179,6 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 			if(StringUtils.isBlank(store.getStoreTemplate())) {
 			store.setStoreTemplate(Constants.DEFAULT_TEMPLATE);
 			}
-
-			/*
-			 * Theme vua duoc doi trong Admin > Store > Branding.
-			 *
-			 * ADMIN_STORE trong session duoc nap mot lan luc dang nhap (AdminFilter) nen
-			 * storeTemplate nam trong do la gia tri cu. Vi StoreFilter lay merchant store
-			 * tu session, sau khi doi sang mot template roi thi khong the doi sang template
-			 * khac nua (moi trang van render bang template cu).
-			 *
-			 * StoreBrandingController luu template vua chon vao session duoi attribute
-			 * SESSION_STORE_TEMPLATE_OVERRIDE. Doc duoc thi thay the store trong session
-			 * bang ban ghi moi nhat trong DB -> theme moi co hieu luc ngay.
-			 */
-			store = this.applyStoreTemplateOverride(request, store);
-
 			request.setAttribute(Constants.MERCHANT_STORE, store);
 			
 			
@@ -939,56 +924,6 @@ public class StoreFilter extends HandlerInterceptorAdapter {
 		item.setUrl(Constants.HOME_URL);
 		return item;
 
-	}
-
-	/**
-	 * Thay the merchant store trong session bang ban ghi moi nhat khi template vua
-	 * duoc doi trong Admin.
-	 *
-	 * Duoc goi tu preHandle. Tra ve chinh store cu neu khong co yeu cau doi template
-	 * hoac template trong DB da giong voi template dang dung (tranh query DB tren
-	 * moi request).
-	 *
-	 * @param request hien tai
-	 * @param store   merchant store dang dung
-	 * @return merchant store can su dung cho request nay
-	 */
-	private MerchantStore applyStoreTemplateOverride(HttpServletRequest request, MerchantStore store) {
-
-	if (store == null || request == null) {
-	return store;
-	}
-
-		try {
-	Object override = request.getSession().getAttribute(Constants.SESSION_STORE_TEMPLATE_OVERRIDE);
-	if (override == null) {
-	return store;
-	}
-
-	String template = override.toString().trim();
-	// Da ap dung xong -> bo co, khong query DB nua
-	request.getSession().removeAttribute(Constants.SESSION_STORE_TEMPLATE_OVERRIDE);
-
-	if (StringUtils.isBlank(template) || template.equals(store.getStoreTemplate())) {
-	return store;
-	}
-
-	// Doc lai tu DB de lay ca cac thay doi khac (logo, ten cua hang...) chu khong
-	// chi rieng storeTemplate.
-	MerchantStore fresh = merchantService.getByCode(store.getCode());
-	if (fresh == null) {
-	LOGGER.warn("Cannot reload merchant store {} after theme change", store.getCode());
-	return store;
-	}
-
-	request.getSession().setAttribute(Constants.MERCHANT_STORE, fresh);
-	LOGGER.info("Store {} theme changed to {}", fresh.getCode(), fresh.getStoreTemplate());
-	return fresh;
-
-	} catch (Exception e) {
-	LOGGER.error("Cannot apply store template change", e);
-	return store;
-	}
 	}
 
 	/**

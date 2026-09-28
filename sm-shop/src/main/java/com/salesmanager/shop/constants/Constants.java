@@ -4,17 +4,6 @@ public class Constants {
 	
 	public final static String DEFAULT_TEMPLATE = "december";
 	
-	/**
-	 * Ghi de template cho merchant store trong ADMIN_STORE cua session.
-	 *
-	 * Xem StoreFilter: ADMIN_STORE trong session duoc nap tu luc dang nhap nen
-	 * gia tri storeTemplate o do bi "dong bang", doi theme trong Admin roi ma
-	 * session van giu template cu. Khi doi template ta ghi vao attribute nay;
-	 * StoreFilter doc duoc thi thay the store trong session truoc khi tra ve
-	 * request nen theme moi co hieu luc ngay, khong phai restart ung dung.
-	 */
-	public final static String SESSION_STORE_TEMPLATE_OVERRIDE = "STORE_TEMPLATE_OVERRIDE";
-
 	public final static String SLASH = "/";
 	public final static String BLANK = "";
 	public final static String EQUALS = "=";
@@ -140,21 +129,12 @@ public class Constants {
 	public final static String KEY_AI_GROQ_MODEL = "AI_GROQ_MODEL";
 	public final static String KEY_AI_CEREBRAS_API_KEY = "AI_CEREBRAS_API_KEY";
 	public final static String KEY_AI_CEREBRAS_MODEL = "AI_CEREBRAS_MODEL";
-	/*
-	 * Google Cloud Vision (label detection) - nhan dien san pham tu anh.
-	 * KEY_AI_GOOGLE_VISION_API_KEY: API key cua Google Cloud (co the la key
-	 * "AIza..." hoac access token). Neu de trong, he thong se doc service
-	 * account JSON da cau hinh qua bien moi truong GOOGLE_APPLICATION_CREDENTIALS
-	 * (mac dinh cua Google Cloud SDK).
-	 */
-	public final static String KEY_AI_GOOGLE_VISION_API_KEY = "AI_GOOGLE_VISION_API_KEY";
 
 	/** Gia tri cua KEY_AI_PROVIDER tuong ung voi tung nha cung cap AI. */
 	public final static String AI_PROVIDER_GEMINI = "gemini";
 	public final static String AI_PROVIDER_OPENAI = "openai";
 	public final static String AI_PROVIDER_GROQ = "groq";
 	public final static String AI_PROVIDER_CEREBRAS = "cerebras";
-	public final static String AI_PROVIDER_GOOGLE_VISION = "googlevision";
 
 	/*
 	 * Login configuration (Admin > Configuration > Login Configuration)
