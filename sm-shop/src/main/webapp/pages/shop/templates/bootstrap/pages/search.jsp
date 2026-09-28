@@ -15,10 +15,9 @@ response.setDateHeader ("Expires", -1);
 <%@page pageEncoding="UTF-8"%>
 
  <script>
- 	//server side rendered, bindings only
- 	$(function(){
-  	initBindings();
- 	});
+ 	// Trang nay duoc render san tu server, khong goi AJAX lay san pham.
+ 	// Khong goi initBindings() o day: shopping-cart.js da tu goi initBindings()
+ 	// trong $(function(){...}) cua chinh no khi trang tai xong.
  </script>
 
 

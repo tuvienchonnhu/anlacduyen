@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -67,6 +68,9 @@ public class StoreBrandingController {
 	@Resource(name="templates")
 	List<String> templates;
 	
+	@Resource(name="templateOptions")
+	Map<String, String> templateOptions;
+
 	@PreAuthorize("hasRole('STORE')")
 	@RequestMapping(value="/admin/store/storeBranding.html", method=RequestMethod.GET)
 	public String displayStoreBranding(Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -75,16 +79,16 @@ public class StoreBrandingController {
 
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
 		
-		//display templates
+			//display templates
 		model.addAttribute("templates", templates);
-		
-		model.addAttribute("store", store);
-		
+		model.addAttribute("templateOptions", templateOptions);
 
-		
+		model.addAttribute("store", store);
+
+
 		return "admin-store-branding";
 	}
-	
+
 	/**
 	 * https://spring.io/guides/gs/uploading-files/
 	 * @param contentImages
@@ -98,14 +102,15 @@ public class StoreBrandingController {
 	@PreAuthorize("hasRole('STORE')")
 	@RequestMapping(value="/admin/store/saveBranding.html", method=RequestMethod.POST)
 	public String saveStoreBranding(@RequestParam("file") MultipartFile file, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
+
 		setMenu(model,request);
 
 		MerchantStore store = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-		
-		model.addAttribute("templates", templates);
-		
-		
+
+			model.addAttribute("templates", templates);
+		model.addAttribute("templateOptions", templateOptions);
+
+
 		model.addAttribute("store", store);
 
 		if(file!=null) {
@@ -113,13 +118,13 @@ public class StoreBrandingController {
 			String imageName = file.getOriginalFilename();
 			InputStream inputStream = file.getInputStream();
 			String mimeType = file.getContentType();
-			
+
             InputContentFile cmsContentImage = new InputContentFile();
             cmsContentImage.setFileName(imageName);
             cmsContentImage.setMimeType(mimeType);
             cmsContentImage.setFile( inputStream );
             contentService.addLogo(store.getCode(), cmsContentImage);
-			
+
             //Update store
             store.setStoreLogo(imageName);
             merchantStoreService.update(store);
@@ -133,25 +138,34 @@ public class StoreBrandingController {
 		model.addAttribute("success","success");
 		return "admin-store-branding";
 	}
-	
+
 	@PreAuthorize("hasRole('STORE')")
 	@RequestMapping(value="/admin/store/saveTemplate.html", method=RequestMethod.POST)
 	public String saveTemplate(@ModelAttribute(value="store") final MerchantStore store, BindingResult result, Model model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
+
 		setMenu(model,request);
 
 		MerchantStore sessionstore = (MerchantStore)request.getAttribute(Constants.ADMIN_STORE);
-		
-		sessionstore.setStoreTemplate(store.getStoreTemplate());
-		
-		merchantStoreService.saveOrUpdate(sessionstore);
-		
-		request.setAttribute(Constants.ADMIN_STORE, sessionstore);		
-		
-		//display templates
-		model.addAttribute("templates", templates);
 
-		model.addAttribute("success","success");
+		if (StringUtils.isBlank(store.getStoreTemplate())) {
+			model.addAttribute("error","error");
+		} else {
+			// Ghi truc tiep len store dang dang nhap, KHONG dung id tu form: neu form
+			// khong gui id thi saveOrUpdate se tao ban ghi merchant moi (id sinh tu dong)
+			// va cua hang cu khong doi template -> chon theme xong nhung khong thay gi.
+			sessionstore.setStoreTemplate(store.getStoreTemplate());
+			merchantStoreService.saveOrUpdate(sessionstore);
+
+			// Doc lai tu DB de chac chan gia tri da duoc luu
+			sessionstore = merchantStoreService.getByCode(sessionstore.getCode());
+			model.addAttribute("success","success");
+		}
+
+		request.getSession().setAttribute(Constants.ADMIN_STORE, sessionstore);
+
+			//display templates
+		model.addAttribute("templates", templates);
+		model.addAttribute("templateOptions", templateOptions);
 		model.addAttribute("store", sessionstore);
 
 		return "admin-store-branding";

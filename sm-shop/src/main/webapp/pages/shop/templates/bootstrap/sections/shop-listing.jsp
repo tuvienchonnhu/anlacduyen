@@ -4,7 +4,11 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib uri="/WEB-INF/shopizer-tags.tld" prefix="sm" %> 
 
-<%@ page session="false" %>
+<%-- KHONG dat directive <%@ page session="false" %> o day: fragment nay duoc nhung
+	bang jsp:include BEN TRONG mot the <script> cua category.jsp. Directive page cua
+	fragment se ghi de trang cha va lam Spring Security mat phien (xem ghi chu trong
+	googleSignIn.jsp). Ngoai ra trong ngu canh nay no khong duoc JSP xu ly ma bi in ra
+	nhu van ban, pha vo cu phap JavaScript cua ca khoi. --%>
 
 /**
 * Builds the product container div from the product list
@@ -34,7 +38,8 @@ function buildProductsList(productList, divProductsContainer) {
 			$(divProductsContainer).append(productHtml);
 
 		}
-		
-		initBindings();
+
+		// Cac su kien (addToCart, mo mini-cart) da duoc gan san boi initBindings() trong
+		// shopping-cart.js khi trang tai xong; o day chi can gan cho phan tu vua them vao.
 
 }

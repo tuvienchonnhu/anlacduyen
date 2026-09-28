@@ -106,7 +106,16 @@
 					<div class="control-group">
 						<label><s:message code="label.store.template" text="Theme"/></label>
 						<div class="controls">
-	                        		<form:select items="${templates}" path="storeTemplate" /> 
+								<%-- Uu tien hien nhan than thien (Generic, December...); neu bean templateOptions
+									khong san sang thi quay ve danh sach ma template. --%>
+								<c:choose>
+									<c:when test="${not empty templateOptions}">
+										<form:select items="${templateOptions}" path="storeTemplate" />
+									</c:when>
+									<c:otherwise>
+										<form:select items="${templates}" path="storeTemplate" />
+									</c:otherwise>
+								</c:choose> 
 	                                <span class="help-inline"></span>
 						</div>
 					</div>

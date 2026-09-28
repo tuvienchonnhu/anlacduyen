@@ -102,7 +102,7 @@ response.setDateHeader ("Expires", -1);
 			} else {
 					$("#button_nav").hide();
 			}
-			$('#productsContainer').hideLoading();
+			hideSMLoading('#productsContainer');
 			
 			//check option
 			var orderBy = getOrderBy();
@@ -125,10 +125,10 @@ response.setDateHeader ("Expires", -1);
 
        <jsp:include page="/pages/shop/templates/bootstrap/sections/breadcrumb.jsp" />
  
-	   <c:if test="${not empty category.description}">
+	   <c:if test="${not empty category.description.description}">
 	   		<!-- category description -->
 		   	<div class="row-fluid category-description">
-		   		<c:out value="${category.description.description.description}" escapeXml="true"/>
+		   		<c:out value="${category.description.description}" escapeXml="false"/>
 		   	</div>
 	   
 	   </c:if>
