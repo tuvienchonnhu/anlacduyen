@@ -40,6 +40,7 @@ import com.salesmanager.shop.store.api.v1.product.ai.AiChatRequest;
 import com.salesmanager.shop.store.api.v1.product.ai.AiChatResponse;
 import com.salesmanager.shop.store.api.v1.product.ai.AiException;
 import com.salesmanager.shop.utils.ImageFilePath;
+import com.salesmanager.shop.utils.LabelUtils;
 
 /**
  * Tim san pham trong catalogue bang cach chup anh.
@@ -60,6 +61,12 @@ public class ProductImageSearchController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProductImageSearchController.class);
 
+	/**
+	 * Ngon ngu mac dinh cho thong bao loi. Bundle khong co ban dich cho locale nao
+	 * thi messageSource lui ve ban goc bundles/messages.properties.
+	 */
+	private static final String DEFAULT_LANGUAGE = "vi";
+
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -68,6 +75,13 @@ public class ProductImageSearchController {
 
 	/** Gioi han so san pham quet tu catalogue de tranh qua tai. */
 	private static final int CATALOGUE_SCAN_LIMIT = 500;
+
+	/**
+	 * Dung de tra thong bao loi theo ngon ngu nguoi dung dang chon
+	 * (bundle bundles/messages_*.properties, key product.camera.error.*).
+	 */
+	@Inject
+	private LabelUtils messages;
 
 	@Inject
 	private ProductService productService;
@@ -101,7 +115,7 @@ public class ProductImageSearchController {
 		Language language = (Language) request.getAttribute(Constants.LANGUAGE);
 
 		if (store == null) {
-			return error(response, "MerchantStore not found");
+			return error(response, msg("product.camera.error.store", locale));
 		}
 		if (language == null) {
 			language = store.getDefaultLanguage();
@@ -109,14 +123,14 @@ public class ProductImageSearchController {
 
 		String imageBase64 = body.get("imageBase64");
 		if (StringUtils.isBlank(imageBase64)) {
-			return error(response, "Thiếu ảnh. Vui lòng chụp lại.");
+			return error(response, msg("product.camera.error.missing.image", locale));
 		}
 
 		String mimeType = "image/jpeg";
 		if (imageBase64.startsWith("data:")) {
 			int commaIndex = imageBase64.indexOf(',');
 			if (commaIndex < 0) {
-				return error(response, "Định dạng ảnh không hợp lệ.");
+				return error(response, msg("product.camera.error.invalid.format", locale));
 			}
 			String meta = imageBase64.substring(0, commaIndex);
 			int semi = meta.indexOf(';');
@@ -129,19 +143,19 @@ public class ProductImageSearchController {
 		try {
 			Base64.getDecoder().decode(imageBase64);
 		} catch (IllegalArgumentException e) {
-			return error(response, "Ảnh không hợp lệ.");
+			return error(response, msg("product.camera.error.invalid.image", locale));
 		}
 
 		// 1. AI phan tich anh -> danh sach san pham nhan dien duoc
 		//    (AI co the nhan dien NHIEU san pham trong cung mot khung hinh)
 		List<DetectedProduct> detectedList;
 		try {
-			detectedList = detectFromImage(store, language, mimeType, imageBase64);
+			detectedList = detectFromImage(store, language, mimeType, imageBase64, locale);
 		} catch (ServiceRuntimeException e) {
 			// Tra JSON loi de giao dien hien thi thong bao than thien thay vi trang 500
 			LOGGER.warn("Product image search failed: {}", e.getMessage());
 			String message = StringUtils.defaultIfBlank(e.getMessage(),
-					"Không nhận diện được sản phẩm. Vui lòng thử lại.");
+					msg("product.camera.error.not.detected", locale));
 			return error(response, message);
 		}
 
@@ -156,7 +170,30 @@ public class ProductImageSearchController {
 			return result;
 		} catch (Exception e) {
 			LOGGER.error("Cannot match products for image search", e);
-			return error(response, "Lỗi khi tìm sản phẩm trong cửa hàng.");
+			return error(response, msg("product.camera.error.match", locale));
+		}
+	}
+
+	/**
+	 * Lay thong bao da ngon ngu theo key trong bundles/messages_*.properties.
+	 * Neu key chua duoc dich o ngon ngu nay thi messageSource (useCodeAsDefaultMessage)
+	 * tra ve chinh key - khi do lay tiep ban goc English de tranh hien key ra giao dien.
+	 */
+	private String msg(String key, Locale locale) {
+		Locale target = (locale != null && StringUtils.isNotBlank(locale.getLanguage())) ? locale
+				: new Locale(DEFAULT_LANGUAGE);
+		try {
+			String message = messages.getMessage(key, target);
+			if (StringUtils.isNotBlank(message) && !key.equals(message)) {
+				return message;
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Missing i18n message for key {} and locale {}", key, target);
+		}
+		try {
+			return messages.getMessage(key, Locale.ENGLISH);
+		} catch (Exception e) {
+			return key;
 		}
 	}
 
@@ -234,7 +271,7 @@ public class ProductImageSearchController {
 	 * Neu AI loi thi nem exception de frontend bao nguoi dung.
 	 */
 	private List<DetectedProduct> detectFromImage(MerchantStore store, Language language, String mimeType,
-			String imageBase64) {
+			String imageBase64, Locale locale) {
 
 		try {
 			AiChatModel chatModel = aiChatModelFactory.getChatModel(store);
@@ -242,23 +279,21 @@ public class ProductImageSearchController {
 			AiChatResponse response = chatModel.call(AiChatRequest.textAndImage(prompt, mimeType, imageBase64));
 
 			if (response == null || StringUtils.isBlank(response.getText())) {
-				throw new ServiceRuntimeException("AI không nhận diện được ảnh. Vui lòng thử lại.");
+				throw new ServiceRuntimeException(msg("product.camera.error.ai.not.detected", locale));
 			}
 
-			return parseDetectedProducts(response.getText());
+			return parseDetectedProducts(response.getText(), locale);
 
 		} catch (AiException e) {
 			LOGGER.warn("AI provider not configured for image search: {}", e.getMessage());
-			throw new ServiceRuntimeException(
-					"Chưa cấu hình AI. Vào Admin > Configuration > AI Configuration để bật tính năng chụp ảnh.");
+			throw new ServiceRuntimeException(msg("product.camera.error.ai.provider", locale));
 			} catch (ServiceRuntimeException e) {
 			// Da la thong bao than thien (vi du AI khong tra ve du lieu) -> giu nguyen
 			throw e;
 			} catch (Exception e) {
 			LOGGER.error("Cannot analyse product image", e);
 			// Ghi lai nguyen nhan that trong log, con nguoi dung thay thong bao de hieu
-			throw new ServiceRuntimeException(
-					"Không phân tích được ảnh bằng AI. Vui lòng kiểm tra lại API key trong Admin > Configuration > AI Configuration.");
+			throw new ServiceRuntimeException(msg("product.camera.error.ai.analysis", locale));
 			}
 	}
 
@@ -268,7 +303,7 @@ public class ProductImageSearchController {
 	 *   2. {"name": ..., "keywords": ...}  - mot san pham (tuong thich cu)
 	 * Cac san pham khong co tu khoa se bi loai bo.
 	 */
-	private List<DetectedProduct> parseDetectedProducts(String json) throws java.io.IOException {
+	private List<DetectedProduct> parseDetectedProducts(String json, Locale locale) throws java.io.IOException {
 		com.fasterxml.jackson.databind.JsonNode root = OBJECT_MAPPER.readTree(json);
 
 		List<DetectedProduct> detected = new ArrayList<>();
@@ -292,7 +327,7 @@ public class ProductImageSearchController {
 						&& StringUtils.isBlank(p.getName())));
 
 		if (detected.isEmpty()) {
-			throw new ServiceRuntimeException("Không nhận diện được sản phẩm trong ảnh. Vui lòng thử lại.");
+			throw new ServiceRuntimeException(msg("product.camera.error.not.detected", locale));
 		}
 		return detected;
 	}
@@ -453,7 +488,7 @@ public class ProductImageSearchController {
 
 		} catch (Exception e) {
 			LOGGER.error("Error while matching products for image search", e);
-			throw new ServiceRuntimeException("Lỗi khi tìm sản phẩm trong cửa hàng.");
+			throw new ServiceRuntimeException(msg("product.camera.error.match", locale));
 		}
 
 		return results;
