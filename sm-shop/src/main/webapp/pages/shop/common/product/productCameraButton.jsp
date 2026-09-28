@@ -1,4 +1,5 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 	<%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 
 		<%-- Nut "Chup anh tim san pham" o header + cau hinh cho product-camera.js. KHONG dat directive <%@ page
@@ -10,8 +11,14 @@
 			contextPath - context path cua ung dung
 			messages - nhan da ban dia hoa lay tu bundle theo ngon ngu dang chon
 
-			Nut chi hien thi khi tinh nang AI da duoc cau hinh (co API key), de tranh
-			nguoi dung bam vao roi gap thong bao loi.
+			Moi template CHI include fragment nay DUNG MOT LAN, o mot vi tri thay hop voi
+			bo cuc header cua template do. Include hai lan se tao hai nut va ghi de
+			window.shopizerProductCamera.
+
+			Nut chi hien thi khi:
+			  - tinh nang AI da duoc cau hinh (co API key), tranh de nguoi dung bam vao roi
+			    gap thong bao loi;
+			  - dang khong o trang gio hang / dat hang (checkout).
 			--%>
 
 			<c:set var="productCameraEnabled" value="${not empty requestScope.CONFIGS['GEMINI_API_KEY']
@@ -19,7 +26,14 @@
 		or not empty requestScope.CONFIGS['AI_GROQ_API_KEY']
 		or not empty requestScope.CONFIGS['AI_CEREBRAS_API_KEY']}" />
 
-			<c:if test="${productCameraEnabled}">
+			<%-- Khong hien nut o trang gio hang va trang dat hang (checkout): nguoi dung dang
+				hoan tat don hang, them mot loi vao giua se lam roi luong mua hang.
+				Cung dieu kien voi minicart o template bootstrap. --%>
+			<c:set var="productCameraPage"
+				value="${not fn:contains(requestScope['javax.servlet.forward.servlet_path'], 'order')
+				and not fn:contains(requestScope['javax.servlet.forward.servlet_path'], 'cart')}" />
+
+			<c:if test="${productCameraEnabled and productCameraPage}">
 
 				<s:message code="label.product.camera.button" text="Chụp ảnh tìm sản phẩm" var="pcButton" />
 				<s:message code="label.product.camera.title" text="Tìm sản phẩm bằng hình ảnh" var="pcTitle" />

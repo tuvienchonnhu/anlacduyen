@@ -359,11 +359,32 @@ li.dropdown:has(> #signinPane) {
 	cursor: pointer;
 }
 
-/* Vai template (exoticamobilia) chen nut vao vung header-top-right dang float,
- * can mot wrapper de nut khong bi day xuong dong va khong pha layout. */
+/* Vai template chen nut vao vung header dang float, can mot wrapper de nut khong bi
+ * day xuong dong va khong pha layout:
+ *   - exoticamobilia, generic, bootstrap: wrapper la <div>
+ *   - december: wrapper la <li> nam trong <ul class="topBarNav"> */
 .header-camera-wrapper {
 	display: inline-block;
 	vertical-align: middle;
+}
+
+/* Khi wrapper la <li> (december): giu dung kieu hien thi cua cac <li> khac trong top bar */
+li.header-camera-wrapper {
+	display: inline-block;
+	vertical-align: middle;
+	list-style: none;
+}
+
+li.header-camera-wrapper .btn-group {
+	vertical-align: middle;
+}
+
+li.header-camera-wrapper .product-camera-trigger {
+	background: none;
+	border: 0;
+	box-shadow: none;
+	padding: 0 10px;
+	line-height: inherit;
 }
 
 /* trong template co icon: chi hien icon cho gon */

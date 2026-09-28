@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,9 +25,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.salesmanager.core.business.services.catalog.product.ProductService;
 import com.salesmanager.core.business.services.catalog.product.PricingService;
 import com.salesmanager.core.model.catalog.product.Product;
+import com.salesmanager.core.model.catalog.product.image.ProductImage;
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.core.model.reference.language.Language;
 import com.salesmanager.shop.constants.Constants;
+import com.salesmanager.shop.model.catalog.product.ReadableImage;
 import com.salesmanager.shop.model.catalog.product.ReadableProduct;
 import com.salesmanager.shop.populator.catalog.ReadableProductPopulator;
 import com.salesmanager.shop.store.api.exception.ServiceRuntimeException;
@@ -368,6 +371,7 @@ public class ProductImageSearchController {
 				try {
 					ReadableProduct readable = populator.populate(entry.product, new ReadableProduct(), store,
 							language);
+					ensureProductImage(readable, entry.product, store);
 					results.add(readable);
 				} catch (Exception e) {
 					LOGGER.warn("Cannot populate product {} for image search", entry.product.getId(), e);
@@ -380,6 +384,43 @@ public class ProductImageSearchController {
 		}
 
 		return results;
+	}
+
+	/**
+	 * Dam bao moi ket qua tra ve deu co anh de hien thi.
+	 *
+	 * ReadableProductPopulator chi set product.image khi ProductImage duoc danh dau la
+	 * default. Neu cua hang khong danh dau default thi truong image la null va man hinh
+	 * ket qua se khong co anh. Khi do:
+	 *   - lay anh dau tien trong danh sach images, hoac
+	 *   - dung imageName + sku de tu dung duong dan anh.
+	 */
+	private void ensureProductImage(ReadableProduct readable, Product product, MerchantStore store) {
+		if (readable == null) {
+			return;
+		}
+
+		if (readable.getImage() == null && !CollectionUtils.isEmpty(readable.getImages())) {
+			readable.setImage(readable.getImages().get(0));
+		}
+
+		if (readable.getImage() != null || product.getImages() == null) {
+			return;
+		}
+
+		for (ProductImage image : product.getImages()) {
+			if (image == null || StringUtils.isBlank(image.getProductImage())) {
+				continue;
+			}
+			ReadableImage fallback = new ReadableImage();
+			fallback.setImageName(image.getProductImage());
+			fallback.setId(image.getId());
+			fallback.setImageType(image.getImageType());
+			// imageUtils da tra ve URL tuyet doi (http://domain/static/...)
+			fallback.setImageUrl(imageUtils.buildProductImageUtils(store, product.getSku(), image.getProductImage()));
+			readable.setImage(fallback);
+			return;
+		}
 	}
 
 	private static class ScoredProduct {

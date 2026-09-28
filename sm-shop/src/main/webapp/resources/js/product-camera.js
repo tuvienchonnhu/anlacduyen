@@ -359,16 +359,46 @@
             container.appendChild(list);
         }
 
+        /**
+         * Tao URL anh day du tu duong dan ma backend tra ve.
+         *
+         * Backend co the tra ve 2 dang:
+         *   - URL tuyet doi: "http://domain/static/products/..." (cau hinh local image)
+         *   - Duong dan tuong doi: "/static/products/..." hoac "static/products/..."
+         * Chi ghep contextPath cho dang tuong doi, neu khong se thanh
+         * "<contextPath>http://..." va anh khong hien.
+         *
+         * imageType == 1 la video -> khong hien thi nhu anh.
+         */
+        function resolveImageUrl(image) {
+            if (!image) {
+                return '';
+            }
+            if (typeof image === 'object' && image.imageType === 1) {
+                return '';
+            }
+            var path = typeof image === 'string' ? image : (image.imageUrl || image.externalUrl || '');
+            if (!path) {
+                return '';
+            }
+            if (/^(https?:)?\/\//i.test(path)) {
+                return path;
+            }
+            var base = config.contextPath || '';
+            return path.charAt(0) === '/' ? (base + path) : (base + '/' + path);
+        }
+
         function buildResultCard(product) {
             var card = document.createElement('div');
             card.className = 'product-camera-result';
 
-            var imageUrl = product.image
-                ? (config.contextPath + product.image)
-                : (config.placeholderImage || '');
+            var imageUrl = resolveImageUrl(product.image);
 
-            var name = product.name || '';
-            var price = product.price || '';
+            // ReadableProduct khong co truong "name" o cap goc: ten nam trong description.name
+            // (xem ReadableProductPopulator.populateDescription). Truong price la BigDecimal tho,
+            // khong phai chuoi da dinh dang -> uu tien finalPrice (da format theo store).
+            var name = (product.description && product.description.name) || product.name || '';
+            var price = product.finalPrice || product.price || '';
             var productId = product.id;
             // friendlyUrl nam trong description (xem ReadableProductPopulator.populateDescription)
             var friendlyUrl = (product.description && product.description.friendlyUrl) || '';
@@ -382,16 +412,36 @@
                 '  <p class="product-camera-result-price">' + escapeHtml(price) + '</p>' +
                 '</div>';
 
-            // Cho phep bam vao ten/anh de xem chi tiet san pham
-            if (friendlyUrl) {
-                var detailUrl = config.contextPath + '/shop/product/' + friendlyUrl + '.html';
-                var info = card.querySelector('.product-camera-result-info');
+            var detailUrl = friendlyUrl
+                ? config.contextPath + '/shop/product/' + friendlyUrl + '.html'
+                : '';
+
+            // Bam vao anh hoac ten de xem chi tiet san pham
+            var info = card.querySelector('.product-camera-result-info');
+            if (detailUrl) {
                 var link = document.createElement('a');
                 link.href = detailUrl;
                 link.className = 'product-camera-result-link';
                 link.textContent = name;
                 info.querySelector('.product-camera-result-name').innerHTML = '';
                 info.querySelector('.product-camera-result-name').appendChild(link);
+            }
+
+            // Anh loi (404, ten file sai...) thi bo khung anh thay vi de bieu tuong vo anh
+            var image = card.querySelector('.product-camera-result-image img');
+            if (image) {
+                if (detailUrl) {
+                    var imageLink = document.createElement('a');
+                    imageLink.href = detailUrl;
+                    image.parentNode.insertBefore(imageLink, image);
+                    imageLink.appendChild(image);
+                }
+                image.addEventListener('error', function () {
+                    var box = card.querySelector('.product-camera-result-image');
+                    if (box) {
+                        box.style.display = 'none';
+                    }
+                });
             }
 
             var button = document.createElement('button');

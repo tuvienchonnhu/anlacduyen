@@ -270,8 +270,8 @@ $(document).ready(function() {
         <c:if test="${requestScope.CONFIGS['displayCustomerSection'] == true}">
         	<li class="dropdown" id="customerAccount"></li>
         </c:if>
-        <!-- Nut chup anh tim san pham (AJAX, fragment dung chung moi template) -->
-        <li class="dropdown">
+        <!-- Nut chup anh tim san pham: chi 1 nut duy nhat, nam tren top bar -->
+        <li class="dropdown header-camera-wrapper">
         	<jsp:include page="/pages/shop/common/product/productCameraButton.jsp" />
         </li>
         <c:if test="${requestScope.CONFIGS['allowPurchaseItems'] == true}">	

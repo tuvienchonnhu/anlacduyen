@@ -142,8 +142,6 @@ response.setDateHeader ("Expires", -1);
 						<div class="col-lg-3 col-md-4 col-sm-4">
 							<div class="header-top-right">
 							<!-- Empty placeholder -->
-								<!-- Nut chup anh tim san pham (AJAX, fragment dung chung moi template) -->
-								<jsp:include page="/pages/shop/common/product/productCameraButton.jsp" />	
 							</div>
 						</div>
 						<!-- Shopping cart -->

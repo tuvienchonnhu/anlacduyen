@@ -205,15 +205,26 @@ public class ReadableProductPopulator extends
 			if(images!=null && images.size()>0) {
 				List<ReadableImage> imageList = new ArrayList<ReadableImage>();
 				
+				// imageUtils.buildProductImageUtils (LocalImageFilePathUtils) tra ve URL TUYET DOI
+				// dang "http://<domain>/static/products/..." (xem getBasePath -> getScheme(store)).
+				// Neu noi them contextPath nua thi URL thanh "<contextPath>http://..." -> anh khong hien.
+				// Chi ghep contextPath khi duong dan la tuong doi (cau hinh external image server).
 				String contextPath = imageUtils.getContextPath();
-				
+				if (contextPath == null || "/".equals(contextPath)) {
+					contextPath = "";
+				}
+
 				for(ProductImage img : images) {
 					ReadableImage prdImage = new ReadableImage();
 					prdImage.setImageName(img.getProductImage());
 					prdImage.setDefaultImage(img.isDefaultImage());
 
+					String imagePath = imageUtils.buildProductImageUtils(store, source.getSku(), img.getProductImage());
 					StringBuilder imgPath = new StringBuilder();
-					imgPath.append(contextPath).append(imageUtils.buildProductImageUtils(store, source.getSku(), img.getProductImage()));
+					if (!isAbsoluteUrl(imagePath)) {
+						imgPath.append(contextPath);
+					}
+					imgPath.append(imagePath);
 
 					prdImage.setImageUrl(imgPath.toString());
 					prdImage.setId(img.getId());
@@ -583,6 +594,18 @@ public class ReadableProductPopulator extends
 		return null;
 	}
 	
+	/**
+	 * Duong dan anh da la URL tuyet doi (co scheme http/https hoac protocol-relative //)?
+	 * Voi URL tuyet doi thi KHONG duoc ghep contextPath vao truoc.
+	 */
+	private boolean isAbsoluteUrl(String path) {
+		if (StringUtils.isBlank(path)) {
+			return false;
+		}
+		String trimmed = path.trim().toLowerCase();
+		return trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("//");
+	}
+
     com.salesmanager.shop.model.catalog.product.ProductDescription populateDescription(ProductDescription description) {
       if(description == null) {
         return null;
