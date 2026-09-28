@@ -44,23 +44,6 @@
     var config = readConfig();
     var card = document.getElementById('google-signin-card');
 
-    /**
-     * Khung dang nhap nam trong dropdown (display:none) nen Google Identity
-     * Services khong the do duoc chieu rong that. Mac dinh lay 320px, rieng
-     * trong #signinPane thi bang chieu rong khung tru di padding 2 ben.
-     */
-    function resolveButtonWidth() {
-        var pane = document.getElementById('signinPane');
-        if (pane) {
-            var width = pane.clientWidth;
-            if (width > 0) {
-                return Math.max(200, Math.min(320, width - 36));
-            }
-            return 300;
-        }
-        return 320;
-    }
-
     function log(message, error) {
         if (error && global.console && global.console.error) {
             global.console.error('[Google sign-in] ' + message, error);
@@ -133,25 +116,17 @@
     }
 
     /**
-     * Google Identity Services chi ho tro mot so ma ngon ngu nhat dinh ("vi"
-     * khong nam trong danh sach nay). Neu truyen mot ma khong duoc ho tro, SDK
-     * co the bo qua va khong ve nut. Vi vay:
-     *   - "vi" -> dua ve "en" (chu tieng Anh) thay vi de SDK that bai;
-     *   - cac ma khac: giu nguyen, SDK se tu fallback theo cai dat cua nguoi dung.
+     * Nut dang nhap Google do CHUNG TA tu ve, chu lay tu bundle theo ngon ngu
+     * dang chon.
+     *
+     * Ly do khong dung iframe cua google.accounts.id.renderButton():
+     * Google cache noi dung nut theo client_id, nen sau khi nguoi dung doi ngon
+     * ngu, iframe van hien chu cua ngon ngu truoc do (thuc te: da gap truong hop
+     * trang tieng Phap nhung nut van ghi "Dang nhap bang Google").
+     *
+     * Doc chu tu data-msg-signin nen nut luon dung ngon ngu cua trang.
      */
-    var GIS_UNSUPPORTED_LOCALES = { vi: 'en' };
-
-    function resolveGisLocale() {
-        var locale = (config.locale || 'en').toLowerCase();
-        return GIS_UNSUPPORTED_LOCALES[locale] || locale;
-    }
-
-    /**
-     * Nut du phong: khi GIS SDK khong ve duoc nut (bi chan, mat mang, cache loi),
-     * hien mot nut that su de nguoi dung khong bi ket. Chu tren nut lay tu bundle
-     * theo ngon ngu dang chon (config.messages.signin) nen luon dung ngon ngu.
-     */
-    function showFallbackButton() {
+    function buildSignInButton() {
         if (!card || card.querySelector('.google-signin-fallback')) {
             return;
         }
@@ -163,35 +138,41 @@
         var button = document.createElement('button');
         button.type = 'button';
         button.className = 'google-signin-fallback';
-        button.innerHTML = '<i class="fa fa-google"></i> '
-            + ((config.messages && config.messages.signin) || 'Sign in with Google');
 
-        // Nut du phong khong the dang nhap (khong co credential tu Google), nhung
-        // dua nguoi dung sang trang dang nhap day du de khong bi ket.
+        button.textContent = '';
+        var icon = document.createElement('i');
+        icon.className = 'fa fa-google';
+        button.appendChild(icon);
+        var label = document.createElement('span');
+        label.textContent = (config.messages && config.messages.signin) || 'Sign in with Google';
+        button.appendChild(label);
+
         button.addEventListener('click', function () {
-            var target = (config.contextPath || '') + '/shop/customer/customLogon.html';
-            global.location.href = target;
+            if (!global.google || !global.google.accounts || !global.google.accounts.oauth2) {
+                // SDK chua san sang: dua nguoi dung sang trang dang nhap day du.
+                global.location.href = (config.contextPath || '') + '/shop/customer/customLogon.html';
+                return;
+            }
+
+            setBusy(true);
+            showMessage('');
+
+            var client = global.google.accounts.oauth2.initTokenClient({
+                client_id: config.clientId,
+                scope: 'openid email profile',
+                callback: function (tokenResponse) {
+                    if (!tokenResponse || !tokenResponse.id_token) {
+                        setBusy(false);
+                        showMessage((config.messages && config.messages.failed) || '');
+                        return;
+                    }
+                    sendCredentialToServer(tokenResponse.id_token);
+                }
+            });
+            client.requestAccessToken();
         });
 
         container.appendChild(button);
-    }
-
-    /**
-     * Kiem tra sau mot khoang thoi gian: neu GIS khong tao ra iframe nao trong
-     * khung thi coi nhu that bai va hien nut du phong.
-     */
-    function verifyButtonRendered() {
-        if (!card) {
-            return;
-        }
-        var container = card.querySelector('.google-signin-button');
-        if (!container) {
-            return;
-        }
-        if (!container.querySelector('iframe')) {
-            log('Google Identity Services did not render the button, showing fallback');
-            showFallbackButton();
-        }
     }
 
     global.onGoogleSignIn = function (response) {
@@ -204,8 +185,16 @@
     };
 
     /**
-     * Khoi tao GIS SDK: render nut Google chinh chu voi theme, kich thuoc va
-     * ngon ngu theo trang hien tai.
+     * Khoi tao nut dang nhap Google.
+     *
+     * Nut do trang tu ve (buildSignInButton) de chu luon lay tu bundle theo ngon
+     * ngu dang chon. Khong dung iframe cua google.accounts.id.renderButton() vi:
+     *   - Google cache noi dung nut theo client_id, nen sau khi doi ngon ngu iframe
+     *     van hien chu cua ngon ngu cu (trang tieng Phap nhung nut ghi tieng Viet);
+     *   - Google Identity Services khong ho tro ma ngon ngu "vi".
+     *
+     * SDK chi con dung de lay ID token qua OAuth popup (google.accounts.oauth2),
+     * duoc goi khi nguoi dung bam nut.
      */
     global.shopizerInitGoogleSignIn = function () {
         config = readConfig();
@@ -225,45 +214,16 @@
             return;
         }
 
-        if (!global.google || !global.google.accounts || !global.google.accounts.id) {
-            // SDK chua tai xong, thu lai sau mot nhip
-            global.setTimeout(global.shopizerInitGoogleSignIn, 200);
-            return;
-        }
-
+        // Luon ve lai nut de chu khop ngon ngu hien tai.
         var container = card.querySelector('.google-signin-button');
-        if (!container) {
-            return;
+        if (container) {
+            container.innerHTML = '';
         }
-
-        //
-        // GIS SDK chi cho phep initialize() mot lan voi cung client_id, nhung
-        // renderButton() co the goi lai. Khi nguoi dung doi ngon ngu, trang duoc
-        // nap lai nen khoi tao moi la an toan.
-        //
-        global.google.accounts.id.initialize({
-            client_id: config.clientId,
-            callback: global.onGoogleSignIn,
-            auto_select: false,
-            cancel_on_tap_outside: true
-        });
-
-        // xoa nut cu (neu co) truoc khi render lai de tranh chong 2 iframe
-        container.innerHTML = '';
-
-        global.google.accounts.id.renderButton(container, {
-            type: 'standard',
-            theme: 'outline',
-            size: 'large',
-            text: 'signin_with',
-            shape: 'rectangular',
-            logo_alignment: 'left',
-            width: resolveButtonWidth(),
-            locale: resolveGisLocale()
-        });
-
-        // GIS ve nut bat dong bo ben trong mot iframe -> kiem tra sau mot nhip.
-        global.setTimeout(verifyButtonRendered, 1500);
+        var existing = card.querySelector('.google-signin-fallback');
+        if (existing && existing.parentNode) {
+            existing.parentNode.removeChild(existing);
+        }
+        buildSignInButton();
     };
 
     /**

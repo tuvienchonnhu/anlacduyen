@@ -54,9 +54,10 @@
 }
 
 /*
- * Nut du phong khi Google Identity Services khong ve duoc nut (bi chan, mat
- * mang...). Chu tren nut lay tu bundle theo ngon ngu dang chon nen luon dung
- * ngon ngu, khong phu thuoc vao danh sach locale cua Google.
+ * Nut dang nhap Google do trang tu ve (khong dung iframe cua Google).
+ *
+ * Chu tren nut lay tu bundle theo ngon ngu dang chon nen luon dung ngon ngu,
+ * khong phu thuoc danh sach locale hay cache theo client_id cua Google.
  */
 .google-signin-fallback {
 	display: block;
@@ -71,10 +72,12 @@
 	font-size: 14px;
 	font-weight: 500;
 	line-height: 1.4;
+	text-align: center;
 	cursor: pointer;
 }
 
-.google-signin-fallback:hover {
+.google-signin-fallback:hover,
+.google-signin-fallback:focus {
 	background: #f8f9fa;
 	border-color: #c6c9cd;
 }
