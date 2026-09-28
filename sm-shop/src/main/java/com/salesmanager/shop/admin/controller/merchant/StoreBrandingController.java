@@ -163,6 +163,21 @@ public class StoreBrandingController {
 
 		request.getSession().setAttribute(Constants.ADMIN_STORE, sessionstore);
 
+		/*
+		 * Dong bo ban ghi merchant store moi cho ca storefront.
+		 *
+		 * /admin/** di qua AdminFilter va dung attribute ADMIN_STORE, con /shop/** di qua
+		 * StoreFilter va dung attribute MERCHANT_STORE. merchantStoreService.getByCode()
+		 * tra ve mot instance MerchantStore moi, nen neu chi cap nhat ADMIN_STORE thi
+		 * MERCHANT_STORE trong session van la ban cu -> storefront van render bang theme
+		 * cu (doi theme lan dau co the "an may" neu object tinh co trung tham chieu, lan
+		 * sau thi khong). Ghi thang vao MERCHANT_STORE dam bao theme moi co hieu luc
+		 * NGAY va doi bao nhieu lan cung duoc.
+		 */
+		if (sessionstore != null) {
+			request.getSession().setAttribute(Constants.MERCHANT_STORE, sessionstore);
+		}
+
 			//display templates
 		model.addAttribute("templates", templates);
 		model.addAttribute("templateOptions", templateOptions);

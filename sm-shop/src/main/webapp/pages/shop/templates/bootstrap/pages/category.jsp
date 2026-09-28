@@ -87,6 +87,27 @@ response.setDateHeader ("Expires", -1);
  		loadProducts(url,'#productsContainer');
  	}
 
+ 	/**
+ 	 * Lam moi khung chua san pham truoc khi nap danh muc/bo loc moi.
+ 	 *
+ 	 * Phai THAY THE phan tu <ul id="productsContainer"> bang mot phan tu moi thay vi
+ 	 * chi xoa noi dung (.html('')). Ly do: ham orderProducts() ben duoi dung plugin
+ 	 * quicksand, plugin nay clone DOM cua container va gan trang thai noi bo len chinh
+ 	 * phan tu do. Sau lan sap xep dau tien, container cu bi quicksand "giu", nen lan
+ 	 * chon danh muc thu hai tro di san pham moi append vao khong hien ra nua.
+ 	 * Tao lai the <ul> voi cung id/class giup quicksand bat dau lai tu trang thai sach.
+ 	 */
+ 	function resetProductsContainer() {
+ 		var container = document.getElementById('productsContainer');
+ 		if (!container) {
+ 			return;
+ 		}
+ 		var fresh = document.createElement('ul');
+ 		fresh.id = 'productsContainer';
+ 		fresh.className = container.className;
+ 		container.parentNode.replaceChild(fresh, container);
+ 	}
+
  	// Nguoi dung bam chon mot danh muc o cot ben trai:
  	// thay vi tai lai toan bo trang, chi tai lai danh sach san pham vao cot ben phai.
  	function selectCategory(friendlyUrl, name, categoryId) {
@@ -102,8 +123,10 @@ response.setDateHeader ("Expires", -1);
  		filterValue = null;
  		START_COUNT_PRODUCTS = 0;
 
- 		$('#productsContainer').html('');
+ 		// lam moi khung chua san pham (chi xoa noi dung la chua du - xem resetProductsContainer)
+ 		resetProductsContainer();
  		$('#button_nav').hide();
+ 		$('#products-qty').html('');
 
  		// cap nhat tieu de danh muc dang xem o cot ben phai
  		$('#categoryName').html(name);
@@ -117,14 +140,14 @@ response.setDateHeader ("Expires", -1);
 
  		return false;
  	}
- 	
+
  	function filterCategory(filterType,filterVal) {
-	 		//reset product section
-	 		$('#productsContainer').html('');
-	 		START_COUNT_PRODUCTS = 0;
-	 		filter = filterType;
-	 		filterValue = filterVal;
-	 		loadCategoryProducts();
+ 			//reset product section
+ 			resetProductsContainer();
+ 			START_COUNT_PRODUCTS = 0;
+ 			filter = filterType;
+ 			filterValue = filterVal;
+ 			loadCategoryProducts();
  	}
  
 	function callBackLoadProducts(productList) {

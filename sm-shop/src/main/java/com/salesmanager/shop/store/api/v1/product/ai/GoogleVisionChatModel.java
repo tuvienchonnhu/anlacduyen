@@ -50,7 +50,7 @@ public class GoogleVisionChatModel implements AiChatModel {
 	private static final String VISION_API_URL = "https://vision.googleapis.com/v1/images:annotate";
 
 	/** Chi giu cac nhan co diem tin cay tu muc nay tro len de tranh nhieu. */
-	private static final double MIN_LABEL_SCORE = 0.6d;
+	private static final double MIN_LABEL_SCORE = 0.5d;
 
 	/** So tu khoa toi da cho mot san pham (giong cac provider khac: 6-10). */
 	private static final int MAX_KEYWORDS = 10;
@@ -147,7 +147,8 @@ public class GoogleVisionChatModel implements AiChatModel {
 	 *
 	 * Voi moi vat the duoc dinh vi (localizedObjectAnnotations) tao mot san pham;
 	 * cac nhan con lai (labelAnnotations) gop thanh mot san pham chung. Neu ca
-	 * hai deu rong thi tra ve mang rong - controller se bao khong nhan dien duoc.
+	 * hai deu rong thi tra ve mang rong - controller se bao khong nhan dien duoc
+	 * va ghi log ro rang de chan doan.
 	 */
 	@SuppressWarnings("unchecked")
 	private String buildProductsJson(Map<String, Object> body) throws AiException {
@@ -164,6 +165,21 @@ public class GoogleVisionChatModel implements AiChatModel {
 			if (first == null) {
 				return "{\"products\":[]}";
 			}
+
+			// Google tra loi kem truong "error" khi API chua duoc bat, sai key,
+			// het quota... Neu bo qua thi nguoi dung chi thay "khong nhan dien duoc"
+			// ma khong biet nguyen nhan that. Vi vay doc va bao ro rang.
+			Object responseError = first.get("error");
+			if (responseError instanceof Map) {
+				Map<?, ?> errorMap = (Map<?, ?>) responseError;
+				Object errorMessage = errorMap.get("message");
+				LOGGER.error("Google Vision returned error: {}", errorMessage);
+				throw new AiException("Google Vision bao loi: " + errorMessage);
+			}
+
+			// Ghi lai ket qua tho de chan doan khi cau hinh/anh khong phu hop.
+			// Dung info de nguoi quan tri thay duoc trong log khi can go loi.
+			LOGGER.info("Google Vision response keys: {}", first.keySet());
 
 			// 1. Vat the duoc dinh vi -> moi vat the la mot san pham rieng biet
 			List<Map<String, Object>> localizedObjects = (List<Map<String, Object>>) first
@@ -203,6 +219,29 @@ public class GoogleVisionChatModel implements AiChatModel {
 						bestLabelScore = confidence;
 					}
 				}
+
+				// Khong co nhan nao dat nguong: van lay nhan co diem cao nhat thay vi
+				// tra ve rong. Anh chup trong dieu kien thieu sang / san pham la thuong
+				// gap diem thap nhung van la thong tin tot nhat co duoc.
+				if (labelNames.isEmpty()) {
+					for (Map<String, Object> label : labels) {
+						Object description = label.get("description");
+						if (description == null || StringUtils.isBlank(description.toString())) {
+							continue;
+						}
+						Number score = (Number) label.get("score");
+						double confidence = score != null ? score.doubleValue() : 0d;
+						if (confidence >= 0.35d) {
+							labelNames.add(description.toString());
+							if (confidence > bestLabelScore) {
+								bestLabelScore = confidence;
+							}
+						}
+					}
+					if (!labelNames.isEmpty()) {
+						LOGGER.debug("No label above threshold, using fallback labels: {}", labelNames);
+					}
+			}
 			}
 
 			if (!labelNames.isEmpty()) {
@@ -255,6 +294,12 @@ public class GoogleVisionChatModel implements AiChatModel {
 					product.put("keywords", new ArrayList<>(list.subList(0, MAX_KEYWORDS)));
 				}
 			}
+		}
+
+		if (products.isEmpty()) {
+			// Khong co vat the lan nhan nao dat nguong -> ghi log ro rang de chan doan
+			// (thuong gap khi anh qua mo / thieu sang, hoac Cloud Vision chua bat).
+			LOGGER.warn("Google Vision khong tra ve vat the/nhan nao dat nguong cho anh nay.");
 		}
 
 		return toJson(products);
