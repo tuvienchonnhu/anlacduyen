@@ -46,6 +46,7 @@
 				<s:message code="label.product.camera.searching" text="Đang nhận diện sản phẩm, vui lòng chờ..."
 					var="pcSearching" />
 				<s:message code="label.product.camera.detected" text="Đã nhận diện:" var="pcDetected" />
+				<s:message code="label.product.camera.quantity" text="Số lượng" var="pcQuantity" />
 				<s:message code="label.product.camera.noResults"
 					text="Không tìm thấy sản phẩm phù hợp trong cửa hàng. Vui lòng thử chụp rõ hơn."
 					var="pcNoResults" />
@@ -89,6 +90,7 @@
 								search: '<c:out value="${pcSearch}" escapeXml="false"/>',
 								searching: '<c:out value="${pcSearching}" escapeXml="false"/>',
 								detected: '<c:out value="${pcDetected}" escapeXml="false"/>',
+						quantity: '<c:out value="${pcQuantity}" escapeXml="false"/>',
 								noResults: '<c:out value="${pcNoResults}" escapeXml="false"/>',
 								addToCart: '<c:out value="${pcAddToCart}" escapeXml="false"/>',
 								adding: '<c:out value="${pcAdding}" escapeXml="false"/>',

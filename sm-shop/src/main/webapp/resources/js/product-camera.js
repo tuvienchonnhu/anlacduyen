@@ -321,7 +321,7 @@
                 });
         }
 
-        /** Hien thi danh sach san pham tim duoc, moi san pham co nut them vao gio. */
+        /** Hien thi danh sach san pham tim duoc, moi san pham mot dong co so luong + nut them vao gio. */
         function renderResults(data) {
             if (!modal) {
                 return;
@@ -329,18 +329,27 @@
             var container = modal.querySelector('.product-camera-results');
             container.innerHTML = '';
 
-            var products = (data && data.products) || [];
-            var detected = (data && data.detected) || null;
+            var rows = (data && data.products) || [];
 
-            // Cho nguoi dung biet AI da nhan dien ra cai gi
-            if (detected && detected.name) {
+            // Danh sach san pham AI nhan dien (co the nhieu san pham trong 1 khung hinh)
+            var detectedList = (data && data.detected) || [];
+            if (detectedList.length && typeof detectedList === 'object' && !detectedList.length) {
+                detectedList = [detectedList];
+            }
+            var names = [];
+            for (var d = 0; d < detectedList.length; d++) {
+                if (detectedList[d] && detectedList[d].name) {
+                    names.push(detectedList[d].name);
+                }
+            }
+            if (names.length > 0) {
                 var summary = document.createElement('p');
                 summary.className = 'product-camera-detected';
-                summary.textContent = t('detected', 'Đã nhận diện:') + ' ' + detected.name;
+                summary.textContent = t('detected', 'Đã nhận diện:') + ' ' + names.join(', ');
                 container.appendChild(summary);
             }
 
-            if (products.length === 0) {
+            if (rows.length === 0) {
                 var empty = document.createElement('p');
                 empty.className = 'product-camera-empty';
                 empty.textContent = t('noResults',
@@ -352,9 +361,9 @@
             var list = document.createElement('div');
             list.className = 'product-camera-result-list';
 
-            products.forEach(function (product) {
-                list.appendChild(buildResultCard(product));
-            });
+            for (var i = 0; i < rows.length; i++) {
+                list.appendChild(buildResultRow(rows[i]));
+            }
 
             container.appendChild(list);
         }
@@ -388,9 +397,25 @@
             return path.charAt(0) === '/' ? (base + path) : (base + '/' + path);
         }
 
-        function buildResultCard(product) {
-            var card = document.createElement('div');
-            card.className = 'product-camera-result';
+        /**
+         * Tao mot dong ket qua cho MOT san pham.
+         *
+         * Backend tra ve moi ket qua dang:
+         *   { "product": {...ReadableProduct...}, "quantity": <so luong ton kho> }
+         * (tuong thich nguoc: neu chi co ReadableProduct thi quantity mac dinh = 1).
+         *
+         * Moi dong co o so luong (mac dinh bang so luong ton kho tim duoc) va nut
+         * "Them vao gio" -> them san pham vao gio DUNG so luong dang hien thi.
+         */
+        function buildResultRow(row) {
+            var product = (row && row.product) || row || {};
+            var foundQty = parseInt(row && row.quantity, 10);
+            if (isNaN(foundQty) || foundQty < 1) {
+                foundQty = 1;
+            }
+
+            var rowEl = document.createElement('div');
+            rowEl.className = 'product-camera-result';
 
             var imageUrl = resolveImageUrl(product.image);
 
@@ -403,13 +428,17 @@
             // friendlyUrl nam trong description (xem ReadableProductPopulator.populateDescription)
             var friendlyUrl = (product.description && product.description.friendlyUrl) || '';
 
-            card.innerHTML =
+            rowEl.innerHTML =
                 '<div class="product-camera-result-image">' +
                 (imageUrl ? '<img src="' + escapeAttribute(imageUrl) + '" alt="' + escapeAttribute(name) + '">' : '') +
                 '</div>' +
                 '<div class="product-camera-result-info">' +
                 '  <p class="product-camera-result-name">' + escapeHtml(name) + '</p>' +
                 '  <p class="product-camera-result-price">' + escapeHtml(price) + '</p>' +
+                '</div>' +
+                '<div class="product-camera-result-qty">' +
+                '  <label class="product-camera-qty-label">' + escapeHtml(t('quantity', 'Số lượng')) + '</label>' +
+                '  <input type="number" class="product-camera-qty-input" min="1" value="' + foundQty + '">' +
                 '</div>';
 
             var detailUrl = friendlyUrl
@@ -417,7 +446,7 @@
                 : '';
 
             // Bam vao anh hoac ten de xem chi tiet san pham
-            var info = card.querySelector('.product-camera-result-info');
+            var info = rowEl.querySelector('.product-camera-result-info');
             if (detailUrl) {
                 var link = document.createElement('a');
                 link.href = detailUrl;
@@ -428,7 +457,7 @@
             }
 
             // Anh loi (404, ten file sai...) thi bo khung anh thay vi de bieu tuong vo anh
-            var image = card.querySelector('.product-camera-result-image img');
+            var image = rowEl.querySelector('.product-camera-result-image img');
             if (image) {
                 if (detailUrl) {
                     var imageLink = document.createElement('a');
@@ -437,7 +466,7 @@
                     imageLink.appendChild(image);
                 }
                 image.addEventListener('error', function () {
-                    var box = card.querySelector('.product-camera-result-image');
+                    var box = rowEl.querySelector('.product-camera-result-image');
                     if (box) {
                         box.style.display = 'none';
                     }
@@ -449,11 +478,16 @@
             button.className = 'btn btn-large product-camera-add';
             button.textContent = t('addToCart', 'Thêm vào giỏ');
             button.addEventListener('click', function () {
-                addProductToCart(productId, button);
+                var qtyInput = rowEl.querySelector('.product-camera-qty-input');
+                var quantity = parseInt(qtyInput && qtyInput.value, 10);
+                if (isNaN(quantity) || quantity < 1) {
+                    quantity = 1;
+                }
+                addProductToCart(productId, quantity, button);
             });
-            card.appendChild(button);
+            rowEl.appendChild(button);
 
-            return card;
+            return rowEl;
         }
 
         /**
@@ -464,9 +498,14 @@
          * Payload o day chi gom productId + quantity, dung voi
          * ShoppingCartController.addShoppingCartItem.
          */
-        function addProductToCart(productId, button) {
+        function addProductToCart(productId, quantity, button) {
             if (!productId) {
                 return;
+            }
+
+            var qty = parseInt(quantity, 10);
+            if (isNaN(qty) || qty < 1) {
+                qty = 1;
             }
 
             var originalText = button.textContent;
@@ -474,7 +513,7 @@
             button.textContent = t('adding', 'Đang thêm...');
 
             var cartCode = getCartCode ? getCartCode() : null;
-            var payload = { quantity: 1, productId: productId };
+            var payload = { quantity: qty, productId: productId };
             if (cartCode) {
                 payload.code = cartCode;
             }
@@ -503,7 +542,7 @@
                         return;
                     }
 
-                    button.textContent = t('added', 'Đã thêm vào giỏ');
+                    button.textContent = t('added', 'Đã thêm vào giỏ') + ' (' + qty + ')';
 
                     // Luu ma gio hang va cap nhat mini cart o header
                     if (cart && cart.code && typeof saveCart === 'function') {

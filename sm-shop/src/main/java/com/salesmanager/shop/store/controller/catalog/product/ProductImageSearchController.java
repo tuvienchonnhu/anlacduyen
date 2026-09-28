@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -63,7 +64,7 @@ public class ProductImageSearchController {
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 	/** Gioi han so san pham tra ve cho trinh duyet. */
-	private static final int MAX_RESULTS = 8;
+	private static final int MAX_RESULTS = 20;
 
 	/** Gioi han so san pham quet tu catalogue de tranh qua tai. */
 	private static final int CATALOGUE_SCAN_LIMIT = 500;
@@ -131,10 +132,11 @@ public class ProductImageSearchController {
 			return error(response, "Ảnh không hợp lệ.");
 		}
 
-		// 1. AI phan tich anh -> tu khoa tim kiem
-		DetectedProduct detected;
+		// 1. AI phan tich anh -> danh sach san pham nhan dien duoc
+		//    (AI co the nhan dien NHIEU san pham trong cung mot khung hinh)
+		List<DetectedProduct> detectedList;
 		try {
-			detected = detectFromImage(store, language, mimeType, imageBase64);
+			detectedList = detectFromImage(store, language, mimeType, imageBase64);
 		} catch (ServiceRuntimeException e) {
 			// Tra JSON loi de giao dien hien thi thong bao than thien thay vi trang 500
 			LOGGER.warn("Product image search failed: {}", e.getMessage());
@@ -145,11 +147,11 @@ public class ProductImageSearchController {
 
 		// 2. Tim trong catalogue cua cua hang
 		try {
-			List<ReadableProduct> matches = findMatchingProducts(store, language, locale, detected);
+			List<Map<String, Object>> matches = findMatchingProducts(store, language, locale, detectedList);
 
 			Map<String, Object> result = new java.util.LinkedHashMap<>();
 			result.put("success", true);
-			result.put("detected", detected);
+			result.put("detected", detectedList);
 			result.put("products", matches);
 			return result;
 		} catch (Exception e) {
@@ -226,10 +228,12 @@ public class ProductImageSearchController {
 	}
 
 	/**
-	 * Goi AI phan tich anh va tra ve thong tin san pham nhan dien duoc.
-	 * Neu AI loi thi tra ve DetectedProduct rong de frontend bao nguoi dung.
+	 * Goi AI phan tich anh va tra ve DANH SACH san pham nhan dien duoc.
+	 * AI co the nhan dien nhieu san pham trong cung mot khung hinh (vi du mot cai
+	 * ban co nhieu mon do). Neu AI chi tra ve mot san pham thi danh sach gom 1 phan tu.
+	 * Neu AI loi thi nem exception de frontend bao nguoi dung.
 	 */
-	private DetectedProduct detectFromImage(MerchantStore store, Language language, String mimeType,
+	private List<DetectedProduct> detectFromImage(MerchantStore store, Language language, String mimeType,
 			String imageBase64) {
 
 		try {
@@ -241,24 +245,59 @@ public class ProductImageSearchController {
 				throw new ServiceRuntimeException("AI không nhận diện được ảnh. Vui lòng thử lại.");
 			}
 
-			return OBJECT_MAPPER.readValue(response.getText(), DetectedProduct.class);
+			return parseDetectedProducts(response.getText());
 
 		} catch (AiException e) {
 			LOGGER.warn("AI provider not configured for image search: {}", e.getMessage());
 			throw new ServiceRuntimeException(
 					"Chưa cấu hình AI. Vào Admin > Configuration > AI Configuration để bật tính năng chụp ảnh.");
-		} catch (ServiceRuntimeException e) {
+			} catch (ServiceRuntimeException e) {
 			// Da la thong bao than thien (vi du AI khong tra ve du lieu) -> giu nguyen
 			throw e;
-		} catch (Exception e) {
+			} catch (Exception e) {
 			LOGGER.error("Cannot analyse product image", e);
 			// Ghi lai nguyen nhan that trong log, con nguoi dung thay thong bao de hieu
 			throw new ServiceRuntimeException(
 					"Không phân tích được ảnh bằng AI. Vui lòng kiểm tra lại API key trong Admin > Configuration > AI Configuration.");
-		}
+			}
 	}
 
-	/** Prompt yeu cau AI tra ve JSON thuan de tim kiem trong catalogue. */
+	/**
+	 * Doc JSON AI tra ve. Ho tro 2 dinh dang:
+	 *   1. {"products": [ {...}, {...} ]}  - nhieu san pham (moi)
+	 *   2. {"name": ..., "keywords": ...}  - mot san pham (tuong thich cu)
+	 * Cac san pham khong co tu khoa se bi loai bo.
+	 */
+	private List<DetectedProduct> parseDetectedProducts(String json) throws java.io.IOException {
+		com.fasterxml.jackson.databind.JsonNode root = OBJECT_MAPPER.readTree(json);
+
+		List<DetectedProduct> detected = new ArrayList<>();
+
+		com.fasterxml.jackson.databind.JsonNode items = root.path("products");
+		if (items.isArray() && items.size() > 0) {
+			for (com.fasterxml.jackson.databind.JsonNode item : items) {
+				DetectedProduct product = OBJECT_MAPPER.treeToValue(item, DetectedProduct.class);
+				if (product != null) {
+					detected.add(product);
+				}
+			}
+		} else if (root.has("keywords") || root.has("name")) {
+			// dinh dang cu: mot san pham duy nhat
+			detected.add(OBJECT_MAPPER.treeToValue(root, DetectedProduct.class));
+		}
+
+		// Loai bo san pham khong dung: khong co tu khoa va khong co ten
+		detected.removeIf(p -> p == null
+				|| ((p.getKeywords() == null || p.getKeywords().isEmpty())
+						&& StringUtils.isBlank(p.getName())));
+
+		if (detected.isEmpty()) {
+			throw new ServiceRuntimeException("Không nhận diện được sản phẩm trong ảnh. Vui lòng thử lại.");
+		}
+		return detected;
+	}
+
+	/** Prompt yeu cau AI tra ve JSON thuan de tim kiem trong catalogue (nhieu san pham). */
 	private String buildDetectionPrompt(Language language) {
 		String langCode = (language != null && StringUtils.isNotBlank(language.getCode()))
 				? language.getCode()
@@ -266,57 +305,53 @@ public class ProductImageSearchController {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("Bạn là hệ thống nhận diện sản phẩm cho một cửa hàng trực tuyến.\n");
-		sb.append("Hãy quan sát kỹ HÌNH ẢNH và cho biết đây là sản phẩm gì.\n\n");
+		sb.append("Hãy quan sát kỹ HÌNH ẢNH và liệt kê TẤT CẢ các sản phẩm nhìn thấy được.\n");
+		sb.append("Ảnh có thể chứa MỘT hoặc NHIỀU sản phẩm (ví dụ một cái bàn có nhiều món đồ).\n\n");
 		sb.append("Trả về DUY NHẤT một JSON theo cấu trúc sau, không thêm chữ nào khác:\n");
 		sb.append("{\n");
-		sb.append("  \"name\": \"Tên sản phẩm bằng ngôn ngữ '").append(langCode).append("'\",\n");
-		sb.append("  \"category\": \"Nhóm sản phẩm, ví dụ: túi xách, giày, áo, đồng hồ\",\n");
-		sb.append("  \"color\": \"Màu sắc chính của sản phẩm\",\n");
-		sb.append("  \"material\": \"Chất liệu nếu nhìn thấy được (da, vải, gỗ, kim loại...)\",\n");
-		sb.append("  \"confidence\": \"high | medium | low\",\n");
-		sb.append("  \"keywords\": [\"6-10 từ khoá ngắn bằng ngôn ngữ '").append(langCode)
+		sb.append("  \"products\": [\n");
+		sb.append("    {\n");
+		sb.append("      \"name\": \"Tên sản phẩm bằng ngôn ngữ '").append(langCode).append("'\",\n");
+		sb.append("      \"category\": \"Nhóm sản phẩm, ví dụ: túi xách, giày, áo, đồng hồ\",\n");
+		sb.append("      \"color\": \"Màu sắc chính của sản phẩm\",\n");
+		sb.append("      \"material\": \"Chất liệu nếu nhìn thấy được (da, vải, gỗ, kim loại...)\",\n");
+		sb.append("      \"confidence\": \"high | medium | low\",\n");
+		sb.append("      \"keywords\": [\"6-10 từ khoá ngắn bằng ngôn ngữ '").append(langCode)
 				.append("' để tìm sản phẩm này trong catalogue\"]\n");
+		sb.append("    }\n");
+		sb.append("  ]\n");
 		sb.append("}\n\n");
 		sb.append("Lưu ý:\n");
+		sb.append("- Mỗi sản phẩm riêng biệt trong ảnh là MỘT phần tử trong mảng \"products\".\n");
 		sb.append("- keywords phải là các từ đơn giản, phổ biến, dùng để so khớp tên sản phẩm trong catalogue.\n");
 		sb.append("- Đưa cả từ khoá chung (ví dụ: \"túi xách\") và từ khoá cụ thể (ví dụ: \"túi da màu nâu\").\n");
-		sb.append("- Nếu ảnh không phải sản phẩm, đặt confidence = \"low\" và keywords rỗng.\n");
+		sb.append("- Nếu ảnh không phải sản phẩm, trả về mảng \"products\" rỗng.\n");
 		sb.append("- Chỉ trả về JSON thuần.");
 		return sb.toString();
 	}
 
 	/**
-	 * Tim san pham trong catalogue khop voi tu khoa AI tra ve.
+	 * Tim san pham trong catalogue khop voi tu khoa AI tra ve cho TAT CA cac san pham
+	 * nhan dien duoc trong khung hinh.
 	 *
-	 * Cach lam: quet san pham cua cua hang mot lan, cham diem theo so tu khoa
-	 * xuat hien trong ten/mo ta san pham, roi lay cac san pham diem cao nhat.
-	 * Cach nay khong phu thuoc vao Elasticsearch nen hoat dong ca khi cua hang
-	 * chua bat search service.
+	 * Cach lam: quet san pham cua cua hang mot lan, cham diem theo so tu khoa xuat
+	 * hien trong ten/mo ta san pham, roi lay cac san pham diem cao nhat cua tung san
+	 * pham AI nhan dien (khong trung lap id). Moi ket qua kem theo SO LUONG ton kho
+	 * dang co trong cua hang (duoc goi la "so luong tim duoc") de giao dien hien thi
+	 * va them vao gio dung so luong do.
+	 *
+	 * Cach nay khong phu thuoc vao Elasticsearch nen hoat dong ca khi cua hang chua
+	 * bat search service.
 	 */
-	private List<ReadableProduct> findMatchingProducts(MerchantStore store, Language language, Locale locale,
-			DetectedProduct detected) {
+	private List<Map<String, Object>> findMatchingProducts(MerchantStore store, Language language, Locale locale,
+			List<DetectedProduct> detectedList) {
 
-		List<ReadableProduct> results = new ArrayList<>();
-		if (detected == null || detected.getKeywords() == null || detected.getKeywords().isEmpty()) {
+		List<Map<String, Object>> results = new ArrayList<>();
+		if (detectedList == null || detectedList.isEmpty()) {
 			return results;
 		}
 
 		try {
-			// Tap tu khoa da chuan hoa (chu thuong, bo dau)
-			List<String> keywords = new ArrayList<>();
-			for (String keyword : detected.getKeywords()) {
-				String normalized = normalize(keyword);
-				if (normalized.length() >= 2 && !keywords.contains(normalized)) {
-					keywords.add(normalized);
-				}
-			}
-			String category = normalize(detected.getCategory());
-			String color = normalize(detected.getColor());
-
-			if (keywords.isEmpty() && category.isEmpty() && color.isEmpty()) {
-				return results;
-			}
-
 			List<Product> products = productService.listByStore(store);
 			if (products == null || products.isEmpty()) {
 				return results;
@@ -326,56 +361,91 @@ public class ProductImageSearchController {
 			populator.setPricingService(pricingService);
 			populator.setimageUtils(imageUtils);
 
-			// Cham diem tung san pham
-			List<ScoredProduct> scored = new ArrayList<>();
-			int scanned = 0;
-			for (Product product : products) {
-				if (scanned++ >= CATALOGUE_SCAN_LIMIT) {
-					break;
-				}
-				if (product == null || !product.isAvailable()) {
-					continue;
-				}
+			// id san pham da them vao ket qua: khong tra ve trung lap
+			Set<Long> addedIds = new java.util.HashSet<>();
 
-				String haystack = buildSearchText(product);
-				if (StringUtils.isBlank(haystack)) {
-					continue;
-				}
-
-				int score = 0;
-				for (String keyword : keywords) {
-					if (haystack.contains(keyword)) {
-						// tu khoa cang dai thi cang dang tin
-						score += Math.min(keyword.length(), 10);
-					}
-				}
-				if (!category.isEmpty() && haystack.contains(category)) {
-					score += 5;
-				}
-				if (!color.isEmpty() && haystack.contains(color)) {
-					score += 3;
-				}
-
-				if (score > 0) {
-					scored.add(new ScoredProduct(product, score));
-				}
-			}
-
-			// Diem cao truoc, gioi han so luong tra ve
-			scored.sort((a, b) -> Integer.compare(b.score, a.score));
-
-			for (ScoredProduct entry : scored) {
+			// Cham diem tung san pham AI nhan dien trong khung hinh
+			for (DetectedProduct detected : detectedList) {
 				if (results.size() >= MAX_RESULTS) {
 					break;
 				}
-				try {
-					ReadableProduct readable = populator.populate(entry.product, new ReadableProduct(), store,
-							language);
-					ensureProductImage(readable, entry.product, store);
-					results.add(readable);
-				} catch (Exception e) {
-					LOGGER.warn("Cannot populate product {} for image search", entry.product.getId(), e);
+
+				// Tap tu khoa da chuan hoa (chu thuong, bo dau)
+				List<String> keywords = new ArrayList<>();
+				if (detected.getKeywords() != null) {
+					for (String keyword : detected.getKeywords()) {
+						String normalized = normalize(keyword);
+						if (normalized.length() >= 2 && !keywords.contains(normalized)) {
+							keywords.add(normalized);
+						}
+					}
 				}
+				String category = normalize(detected.getCategory());
+				String color = normalize(detected.getColor());
+
+				if (keywords.isEmpty() && category.isEmpty() && color.isEmpty()) {
+					continue;
+				}
+
+				// Tim san pham khop tot nhat cho san pham AI nay
+				Product best = null;
+				int bestScore = 0;
+				int scanned = 0;
+				for (Product product : products) {
+					if (scanned++ >= CATALOGUE_SCAN_LIMIT) {
+						break;
+					}
+					if (product == null || !product.isAvailable()) {
+						continue;
+					}
+					if (product.getId() != null && addedIds.contains(product.getId())) {
+						continue;
+					}
+
+					String haystack = buildSearchText(product);
+					if (StringUtils.isBlank(haystack)) {
+						continue;
+					}
+
+					int score = 0;
+					for (String keyword : keywords) {
+						if (haystack.contains(keyword)) {
+							// tu khoa cang dai thi cang dang tin
+							score += Math.min(keyword.length(), 10);
+						}
+					}
+					if (!category.isEmpty() && haystack.contains(category)) {
+						score += 5;
+					}
+					if (!color.isEmpty() && haystack.contains(color)) {
+						score += 3;
+					}
+
+					if (score > bestScore) {
+						bestScore = score;
+						best = product;
+					}
+				}
+
+				if (best == null || best.getId() == null) {
+					continue;
+				}
+				addedIds.add(best.getId());
+
+				ReadableProduct readable;
+				try {
+					readable = populator.populate(best, new ReadableProduct(), store, language);
+					ensureProductImage(readable, best, store);
+				} catch (Exception e) {
+					LOGGER.warn("Cannot populate product {} for image search", best.getId(), e);
+					continue;
+				}
+
+				Map<String, Object> row = new java.util.LinkedHashMap<>();
+				row.put("product", readable);
+				// So luong ton kho dang co trong cua hang
+				row.put("quantity", resolveAvailableQuantity(best));
+				results.add(row);
 			}
 
 		} catch (Exception e) {
@@ -384,6 +454,24 @@ public class ProductImageSearchController {
 		}
 
 		return results;
+	}
+
+	/**
+	 * Tong so luong ton kho cua san pham trong cua hang (so luong tim duoc).
+	 * Neu khong dinh duoc thi tra ve 1 de co the them vao gio.
+	 */
+	private int resolveAvailableQuantity(Product product) {
+		int total = 0;
+		if (product.getAvailabilities() != null) {
+			for (com.salesmanager.core.model.catalog.product.availability.ProductAvailability availability : product
+					.getAvailabilities()) {
+				if (availability != null && availability.getProductQuantity() != null
+						&& availability.getProductQuantity().intValue() > 0) {
+					total += availability.getProductQuantity().intValue();
+				}
+			}
+		}
+		return total > 0 ? total : 1;
 	}
 
 	/**
@@ -420,16 +508,6 @@ public class ProductImageSearchController {
 			fallback.setImageUrl(imageUtils.buildProductImageUtils(store, product.getSku(), image.getProductImage()));
 			readable.setImage(fallback);
 			return;
-		}
-	}
-
-	private static class ScoredProduct {
-		private final Product product;
-		private final int score;
-
-		ScoredProduct(Product product, int score) {
-			this.product = product;
-			this.score = score;
 		}
 	}
 

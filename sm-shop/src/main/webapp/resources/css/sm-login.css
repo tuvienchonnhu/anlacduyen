@@ -630,6 +630,44 @@ li.header-camera-wrapper .product-camera-trigger {
 	white-space: nowrap;
 }
 
+/* --- O so luong tren moi dong ket qua ------------------------------------ */
+.product-camera-result-qty {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2px;
+}
+
+.product-camera-qty-label {
+	font-size: 11px;
+	color: #888;
+	white-space: nowrap;
+}
+
+.product-camera-qty-input {
+	width: 62px;
+	height: 32px;
+	padding: 0 6px;
+	text-align: center;
+	font-size: 13px;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+}
+
+@media (max-width: 560px) {
+	.product-camera-result {
+		flex-wrap: wrap;
+	}
+
+	.product-camera-result-qty {
+		flex-direction: row;
+		align-items: center;
+		gap: 6px;
+	}
+}
+
 .product-camera-result .product-camera-add:disabled {
 	opacity: .65;
 	cursor: default;

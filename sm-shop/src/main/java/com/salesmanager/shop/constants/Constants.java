@@ -4,6 +4,17 @@ public class Constants {
 	
 	public final static String DEFAULT_TEMPLATE = "december";
 	
+	/**
+	 * Ghi de template cho merchant store trong ADMIN_STORE cua session.
+	 *
+	 * Xem StoreFilter: ADMIN_STORE trong session duoc nap tu luc dang nhap nen
+	 * gia tri storeTemplate o do bi "dong bang", doi theme trong Admin roi ma
+	 * session van giu template cu. Khi doi template ta ghi vao attribute nay;
+	 * StoreFilter doc duoc thi thay the store trong session truoc khi tra ve
+	 * request nen theme moi co hieu luc ngay, khong phai restart ung dung.
+	 */
+	public final static String SESSION_STORE_TEMPLATE_OVERRIDE = "STORE_TEMPLATE_OVERRIDE";
+
 	public final static String SLASH = "/";
 	public final static String BLANK = "";
 	public final static String EQUALS = "=";
