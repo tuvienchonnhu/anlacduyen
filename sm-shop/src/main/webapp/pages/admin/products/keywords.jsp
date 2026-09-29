@@ -22,7 +22,39 @@
 					<s:message code="label.product.searchkeywords" text="Search keywords" />
 				</h3>
 				
-				
+								<%--
+					Nut sinh tu khoa bang AI.
+
+					AI doc TEN va MO TA san pham (theo ngon ngu dang chon o o Language ben
+					duoi), roi sinh tu khoa tim kiem phu hop cho TAT CA ngon ngu ma cua hang
+					dang ho tro. Ket qua duoc dien san vao o Keyword theo tung ngon ngu de
+					Admin xem lai, bam "Them" moi luu - AI khong tu ghi vao co so du lieu.
+
+					Cac nhan duoc truyen qua data-* thay vi nhung truc tiep vao JS, de ban
+					dich co dau nhay don (vd tieng Phap "n'est") khong lam vo cu phap.
+				--%>
+				<div class="control-group">
+					<div class="controls">
+						<button type="button" id="generate-keywords-ai" class="btn"
+							data-product-id="<c:out value="${product.id}" />"
+							data-url="<c:url value="/admin/products/product/generateKeywords.html" />"
+							data-msg-working="<s:message code='label.product.keyword.ai.working' text='AI is reading the product name and description, please wait 10-30 seconds...' />"
+							data-msg-success="<s:message code='label.product.keyword.ai.success' text='Keywords have been filled in for each language. Please review then press Add.' />"
+							data-msg-failed="<s:message code='label.product.keyword.ai.failed' text='Unable to generate keywords. Please try again.' />"
+							data-msg-nolang="<s:message code='label.product.keyword.ai.noLanguages' text='No supported language found for this store.' />">
+							<i class="fa fa-magic"></i>
+							<s:message code="button.label.generate_product_keywords_with_AI"
+								text="Add search keywords with AI" />
+						</button>
+						<span class="help-inline">
+							<s:message code="button.label.AI_Keywords_Description"
+								text="AI reads the product name and description and suggests search keywords for every supported language." />
+						</span>
+						<div id="keyword-ai-status" class="alert" style="display:none;margin-top:10px;"></div>
+					</div>
+				</div>
+
+
 			
 			<c:url var="addKeyword" value="/admin/products/product/addKeyword.html" />
 			<form:form method="POST" enctype="multipart/form-data" modelAttribute="productKeyword" action="${addKeyword}">
@@ -79,6 +111,7 @@
             	 <jsp:include page="/pages/admin/components/list.jsp"></jsp:include> 
 				 <!-- End listing grid include -->
 			
+				<script src="<c:url value="/resources/js/admin-product-keywords-ai.js" />" type="text/javascript"></script>
 
 		</div>
 	   </div>
