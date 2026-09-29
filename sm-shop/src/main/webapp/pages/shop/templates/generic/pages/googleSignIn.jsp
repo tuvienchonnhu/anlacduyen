@@ -1,4 +1,4 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+﻿<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 	<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 	<%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 
@@ -80,6 +80,5 @@
 					</div>
 
 					<script src="<c:url value="/resources/js/google-signin.js" />" type="text/javascript"></script>
-					<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 				</c:if>

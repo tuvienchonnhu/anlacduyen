@@ -1,16 +1,22 @@
 /**
- * Dang nhap bang Google su dung Google Identity Services (GIS) SDK.
+ * Nut "Dang nhap bang Google".
  *
- * SDK duoc Google tai bang <script src="https://accounts.google.com/gsi/client">
- * o cuoi trang. Callback onGoogleSignIn nhan ID token (credential) ma SDK tra ve
- * va gui len server de xac minh chu ky, audience, issuer truoc khi tao phien
- * dang nhap.
+ * Nut do trang tu ve (khong dung iframe cua Google) va khi bam se CHUYEN HUONG
+ * sang /shop/customer/google/login.html de bat dau luong OAuth authorization code.
+ * Toan bo viec doi code lay token, xac minh chu ky/audience/issuer va tao phien
+ * dang nhap deu do server xu ly (xem GoogleOAuthController).
  *
- * Cac tham so duoc JSP truyen vao qua window.shopizerGoogleSignIn:
- *   clientId   - Google Client ID cau hinh trong Admin > Configuration
- *   contextPath- context path cua ung dung
- *   redirect   - URL chuyen huong khi dang nhap thanh cong
- *   messages   - thong bao loi da ban dia hoa
+ * Vi sao khong dung popup cua GIS SDK (google.accounts.oauth2.initTokenClient):
+ *   - SDK la script ben thu ba (async defer) nen co the chua tai xong khi bam;
+ *   - neu popup mo ma nguoi dung dong lai, SDK khong goi callback nao -> trang thai
+ *     "dang xac minh" bi ket vinh vien;
+ *   - popup con bi chan boi trinh duyet/trinh chan quang cao.
+ *
+ * Cac tham so duoc JSP truyen vao qua thuoc tinh data-* cua #google-signin-config:
+ *   data-client-id   - Google Client ID cau hinh trong Admin > Configuration
+ *   data-context-path- context path cua ung dung
+ *   data-locale      - ma ngon ngu de hien thi (khong dung de ve nut)
+ *   data-msg-signin  - nhan tren nut, da ban dia hoa
  */
 (function (global) {
     'use strict';
@@ -76,54 +82,22 @@
 
     function setBusy(card, config, busy) {
         if (card) {
-            card.className = busy ? 'google-signin-card is-busy' : 'google-signin-card';
+            // Dung classList thay vi gan lai className: className = '...' se xoa het
+            // cac class khac cua the (ke ca class do template them vao), va lam mat
+            // trang thai busy cua khung khac khi nhieu khung cung ton tai tren trang.
+            if (busy) {
+                card.classList.add('is-busy');
+            } else {
+                card.classList.remove('is-busy');
+            }
         }
         var text = card && card.querySelector('.google-signin-status');
         if (text) {
-            text.textContent = busy ? (config.messages && config.messages.verifying) || '' : '';
+            var messages = (config && config.messages) || {};
+            text.textContent = busy ? (messages.verifying || '') : '';
             text.style.display = busy ? 'block' : 'none';
         }
     }
-
-    /**
-     * Gui ID token len server. Server tra JSON {success:true, redirect:...}
-     * hoac {success:false, message:...} (thong bao da ban dia hoa).
-     */
-    function sendCredentialToServer(card, config, idToken) {
-        setBusy(card, config, true);
-        showMessage(card, '');
-
-        var params = new URLSearchParams();
-        params.append('credential', idToken);
-
-        var request = new Request(config.contextPath + '/shop/customer/google/token.html', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            credentials: 'same-origin',
-            body: params.toString()
-        });
-
-        fetch(request)
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status);
-                }
-                return response.json();
-            })
-            		.then(function (data) {
-            			if (data && data.success) {
-            				global.location.href = data.redirect || config.redirect;
-            				return;
-            			}
-            			setBusy(card, config, false);
-            			showMessage(card, (data && data.message) || (config.messages && config.messages.failed));
-            		})
-            		.catch(function (error) {
-            			setBusy(card, config, false);
-            			log('unable to complete sign-in', error);
-            			showMessage(card, (config.messages && config.messages.failed) || '');
-            		});
-            }
 
             /**
              * Nut dang nhap Google do CHUNG TA tu ve, chu lay tu bundle theo ngon ngu
@@ -158,44 +132,26 @@
             	button.appendChild(label);
 
             	button.addEventListener('click', function () {
-            		if (!global.google || !global.google.accounts || !global.google.accounts.oauth2) {
-            			// SDK chua san sang: dua nguoi dung sang trang dang nhap day du.
-            			global.location.href = (config.contextPath || '') + '/shop/customer/customLogon.html';
-            			return;
-            		}
-
-            		setBusy(card, config, true);
-            		showMessage(card, '');
-
-            var client = global.google.accounts.oauth2.initTokenClient({
-                client_id: config.clientId,
-                scope: 'openid email profile',
-                callback: function (tokenResponse) {
-                    if (!tokenResponse || !tokenResponse.id_token) {
-                        setBusy(false);
-                        showMessage((config.messages && config.messages.failed) || '');
-                        return;
-                    }
-                    sendCredentialToServer(tokenResponse.id_token);
-                }
-            });
-            client.requestAccessToken();
-        });
+            	    //
+            	    // Chuyen huong sang /shop/customer/google/login.html de bat dau luong
+            	    // OAuth authorization code, giong het nut Facebook.
+            	    //
+            	    // Vi sao khong dung popup cua google.accounts.oauth2 (initTokenClient):
+            	    //   - SDK la script ben thu ba (async defer) nen co the chua tai xong;
+            	    //   - neu popup mo ma nguoi dung dong lai, SDK khong goi callback nao
+            	    //     -> trang thai "dang xac minh" bi ket vinh vien;
+            	    //   - popup con bi chan boi trinh duyet/trinh chan quang cao.
+            	    //
+            	    // Luong chuyen huong khong phu thuoc SDK phia client, server tu doi
+            	    // code lay token va xac minh, nguoi dung chi thay trang Google roi
+            	    // quay lai dashboard.
+            	    //
+            	    var loginUrl = (config.contextPath || '') + '/shop/customer/google/login.html';
+            	    global.location.href = loginUrl;
+            	});
 
         container.appendChild(button);
     }
-
-    global.onGoogleSignIn = function (response) {
-        if (!response || !response.credential) {
-            log('no credential returned by Google Identity Services');
-            return;
-        }
-        var cards = findCards();
-        if (cards && cards.length > 0) {
-            var card = cards[0];
-            sendCredentialToServer(card, readConfigFrom(card), response.credential);
-        }
-    };
 
     /**
      * Khoi tao nut dang nhap Google tren TAT CA cac khung co tren trang.
@@ -206,8 +162,9 @@
      *     van hien chu cua ngon ngu cu (trang tieng Phap nhung nut ghi tieng Viet);
      *   - Google Identity Services khong ho tro ma ngon ngu "vi".
      *
-     * SDK chi con dung de lay ID token qua OAuth popup (google.accounts.oauth2),
-     * duoc goi khi nguoi dung bam nut.
+     * Khi bam, nut chuyen huong sang /shop/customer/google/login.html; toan bo
+     * luong OAuth (doi code lay token, xac minh, dang nhap) do server xu ly nen
+     * khong phu thuoc SDK phia client.
      */
     global.shopizerInitGoogleSignIn = function () {
         var cards = findCards();
