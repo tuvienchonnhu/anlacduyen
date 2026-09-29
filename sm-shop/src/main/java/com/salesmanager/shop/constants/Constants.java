@@ -149,6 +149,13 @@ public class Constants {
 	public final static String KEY_GOOGLE_CLIENT_ID = "GOOGLE_CLIENT_ID";
 	public final static String KEY_GOOGLE_CLIENT_SECRET = "GOOGLE_CLIENT_SECRET";
 
+	/*
+	 * Facebook Login (Admin > Configuration > Login Configuration).
+	 * App ID / App Secret lay tu Facebook Developers > App > Settings > Basic.
+	 */
+	public final static String KEY_FACEBOOK_APP_ID = "FACEBOOK_APP_ID";
+	public final static String KEY_FACEBOOK_APP_SECRET = "FACEBOOK_APP_SECRET";
+
 	public final static String KEY_SESSION_ADDRESS = "readableDelivery";
 
 	public final static String CATEGORY_LINEAGE_DELIMITER = "/";

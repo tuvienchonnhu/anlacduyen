@@ -51,6 +51,24 @@ response.setDateHeader ("Expires", -1);
 			</script>
 </script>
 
+<%--
+	Vung chua nut "Dang nhap bang Google" va "Dang nhap bang Facebook" de
+	shop-account.js chen vao menu tai khoan o header.
+
+	Ly do phai lam giau: menu tai khoan nam trong the <script type="text/html">
+	cua Hogan (Hogan compile roi render bang JavaScript), nen KHONG the dat
+	jsp:include truc tiep trong do - fragment chua <script> that se bi Hogan tra ve
+	nhu van ban tho va lam vo ca khoi.
+
+	Cach lam: render fragment vao vung an nay (JSP chay binh thuong), sau do
+	shop-account.js chuyen noi dung vao dung menu. Vung an co display:none nen
+	khong hien thi o dau ngoai menu.
+--%>
+<div id="header-social-signin" class="header-social-signin" style="display:none;">
+	<jsp:include page="/pages/shop/templates/december/pages/googleSignIn.jsp" />
+	<jsp:include page="/pages/shop/templates/december/pages/facebookSignIn.jsp" />
+</div>
+
 <!-- Mini shopping cart JS template -->
 <script type="text/html" id="miniCartTemplate">
 

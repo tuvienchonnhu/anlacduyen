@@ -112,6 +112,8 @@ response.setDateHeader ("Expires", -1);
 									
 								</form>
 								<jsp:include page="/pages/shop/templates/bootstrap/pages/googleSignIn.jsp" />
+								<!-- Nut dang nhap bang Facebook: nam ngay duoi nut Google -->
+								<jsp:include page="/pages/shop/templates/bootstrap/pages/facebookSignIn.jsp" />
 								<a onClick="javascript:location.href='<c:url value="/shop/customer/registration.html" />';" href="" role="button" class="" data-toggle="modal"><s:message code="label.register.notyetregistered" text="Not yet registered ?" /></a>
 							</div>
 					  </li>

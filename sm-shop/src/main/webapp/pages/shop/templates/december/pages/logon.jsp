@@ -42,6 +42,8 @@ response.setDateHeader ("Expires", -1);
 								<!-- Nut dang nhap bang Google: fragment tu kiem tra cau hinh (model hoac CONFIGS) nen
 								     khong can boc trong c:if googleLoginEnabled - tranh truong hop header/doi ngon ngu khong co model -->
 								<jsp:include page="googleSignIn.jsp" />
+								<!-- Nut dang nhap bang Facebook: nam ngay duoi nut Google -->
+								<jsp:include page="facebookSignIn.jsp" />
 
 							</div>
 

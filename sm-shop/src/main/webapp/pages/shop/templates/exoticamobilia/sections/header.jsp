@@ -304,6 +304,8 @@ $(document).ready(function() {
                                                 </form>
                                                 <!-- Nut dang nhap bang Google: JSP fragment nam TRONG #signinPane -->
                                                 <jsp:include page="/pages/shop/templates/exoticamobilia/pages/googleSignIn.jsp" />
+                                                <!-- Nut dang nhap bang Facebook: nam ngay duoi nut Google -->
+                                                <jsp:include page="/pages/shop/templates/exoticamobilia/pages/facebookSignIn.jsp" />
                                                 <a id="registerLink" onClick="javascript:location.href='<c:url value="/shop/customer/registration.html" />';" href="" role="button" data-toggle="modal"><s:message code="label.register.notyetregistered" text="Not yet registered ?" /></a>
                                             </li>
                                         </ul>

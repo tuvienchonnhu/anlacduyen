@@ -40,7 +40,9 @@ response.setDateHeader ("Expires", -1);
 								</form>
 
 								<jsp:include page="googleSignIn.jsp" />
-					
+													<!-- Nut dang nhap bang Facebook: nam ngay duoi nut Google -->
+								<jsp:include page="facebookSignIn.jsp" />
+
 							</div>
 
 <%-- 							<a href="#" class="back"><s:message code="button.label.forgotpassword" text="Forgot Password ?" /></a>

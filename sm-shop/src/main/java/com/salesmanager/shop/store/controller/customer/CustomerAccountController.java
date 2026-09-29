@@ -122,6 +122,9 @@ public class CustomerAccountController extends AbstractController {
     @Inject
     private GoogleOAuthService googleOAuthService;
 
+    @Inject
+    private FacebookOAuthService facebookOAuthService;
+
     /**
      * Dua cau hinh Google (Client ID + ma ngon ngu) vao model de fragment
      * googleSignIn.jsp hien thi nut dang nhap bang GIS SDK.
@@ -130,6 +133,16 @@ public class CustomerAccountController extends AbstractController {
         model.addAttribute("googleLoginEnabled", googleOAuthService.isConfigured(store));
         model.addAttribute("googleClientId", googleOAuthService.getClientId(store));
         model.addAttribute("googleLocale", resolveGoogleLocale());
+    }
+
+    /**
+     * Dua cau hinh Facebook (App ID + ma ngon ngu) vao model de fragment
+     * facebookSignIn.jsp hien thi nut dang nhap.
+     */
+    public void setFacebookLoginAttributes(Model model, MerchantStore store) {
+        model.addAttribute("facebookLoginEnabled", facebookOAuthService.isConfigured(store));
+        model.addAttribute("facebookAppId", facebookOAuthService.getAppId(store));
+        model.addAttribute("facebookLocale", resolveFacebookLocale());
     }
 
     /**
@@ -146,6 +159,25 @@ public class CustomerAccountController extends AbstractController {
             LOGGER.debug("Cannot resolve locale for Google sign-in button", e);
         }
         return "en";
+    }
+
+    /**
+     * Lay ma ngon ngu kieu Facebook (dang "vi_VN", "fr_FR") tu locale hien tai.
+     * Mac dinh la "en_US" neu chua xac dinh duoc.
+     */
+    private String resolveFacebookLocale() {
+        try {
+            Locale locale = LocaleContextHolder.getLocale();
+            if (locale != null && StringUtils.isNotBlank(locale.getLanguage())) {
+                String language = locale.getLanguage();
+                String country = StringUtils.isNotBlank(locale.getCountry()) ? locale.getCountry()
+                        : language.toUpperCase(Locale.ROOT);
+                return language + "_" + country;
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Cannot resolve locale for Facebook sign-in button", e);
+        }
+        return "en_US";
     }
 
     @Inject
@@ -174,6 +206,7 @@ public class CustomerAccountController extends AbstractController {
 	    MerchantStore store = getSessionAttribute(Constants.MERCHANT_STORE, request);
 
 		this.setGoogleLoginAttributes(model, store);
+		this.setFacebookLoginAttributes(model, store);
 		//dispatch to dedicated customer logon
 		
 		/** template **/

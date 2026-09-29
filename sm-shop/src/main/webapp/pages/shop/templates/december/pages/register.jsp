@@ -214,6 +214,8 @@ function checkEmailExists() {
 
 								<!-- Nut dang nhap bang Google: fragment tu kiem tra cau hinh nen khong can boc trong c:if -->
 								<jsp:include page="googleSignIn.jsp" />
+								<!-- Nut dang nhap bang Facebook: nam ngay duoi nut Google -->
+								<jsp:include page="facebookSignIn.jsp" />
 							</div>
 						</div>
 						<div class="col-lg-6 col-md-6 col-sm-4 hidden-xs">

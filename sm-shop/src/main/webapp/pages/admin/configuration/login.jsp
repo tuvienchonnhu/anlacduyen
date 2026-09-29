@@ -52,6 +52,11 @@
 													text="Authorized redirect URI to declare in Google Console: {0}"
 													arguments="${loginCallbackUrl}" />
 											</p>
+											<p class="help-block">
+												<s:message code="label.configuration.login.facebook.callback.hint"
+													text="Valid OAuth Redirect URI to declare in Facebook Console: {0}"
+													arguments="${facebookCallbackUrl}" />
+											</p>
 										</div>
 
 										<div class="form-actions">

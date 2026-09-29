@@ -16,14 +16,16 @@
     'use strict';
 
     /**
-     * Cau hinh duoc JSP ghi vao cac thuoc tinh data-* cua #google-signin-config.
+     * Doc cau hinh cho MOT fragment cu the (moi fragment co #google-signin-config rieng).
      *
      * Doc bang getAttribute nen moi ky tu trong ban dich (dau nhay don, dau
      * ngoac kep...) deu nguyen ven - khong con rui ro lam vo cu phap JavaScript
      * nhu khi nhung truc tiep vao mot doi tuong JS.
      */
-    function readConfig() {
-        var el = document.getElementById('google-signin-config');
+    function readConfigFrom(root) {
+        var el = root.querySelector('#google-signin-config')
+            || root.closest('.google-signin-wrapper')
+            || document.getElementById('google-signin-config');
         if (!el) {
             return {};
         }
@@ -41,8 +43,16 @@
         };
     }
 
-    var config = readConfig();
-    var card = document.getElementById('google-signin-card');
+    /**
+     * Danh sach cac khung nut Google tren trang.
+     *
+     * Fragment duoc nhung o NHIEU noi (dropdown o header, trang logon, trang
+     * register...), nen phai xu ly TAT CA chu khong chi phan tu dau tien - neu
+     * chi lay mot phan tu thi nut o cac khung con lai se trong.
+     */
+    function findCards() {
+        return document.querySelectorAll('#google-signin-card');
+    }
 
     function log(message, error) {
         if (error && global.console && global.console.error) {
@@ -52,7 +62,7 @@
         }
     }
 
-    function showMessage(message) {
+    function showMessage(card, message) {
         if (!card) {
             return;
         }
@@ -64,7 +74,7 @@
         text.style.display = message ? 'block' : 'none';
     }
 
-    function setBusy(busy) {
+    function setBusy(card, config, busy) {
         if (card) {
             card.className = busy ? 'google-signin-card is-busy' : 'google-signin-card';
         }
@@ -79,9 +89,9 @@
      * Gui ID token len server. Server tra JSON {success:true, redirect:...}
      * hoac {success:false, message:...} (thong bao da ban dia hoa).
      */
-    function sendCredentialToServer(idToken) {
-        setBusy(true);
-        showMessage('');
+    function sendCredentialToServer(card, config, idToken) {
+        setBusy(card, config, true);
+        showMessage(card, '');
 
         var params = new URLSearchParams();
         params.append('credential', idToken);
@@ -100,62 +110,62 @@
                 }
                 return response.json();
             })
-            .then(function (data) {
-                if (data && data.success) {
-                    global.location.href = data.redirect || config.redirect;
-                    return;
-                }
-                setBusy(false);
-                showMessage((data && data.message) || (config.messages && config.messages.failed));
-            })
-            .catch(function (error) {
-                setBusy(false);
-                log('unable to complete sign-in', error);
-                showMessage((config.messages && config.messages.failed) || '');
-            });
-    }
-
-    /**
-     * Nut dang nhap Google do CHUNG TA tu ve, chu lay tu bundle theo ngon ngu
-     * dang chon.
-     *
-     * Ly do khong dung iframe cua google.accounts.id.renderButton():
-     * Google cache noi dung nut theo client_id, nen sau khi nguoi dung doi ngon
-     * ngu, iframe van hien chu cua ngon ngu truoc do (thuc te: da gap truong hop
-     * trang tieng Phap nhung nut van ghi "Dang nhap bang Google").
-     *
-     * Doc chu tu data-msg-signin nen nut luon dung ngon ngu cua trang.
-     */
-    function buildSignInButton() {
-        if (!card || card.querySelector('.google-signin-fallback')) {
-            return;
-        }
-        var container = card.querySelector('.google-signin-button');
-        if (!container) {
-            return;
-        }
-
-        var button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'google-signin-fallback';
-
-        button.textContent = '';
-        var icon = document.createElement('i');
-        icon.className = 'fa fa-google';
-        button.appendChild(icon);
-        var label = document.createElement('span');
-        label.textContent = (config.messages && config.messages.signin) || 'Sign in with Google';
-        button.appendChild(label);
-
-        button.addEventListener('click', function () {
-            if (!global.google || !global.google.accounts || !global.google.accounts.oauth2) {
-                // SDK chua san sang: dua nguoi dung sang trang dang nhap day du.
-                global.location.href = (config.contextPath || '') + '/shop/customer/customLogon.html';
-                return;
+            		.then(function (data) {
+            			if (data && data.success) {
+            				global.location.href = data.redirect || config.redirect;
+            				return;
+            			}
+            			setBusy(card, config, false);
+            			showMessage(card, (data && data.message) || (config.messages && config.messages.failed));
+            		})
+            		.catch(function (error) {
+            			setBusy(card, config, false);
+            			log('unable to complete sign-in', error);
+            			showMessage(card, (config.messages && config.messages.failed) || '');
+            		});
             }
 
-            setBusy(true);
-            showMessage('');
+            /**
+             * Nut dang nhap Google do CHUNG TA tu ve, chu lay tu bundle theo ngon ngu
+             * dang chon.
+             *
+             * Ly do khong dung iframe cua google.accounts.id.renderButton():
+             * Google cache noi dung nut theo client_id, nen sau khi nguoi dung doi ngon
+             * ngu, iframe van hien chu cua ngon ngu truoc do (thuc te: da gap truong hop
+             * trang tieng Phap nhung nut van ghi "Dang nhap bang Google").
+             *
+             * Doc chu tu data-msg-signin nen nut luon dung ngon ngu cua trang.
+             */
+            function buildSignInButton(card, config) {
+            	if (!card || card.querySelector('.google-signin-fallback')) {
+            		return;
+            	}
+            	var container = card.querySelector('.google-signin-button');
+            	if (!container) {
+            		return;
+            	}
+
+            	var button = document.createElement('button');
+            	button.type = 'button';
+            	button.className = 'google-signin-fallback';
+
+            	button.textContent = '';
+            	var icon = document.createElement('i');
+            	icon.className = 'fa fa-google';
+            	button.appendChild(icon);
+            	var label = document.createElement('span');
+            	label.textContent = (config.messages && config.messages.signin) || 'Sign in with Google';
+            	button.appendChild(label);
+
+            	button.addEventListener('click', function () {
+            		if (!global.google || !global.google.accounts || !global.google.accounts.oauth2) {
+            			// SDK chua san sang: dua nguoi dung sang trang dang nhap day du.
+            			global.location.href = (config.contextPath || '') + '/shop/customer/customLogon.html';
+            			return;
+            		}
+
+            		setBusy(card, config, true);
+            		showMessage(card, '');
 
             var client = global.google.accounts.oauth2.initTokenClient({
                 client_id: config.clientId,
@@ -178,14 +188,17 @@
     global.onGoogleSignIn = function (response) {
         if (!response || !response.credential) {
             log('no credential returned by Google Identity Services');
-            showMessage((config.messages && config.messages.failed) || '');
             return;
         }
-        sendCredentialToServer(response.credential);
+        var cards = findCards();
+        if (cards && cards.length > 0) {
+            var card = cards[0];
+            sendCredentialToServer(card, readConfigFrom(card), response.credential);
+        }
     };
 
     /**
-     * Khoi tao nut dang nhap Google.
+     * Khoi tao nut dang nhap Google tren TAT CA cac khung co tren trang.
      *
      * Nut do trang tu ve (buildSignInButton) de chu luon lay tu bundle theo ngon
      * ngu dang chon. Khong dung iframe cua google.accounts.id.renderButton() vi:
@@ -197,33 +210,32 @@
      * duoc goi khi nguoi dung bam nut.
      */
     global.shopizerInitGoogleSignIn = function () {
-        config = readConfig();
-
-        if (!card) {
-            // Truong hop nut Google nam trong dropdown duoc render bang JSP sau khi
-            // thay noi dung khung dang nhap -> tim lai phan tu.
-            card = document.getElementById('google-signin-card');
-        }
-        if (!card) {
+        var cards = findCards();
+        if (!cards || cards.length === 0) {
             return;
         }
 
-        if (!config.clientId) {
-            log('client id is not configured');
-            showMessage((config.messages && config.messages.notConfigured) || '');
-            return;
-        }
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            var config = readConfigFrom(card);
 
-        // Luon ve lai nut de chu khop ngon ngu hien tai.
-        var container = card.querySelector('.google-signin-button');
-        if (container) {
-            container.innerHTML = '';
+            if (!config.clientId) {
+                log('client id is not configured');
+                showMessage(card, (config.messages && config.messages.notConfigured) || '');
+                continue;
+            }
+
+            // Luon ve lai nut de chu khop ngon ngu hien tai.
+            var container = card.querySelector('.google-signin-button');
+            if (container) {
+                container.innerHTML = '';
+            }
+            var existing = card.querySelector('.google-signin-fallback');
+            if (existing && existing.parentNode) {
+                existing.parentNode.removeChild(existing);
+            }
+            buildSignInButton(card, config);
         }
-        var existing = card.querySelector('.google-signin-fallback');
-        if (existing && existing.parentNode) {
-            existing.parentNode.removeChild(existing);
-        }
-        buildSignInButton();
     };
 
     /**

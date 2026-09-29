@@ -87,6 +87,67 @@
 	color: #4285f4;
 }
 
+/* ---------------------------------------------------------------------------
+ * 1b. Nut Facebook (nam ngay duoi nut Google)
+ *
+ * Cung cach lam voi nut Google: nut do trang tu ve, chu lay tu bundle theo ngon
+ * ngu dang chon. Khong dung iframe cua Facebook de tranh phu thuoc cache.
+ * ------------------------------------------------------------------------ */
+.facebook-signin-wrapper {
+	margin-top: 10px;
+	clear: both;
+}
+
+.facebook-signin-card {
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+
+.facebook-signin-card .facebook-signin-button {
+	display: block;
+	width: 100%;
+	max-width: 320px;
+	min-height: 44px;
+	margin: 0 auto;
+}
+
+.facebook-signin-fallback {
+	display: block;
+	width: 100%;
+	max-width: 320px;
+	margin: 0 auto;
+	padding: 10px 16px;
+	background: #1877f2;
+	border: 1px solid #1877f2;
+	border-radius: 4px;
+	color: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.4;
+	text-align: center;
+	cursor: pointer;
+}
+
+.facebook-signin-fallback:hover,
+.facebook-signin-fallback:focus {
+	background: #166fe5;
+	border-color: #166fe5;
+}
+
+.facebook-signin-fallback .fa {
+	margin-right: 8px;
+	color: #fff;
+}
+
+.facebook-signin-hint {
+	margin: 10px 0 0;
+	color: #888;
+	font-size: 12px;
+	line-height: 1.4;
+	text-align: center;
+}
+
 .google-signin-hint {
 	margin: 10px 0 0;
 	color: #888;
@@ -221,34 +282,60 @@
 	font-size: 11px;
 }
 
-/*
- * Nut Google nam trong menu tai khoan o header cua template december.
- * Menu nay rong 150px nen phai cho khung rong ra de nut Google hien du chu.
- */
-.google-signin-in-account-menu {
-	padding: 10px 12px 12px;
-	border-top: 1px solid rgba(0, 0, 0, .1);
+#signinPane .facebook-signin-card .facebook-signin-button,
+#signinPane .facebook-signin-fallback {
+	width: 100% !important;
+	max-width: 100% !important;
 }
 
-.google-signin-in-account-menu .google-signin-wrapper {
+#signinPane .facebook-signin-hint {
+	font-size: 11px;
+	line-height: 1.4;
+	margin-top: 8px;
+}
+
+/*
+ * Nut Google/Facebook nam trong menu tai khoan o header cua template december.
+ *
+ * Menu nay rong 150px nen phai cho khung rong ra de nut hien du chu. Block duoc
+ * shop-account.js chuyen tu #header-social-signin vao cuoi menu (xem file do).
+ */
+.header-social-signin {
+	padding: 10px 12px 12px;
+	border-top: 1px solid rgba(0, 0, 0, .1);
+	list-style: none;
+}
+
+.header-social-signin .google-signin-wrapper,
+.header-social-signin .facebook-signin-wrapper {
 	margin-top: 0;
 	padding-top: 0;
 	border-top: 0;
 }
 
-.google-signin-in-account-menu .google-signin-divider,
-.google-signin-in-account-menu .google-signin-hint,
-.google-signin-in-account-menu .google-signin-status,
-.google-signin-in-account-menu .google-signin-error {
-	font-size: 11px;
-	text-transform: none;
-	letter-spacing: normal;
+.header-social-signin .google-signin-wrapper ~ .facebook-signin-wrapper {
+	margin-top: 8px;
 }
 
-.google-signin-in-account-menu .google-signin-card .google-signin-button,
-.google-signin-in-account-menu .google-signin-fallback {
-	width: 240px;
+.header-social-signin .google-signin-divider {
+	display: none;
+}
+
+.header-social-signin .google-signin-hint,
+.header-social-signin .google-signin-status,
+.header-social-signin .google-signin-error,
+.header-social-signin .facebook-signin-hint {
+	display: none;
+}
+
+.header-social-signin .google-signin-card .google-signin-button,
+.header-social-signin .google-signin-fallback,
+.header-social-signin .facebook-signin-card .facebook-signin-button,
+.header-social-signin .facebook-signin-fallback {
+	width: 100%;
 	max-width: 100%;
+	font-size: 12px;
+	padding: 8px 10px;
 }
 
 /* link "Chua co tai khoan?" */

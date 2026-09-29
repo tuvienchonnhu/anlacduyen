@@ -228,9 +228,9 @@ public class ConfigurationController {
 
 	/**
 	 * Hien thi trang cau hinh dang nhap (Admin > Configuration > Login
-	 * Configuration). Cac key o day (Google Client ID / Client Secret) duoc
-	 * GoogleOAuthService doc de cho phep khach hang dang nhap bang tai khoan
-	 * Google.
+	 * Configuration). Cac key o day (Google Client ID / Client Secret,
+	 * Facebook App ID / App Secret) duoc GoogleOAuthService va FacebookOAuthService
+	 * doc de cho phep khach hang dang nhap bang tai khoan mang xa hoi.
 	 */
 	@PreAuthorize("hasRole('AUTH')")
 	@RequestMapping(value="/admin/configuration/login.html", method=RequestMethod.GET)
@@ -241,11 +241,14 @@ public class ConfigurationController {
 	List<MerchantConfiguration> configs = new ArrayList<MerchantConfiguration>();
 	configs.add(aiConfig(Constants.KEY_GOOGLE_CLIENT_ID, store));
 	configs.add(aiConfig(Constants.KEY_GOOGLE_CLIENT_SECRET, store));
+	configs.add(aiConfig(Constants.KEY_FACEBOOK_APP_ID, store));
+	configs.add(aiConfig(Constants.KEY_FACEBOOK_APP_SECRET, store));
 
 	ConfigListWrapper configWrapper = new ConfigListWrapper();
 	configWrapper.setMerchantConfigs(configs);
 	model.addAttribute("configuration",configWrapper);
 	model.addAttribute("loginCallbackUrl", buildGoogleCallbackUrl(request));
+	model.addAttribute("facebookCallbackUrl", buildFacebookCallbackUrl(request));
 
 	return com.salesmanager.shop.admin.controller.ControllerConstants.Tiles.Configuration.login;
 	}
@@ -286,6 +289,14 @@ public class ConfigurationController {
 	private String buildGoogleCallbackUrl(HttpServletRequest request) {
 	return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
 	+ request.getContextPath() + "/shop/customer/google/callback.html";
+	}
+
+	/**
+	 * URL callback phai khai bao trong Facebook Console (Valid OAuth Redirect URIs).
+	 */
+	private String buildFacebookCallbackUrl(HttpServletRequest request) {
+	return request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+	+ request.getContextPath() + "/shop/customer/facebook/callback.html";
 	}
 
 	@PreAuthorize("hasRole('AUTH')")
