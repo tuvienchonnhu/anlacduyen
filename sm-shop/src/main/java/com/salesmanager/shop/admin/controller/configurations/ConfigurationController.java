@@ -117,6 +117,12 @@ public class ConfigurationController {
 		}
 		configs.add(twitterConfiguration);
 		
+		// Sapo integration (dong bo san pham theo thoi gian thuc)
+		configs.add(aiConfig("SAPO_STORE_DOMAIN", store));
+		configs.add(aiConfig(Constants.KEY_SAPO_API_KEY, store));
+		configs.add(aiConfig(Constants.KEY_SAPO_API_SECRET, store));
+		configs.add(aiConfig("SAPO_WEBHOOK_SECRET", store));
+
 		ConfigListWrapper configWrapper = new ConfigListWrapper();
 		configWrapper.setMerchantConfigs(configs);
 		model.addAttribute("configuration",configWrapper);
@@ -135,8 +141,12 @@ public class ConfigurationController {
 		{
 					mConfigs.setMerchantStore(store);
 				if(!StringUtils.isBlank(mConfigs.getValue())) {
-				// Tab Accounts chi con cac key SOCIAL (Facebook, Instagram, ...)
-				mConfigs.setMerchantConfigurationType(MerchantConfigurationType.SOCIAL);
+				// Cac key SAPO phai duoc luu voi type CONFIG de SapoProductSyncService doc dung
+				if (mConfigs.getKey() != null && mConfigs.getKey().startsWith("SAPO_")) {
+					mConfigs.setMerchantConfigurationType(MerchantConfigurationType.CONFIG);
+				} else {
+					mConfigs.setMerchantConfigurationType(MerchantConfigurationType.SOCIAL);
+				}
 				merchantConfigurationService.saveOrUpdate(mConfigs);
 			} else {//remove if submited blank and exists
 				MerchantConfiguration config = merchantConfigurationService.getMerchantConfiguration(mConfigs.getKey(), store);

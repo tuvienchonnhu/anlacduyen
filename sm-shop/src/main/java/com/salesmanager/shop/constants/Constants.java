@@ -156,6 +156,15 @@ public class Constants {
 	public final static String KEY_FACEBOOK_APP_ID = "FACEBOOK_APP_ID";
 	public final static String KEY_FACEBOOK_APP_SECRET = "FACEBOOK_APP_SECRET";
 
+	/*
+	 * Sapo integration (Admin > Configuration > Accounts Configuration).
+	 * Key API + Secret API cua Private App, xac thuc bang Basic Auth:
+	 *   Authorization: Basic base64(key:secret)
+	 */
+	public final static String KEY_SAPO_API_KEY = "SAPO_API_KEY";
+	public final static String KEY_SAPO_API_SECRET = "SAPO_API_SECRET";
+	public final static String KEY_SAPO_WEBHOOK_SECRET = "SAPO_WEBHOOK_SECRET";
+
 	public final static String KEY_SESSION_ADDRESS = "readableDelivery";
 
 	public final static String CATEGORY_LINEAGE_DELIMITER = "/";
