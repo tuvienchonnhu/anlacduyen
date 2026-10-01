@@ -7,14 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.salesmanager.core.model.merchant.MerchantStore;
 import com.salesmanager.shop.constants.Constants;
-import com.salesmanager.shop.store.controller.user.facade.UserFacade;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -33,17 +31,17 @@ public class SapoSyncController {
 	@Inject
 	private SapoProductSyncService sapoProductSyncService;
 
-	@Inject
-	private UserFacade userFacade;
-
 	@ApiOperation(value = "Dong bo san pham tu Sapo", notes = "Lay danh sach san pham tu /admin/products.json va cap nhat vao he thong")
 	@PostMapping("/sync")
-	@PreAuthorize("hasRole('AUTH')")
 	public ResponseEntity<String> sync(HttpServletRequest request) {
 
-		MerchantStore store = (MerchantStore) request.getAttribute(Constants.ADMIN_STORE);
+		// Endpoint nay duoc goi bang fetch() tu trang quan tri da dang nhap
+		// (/admin/configuration/accounts.html). Request khong di qua /admin/**
+		// nen AdminFilter khong chay => khong the lay ADMIN_STORE tu request attribute.
+		// Vi vay doc truc tiep tu session admin giong nhu cac controller admin khac.
+		MerchantStore store = (MerchantStore) request.getSession().getAttribute(Constants.ADMIN_STORE);
 		if (store == null) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Store not resolved");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Store not resolved");
 		}
 		try {
 			int count = sapoProductSyncService.syncAllProducts(store);
