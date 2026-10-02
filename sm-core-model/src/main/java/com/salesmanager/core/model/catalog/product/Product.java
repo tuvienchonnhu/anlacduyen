@@ -172,24 +172,31 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	@Column(name = "REF_SKU")
 	private String refSku;
 	
+	/**
+	 * ID san pham tren Sapo, dung lam khoa doi chieu khi dong bo hai chieu.
+	 * Giu nguyen SKU inner cua Shopizer khi du lieu Sapo thay doi.
+	 */
+	@Column(name = "SAPO_PRODUCT_ID")
+	private Long sapoProductId;
+
 	@Column(name="COND", nullable = true)
 	private ProductCondition condition;
-	
+
 	/**
 	 * RENTAL ADDITIONAL FIELDS
 	 */
 
 	@Column(name="RENTAL_STATUS", nullable = true)
 	private RentalStatus rentalStatus;
-	
+
 
 	@Column(name="RENTAL_DURATION", nullable = true)
 	private Integer rentalDuration;
-	
+
 	@Column(name="RENTAL_PERIOD", nullable = true)
 	private Integer rentalPeriod;
 
-	
+
 	public Integer getRentalPeriod() {
 		return rentalPeriod;
 	}
@@ -209,7 +216,7 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	/**
 	 * End rental fields
 	 */
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="CUSTOMER_ID", nullable=true)
 	private Customer owner;
@@ -441,7 +448,7 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 	public boolean isAvailable() {
 		return available;
 	}
-	
+
 	public boolean isProductShipeable() {
 		return productShipeable;
 	}
@@ -450,14 +457,14 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 		this.productShipeable = productShipeable;
 	}
 
-	
+
 	public ProductDescription getProductDescription() {
 		if(this.getDescriptions()!=null && this.getDescriptions().size()>0) {
 			return this.getDescriptions().iterator().next();
 		}
 		return null;
 	}
-	
+
 	public ProductImage getProductImage() {
 		ProductImage productImage = null;
 		if(this.getImages()!=null && this.getImages().size()>0) {
@@ -470,7 +477,7 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 		}
 		return productImage;
 	}
-	
+
 	public boolean isPreOrder() {
 		return preOrder;
 	}
@@ -485,6 +492,14 @@ public class Product extends SalesManagerEntity<Long, Product> implements Audita
 
 	public void setRefSku(String refSku) {
 		this.refSku = refSku;
+	}
+
+	public Long getSapoProductId() {
+		return sapoProductId;
+	}
+
+	public void setSapoProductId(Long sapoProductId) {
+		this.sapoProductId = sapoProductId;
 	}
 
 	public ProductCondition getCondition() {

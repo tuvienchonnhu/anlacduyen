@@ -19,6 +19,9 @@ public class SapoProductDto {
 	private String name;
 	private String title;
 	private String handle;
+	/** Sapo dung "alias" cho duong dan than thien (khong dung "handle") */
+	@JsonProperty("alias")
+	private String alias;
 	/** SKU cua san pham goc trong Sapo */
 	private String sku;
 	/** Ma san pham tham chieu (product code tren he thong Sapo) */
@@ -66,6 +69,14 @@ public class SapoProductDto {
 
 	public void setHandle(String handle) {
 		this.handle = handle;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
 	}
 
 	public String getSku() {

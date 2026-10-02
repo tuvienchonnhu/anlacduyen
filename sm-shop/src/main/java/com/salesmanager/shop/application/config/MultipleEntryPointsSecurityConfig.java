@@ -372,6 +372,44 @@ public class MultipleEntryPointsSecurityConfig {
 
 
 	/**
+	 * Sapo integration api.
+	 *
+	 * - /api/v1/sapo/webhooks/** : PUBLIC, Sapo goi vao. Xac thuc bang chu ky
+	 *   HMAC-SHA256 (X-Sapo-Hmac-SHA256) chu khong bang phien dang nhap.
+	 * - /api/v1/sapo/** (sync, sync-categories) : duoc goi bang fetch() tu trang
+	 *   quan tri da dang nhap nen yeu cau phien admin (hasRole("AUTH")).
+	 *
+	 * Khong the dung API_VERSION ("/api/v*") vi Spring AntPathMatcher khong khop
+	 * "v1" voi mau "v*".
+	 */
+	@Configuration
+	@Order(7)
+	public static class SapoApiConfigurationAdapter extends WebSecurityConfigurerAdapter {
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			http
+				.antMatcher("/api/v1/sapo/**")
+				.csrf().disable()
+				.authorizeRequests()
+				.antMatchers("/api/v1/sapo/webhooks/**").permitAll()
+				.antMatchers("/api/v1/sapo/**").hasRole("AUTH")
+				.anyRequest().authenticated()
+				.and()
+				.httpBasic().authenticationEntryPoint(sapoAuthenticationEntryPoint());
+		}
+
+		@Bean
+		public AuthenticationEntryPoint sapoAuthenticationEntryPoint() {
+			BasicAuthenticationEntryPoint entryPoint = new BasicAuthenticationEntryPoint();
+			entryPoint.setRealmName("sapo-realm");
+			return entryPoint;
+		}
+	}
+
+
+
+	/**
 	 * customer api
 	 * 
 	 * @author dur9213

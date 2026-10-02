@@ -55,6 +55,10 @@ public class CategoryController {
     @Inject
     ProductService productService;
 
+    // Dong bo nguoc ten danh muc len Sapo khi Admin luu
+    @Inject
+    com.salesmanager.shop.store.api.v1.product.sapo.SapoProductSyncService sapoProductSyncService;
+
     @Inject
     LabelUtils messages;
 
@@ -184,6 +188,11 @@ public class CategoryController {
             parent.setMerchantStore(store);
             categoryService.addChild(parent, category.getCategory());
         }
+
+        // Dong bo nguoc len Sapo (chi ap dung voi danh muc da den tu Sapo).
+        // Loi Sapo khong duoc phep lam hong thao tac luu cua Admin.
+        sapoProductSyncService.pushCategoryToSapo(store, category.getCategory());
+
         //get parent categories
         model.addAttribute("categories", CategoryUtils.readableCategoryListConverter(
                 CategoryUtils.parentCandidates(categories, category.getCategory()), language));

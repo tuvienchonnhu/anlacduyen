@@ -86,12 +86,27 @@ public class Category extends SalesManagerEntity<Long, Category> implements Audi
     @Column(name="CODE", length=100, nullable=false)
     private String code;
 
+    /**
+     * ID danh muc (collection) tren Sapo, dung lam khoa doi chieu khi dong bo.
+     * Giu nguyen CODE cua Shopizer khi ten/alias danh muc tren Sapo thay doi.
+     */
+    @Column(name="SAPO_CATEGORY_ID")
+    private Long sapoCategoryId;
+
     public String getCode() {
         return code;
     }
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public Long getSapoCategoryId() {
+        return sapoCategoryId;
+    }
+
+    public void setSapoCategoryId(Long sapoCategoryId) {
+        this.sapoCategoryId = sapoCategoryId;
     }
 
     public Category() {

@@ -82,6 +82,13 @@ public class SapoWebhookController {
 			SapoProductDto sapoProduct = objectMapper.treeToValue(productNode, SapoProductDto.class);
 			String sapoProductId = String.valueOf(productNode.get("id").asLong());
 
+			// CHONG VONG LAP: neu webhook nay la ket qua cua lan Shopizer vua day
+			// len Sapo thi bo qua, khong ghi de lai du lieu local.
+			if (sapoProductSyncService.isSelfOriginatedWebhook(sapoProductId)) {
+				LOGGER.info("Skip Sapo webhook for product {} - originated from Shopizer", sapoProductId);
+				return ResponseEntity.ok("SKIPPED");
+			}
+
 			if (topic != null && topic.toLowerCase().contains("delete")) {
 				// Xoa san pham local khi Sapo xoa
 				sapoProductSyncService.deleteLocalProduct(store, sapoProductId);
